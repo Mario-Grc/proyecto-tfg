@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Prueba rápida LM Studio</title>
+</head>
+<body>
+    <main id="chat-container">
+        <h1 id="chat-title">Chat local de prueba</h1>
+
+        <div class="config-row">
+            <label for="endpoint">Endpoint</label>
+            <input id="endpoint" type="text" value="http://localhost:1234/v1/chat/completions">
+        </div>
+
+        <div id="chat-messages" aria-live="polite"></div>
+
+        <form id="chat-form" autocomplete="off">
+            <input id="prompt" type="text" placeholder="Escribe tu mensaje..." required>
+            <button id="send-btn" type="submit">Enviar</button>
+        </form>
+
+        <p id="status">Estado: listo para enviar.</p>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
