@@ -86,30 +86,39 @@ body {
 #chat-form {
     display: grid;
     grid-template-columns: 1fr auto;
+    align-items:end;
     gap: 8px;
     border-top: 1px solid #e6dfd6;
+    /* border: 2px solid black; */
     padding-top: 18px;
 }
 
-input,
+textarea,
 button {
     padding: 10px 14px;
     border: 1px solid #cec8c0;
     border-radius: 6px;
     font-size: 14px;
     font-family: inherit;
+    min-height: 44px;
 }
 
-input {
+textarea {
     background: #faf8f5;
     color: #1c1c1c;
+    resize: none;
+    max-height: 260px;
+    display: block;
+    overflow-y: auto;
+    line-height: 1.5;
+    margin: 0;
 }
 
-input::placeholder {
+textarea::placeholder {
     color: #b0a898;
 }
 
-input:focus,
+textarea:focus,
 button:focus-visible {
     outline: none;
     border-color: #2e7d6b;

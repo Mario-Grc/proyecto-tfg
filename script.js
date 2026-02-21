@@ -1,4 +1,4 @@
-// si hay mas de un modelo activo en LM Studio, hay que cambiar esto por el nombre del que quiera
+// si hay mas de un modelo activo en LM Studio hay que cambiar esto por el nombre del que quiera
 const MODEL_NAME = "local-model";
 const API_ENDPOINT = "http://127.0.0.1:1234/v1/chat/completions";
 
@@ -19,6 +19,19 @@ function addMessage(text, type) {
 	messages.appendChild(bubble);
 	messages.scrollTop = messages.scrollHeight;
 }
+
+promptInput.addEventListener("input", () => {
+	promptInput.style.height = "auto";
+	promptInput.style.height = promptInput.scrollHeight + "px";
+});
+
+// para poder poner otra linea
+promptInput.addEventListener("keydown", (e) => {
+	if (e.key === "Enter" && !e.shiftKey) {
+		e.preventDefault();
+		chatForm.requestSubmit();
+	}
+});
 
 async function sendMessage(userText) {
 	conversation.push({ role: "user", content: userText });
@@ -63,6 +76,7 @@ chatForm.addEventListener("submit", async (event) => {
 
 	addMessage(userText, "user");
 	promptInput.value = "";
+	promptInput.style.height = "auto";
 	promptInput.focus();
 	sendBtn.disabled = true;
 	statusEl.textContent = "Consultando al modelo...";
