@@ -1,11 +1,11 @@
-// si hay mas de un modelo activo en LM Studio, hay que cambiar esto por el nombre del que quiera
+// si hay mas de un modelo activo en LM Studio hay que cambiar esto por el nombre del que quiera
 const MODEL_NAME = "local-model";
+const API_ENDPOINT = "http://127.0.0.1:1234/v1/chat/completions";
 
 const chatForm = document.getElementById("chat-form");
 const promptInput = document.getElementById("prompt");
 const messages = document.getElementById("chat-messages");
 const statusEl = document.getElementById("status");
-const endpointInput = document.getElementById("endpoint");
 const sendBtn = document.getElementById("send-btn");
 
 const conversation = [
@@ -20,16 +20,23 @@ function addMessage(text, type) {
 	messages.scrollTop = messages.scrollHeight;
 }
 
-async function sendMessage(userText) {
-	const endpoint = endpointInput.value.trim();
+promptInput.addEventListener("input", () => {
+	promptInput.style.height = "auto";
+	promptInput.style.height = promptInput.scrollHeight + "px";
+});
 
-	if (!endpoint) {
-		throw new Error("Define un endpoint válido.");
+// para poder poner otra linea
+promptInput.addEventListener("keydown", (e) => {
+	if (e.key === "Enter" && !e.shiftKey) {
+		e.preventDefault();
+		chatForm.requestSubmit();
 	}
+});
 
+async function sendMessage(userText) {
 	conversation.push({ role: "user", content: userText });
 
-	const response = await fetch(endpoint, {
+	const response = await fetch(API_ENDPOINT, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json"
@@ -69,6 +76,7 @@ chatForm.addEventListener("submit", async (event) => {
 
 	addMessage(userText, "user");
 	promptInput.value = "";
+	promptInput.style.height = "auto";
 	promptInput.focus();
 	sendBtn.disabled = true;
 	statusEl.textContent = "Consultando al modelo...";
