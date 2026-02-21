@@ -1,11 +1,11 @@
 // si hay mas de un modelo activo en LM Studio, hay que cambiar esto por el nombre del que quiera
 const MODEL_NAME = "local-model";
+const API_ENDPOINT = "http://127.0.0.1:1234/v1/chat/completions";
 
 const chatForm = document.getElementById("chat-form");
 const promptInput = document.getElementById("prompt");
 const messages = document.getElementById("chat-messages");
 const statusEl = document.getElementById("status");
-const endpointInput = document.getElementById("endpoint");
 const sendBtn = document.getElementById("send-btn");
 
 const conversation = [
@@ -21,15 +21,9 @@ function addMessage(text, type) {
 }
 
 async function sendMessage(userText) {
-	const endpoint = endpointInput.value.trim();
-
-	if (!endpoint) {
-		throw new Error("Define un endpoint válido.");
-	}
-
 	conversation.push({ role: "user", content: userText });
 
-	const response = await fetch(endpoint, {
+	const response = await fetch(API_ENDPOINT, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json"
