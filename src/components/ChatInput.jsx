@@ -14,7 +14,7 @@ export default function ChatInput({ onSend, disabled }) {
             el.style.height = "auto";
             el.style.height = el.scrollHeight + "px";
         }
-    }, [input]); // Se ejecuta cada vez que 'input' cambia
+    }, [input]);
 
     function handleSubmit(e) {
         e.preventDefault();

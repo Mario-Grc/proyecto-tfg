@@ -1,62 +1,43 @@
-// App.jsx — Componente raíz, el "cerebro" de la app
-// -----------------------------------------------
-// Aquí vive TODO el estado global:
-//   - messages: los mensajes visibles en el chat
-//   - conversation: el historial que se manda al LLM (incluye system prompt)
-//   - status: texto informativo ("Consultando...", "Respuesta recibida", etc.)
-//   - loading: si estamos esperando respuesta (para desactivar el input)
-//
-// IMPORTANTE: en React el estado es INMUTABLE.
-// Nunca haces messages.push(...). Siempre creas un array nuevo:
-//   setMessages(prev => [...prev, nuevoMensaje])
-// React compara el array viejo con el nuevo y actualiza solo lo que cambió.
-
 import { useState, useRef } from "react";
 import ChatWindow from "./components/ChatWindow";
 import ChatInput from "./components/ChatInput";
 import { sendMessage } from "./services/llmService";
 import "./App.css";
 
-// Sistema prompt inicial — se envía con cada petición pero no se muestra
+// prompt inicial del sistema
 const SYSTEM_PROMPT = { role: "system", content: "Eres un asistente útil y breve." };
 
 function App() {
-    // useState devuelve [valorActual, funcionParaCambiarlo]
-    const [messages, setMessages] = useState([]);          // Lo que se ve en pantalla
+    const [messages, setMessages] = useState([]);
     const [status, setStatus] = useState("Listo para enviar.");
     const [loading, setLoading] = useState(false);
 
-    // useRef para el historial de conversación — NO necesita re-render,
-    // por eso usamos ref en vez de state. Es como una variable de instancia.
     const conversationRef = useRef([SYSTEM_PROMPT]);
 
-    // Contador simple para dar IDs únicos a los mensajes
+    // ids de los mensajes para identificarlso
     const nextIdRef = useRef(1);
 
     async function handleSend(text) {
-        // 1. Añadir mensaje del usuario a la pantalla
         const userId = nextIdRef.current++;
         setMessages((prev) => [...prev, { id: userId, text, type: "user" }]);
 
-        // 2. Añadir al historial de conversación (para el LLM)
+        // pasar el mensaje al llm
         conversationRef.current.push({ role: "user", content: text });
 
-        // 3. Desactivar input y actualizar status
         setLoading(true);
         setStatus("Consultando al modelo...");
 
         try {
-            // 4. Llamar a LM Studio
+            // pasar mensaje a lm studio
             const response = await sendMessage(conversationRef.current);
 
-            // 5. Añadir respuesta del LLM a la pantalla
             const llmId = nextIdRef.current++;
             setMessages((prev) => [...prev, { id: llmId, text: response.text, type: "llm" }]);
 
-            // 6. Guardar en el historial (la versión completa, con <think> y todo)
+            // en el historial guardo el texto completo con los think, por si luego quiero mostrarlo o analizarlo
             conversationRef.current.push({ role: "assistant", content: response.rawText });
 
-            // 7. Mostrar uso de tokens si está disponible
+            // uso de tokens para saber el contexto
             if (response.usage) {
                 setStatus(
                     `Respuesta recibida — ${response.usage.total_tokens} tokens usados`
@@ -74,8 +55,6 @@ function App() {
         }
     }
 
-    // El JSX es lo que se renderiza. Es como el template de Angular.
-    // Nota: en React usamos className en vez de class (porque class es palabra reservada en JS)
     return (
         <main className="chat-container">
             <header className="chat-header">
