@@ -1,27 +1,12 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>Prueba rápida LM Studio</title>
-</head>
-<body>
-    <main id="chat-container">
-            <header id="chat-header">
-                <h1 id="chat-title">Asistente local</h1>
-                <p id="chat-subtitle">Demo simple.</p>
-            </header>
-            
-            <div id="chat-messages" aria-live="polite"></div>
-            
-            <form id="chat-form" autocomplete="off">
-                <textarea id="prompt" placeholder="Escribe tu mensaje..." rows="1" required></textarea>
-                <button id="send-btn" type="submit">Enviar</button>
-            </form>
-            
-            <p id="status">Estado: listo para enviar.</p>
-    </main>
-    <script src="script.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TFT</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
