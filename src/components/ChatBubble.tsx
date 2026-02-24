@@ -2,7 +2,12 @@
 
 import ReactMarkdown from "react-markdown";
 
-export default function ChatBubble({ text, type }) {
+interface ChatBubbleProps {
+    text: string;
+    type: "user" | "llm";
+}
+
+export default function ChatBubble({ text, type }: ChatBubbleProps) {
     const className = type === "user" ? "user-message" : "llm-message";
 
     return (

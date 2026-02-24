@@ -2,12 +2,17 @@
 
 import { useState, useRef, useEffect } from "react";
 
-export default function ChatInput({ onSend, disabled }) {
+interface ChatInputProps {
+    onSend: (text: string) => void;
+    disabled: boolean;
+}
+
+export default function ChatInput({ onSend, disabled }: ChatInputProps) {
     // Estado local: solo el texto que el usuario está escribiendo
     const [input, setInput] = useState("");
-    const textareaRef = useRef(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-    // Auto-resize del textarea cuando cambia el contenido
+    // resize del textarea cuando cambia el contenido
     useEffect(() => {
         const el = textareaRef.current;
         if (el) {
@@ -16,8 +21,8 @@ export default function ChatInput({ onSend, disabled }) {
         }
     }, [input]);
 
-    function handleSubmit(e) {
-        e.preventDefault();
+    // Lógica de envío separada del evento, para poder llamarla desde el form y desde el teclado
+    function submit() {
         const trimmed = input.trim();
         if (!trimmed || disabled) return;
 
@@ -25,11 +30,16 @@ export default function ChatInput({ onSend, disabled }) {
         setInput("");
     }
 
+    function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
+        e.preventDefault();
+        submit();
+    }
+
     // para poder hacer el salto de línea
-    function handleKeyDown(e) {
+    function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
-            handleSubmit(e);
+            submit();
         }
     }
 

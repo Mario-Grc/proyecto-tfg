@@ -1,23 +1,29 @@
 import { useState, useRef } from "react";
 import ChatWindow from "./components/ChatWindow";
 import ChatInput from "./components/ChatInput";
-import { sendMessage } from "./services/llmService";
+import { sendMessage, ConversationMessage } from "./services/llmService";
 import "./App.css";
 
+interface Message {
+    id: number;
+    text: string;
+    type: "user" | "llm";
+}
+
 // prompt inicial del sistema
-const SYSTEM_PROMPT = { role: "system", content: "Eres un asistente útil y breve." };
+const SYSTEM_PROMPT: ConversationMessage = { role: "system", content: "Eres un asistente útil y breve." };
 
 function App() {
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [status, setStatus] = useState("Listo para enviar.");
     const [loading, setLoading] = useState(false);
 
-    const conversationRef = useRef([SYSTEM_PROMPT]);
+    const conversationRef = useRef<ConversationMessage[]>([SYSTEM_PROMPT]);
 
     // ids de los mensajes para identificarlso
     const nextIdRef = useRef(1);
 
-    async function handleSend(text) {
+    async function handleSend(text: string) {
         const userId = nextIdRef.current++;
         setMessages((prev) => [...prev, { id: userId, text, type: "user" }]);
 
@@ -39,17 +45,16 @@ function App() {
 
             // uso de tokens para saber el contexto
             if (response.usage) {
-                setStatus(
-                    `Respuesta recibida — ${response.usage.total_tokens} tokens usados`
-                );
+                setStatus(`Respuesta recibida — ${response.usage.total_tokens} tokens usados`);
             } else {
                 setStatus("Respuesta recibida.");
             }
         } catch (error) {
-            // Si falla, mostramos el error como mensaje del LLM
+            // muestro el error en el chat y en el status
+            const message = error instanceof Error ? error.message : "Error desconocido";
             const errorId = nextIdRef.current++;
-            setMessages((prev) => [...prev, { id: errorId, text: error.message, type: "llm" }]);
-            setStatus(`Fallo: ${error.message}`);
+            setMessages((prev) => [...prev, { id: errorId, text: message, type: "llm" }]);
+            setStatus(`Fallo: ${message}`);
         } finally {
             setLoading(false);
         }

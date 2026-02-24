@@ -2,13 +2,31 @@
 const MODEL_NAME = "local-model";
 const API_ENDPOINT = "http://127.0.0.1:1234/v1/chat/completions";
 
-/**
- * Envía el historial de conversación a LM Studio y devuelve la respuesta.
- *
- * @param {Array} conversation - Array de objetos {role, content}
- * @returns {Promise<{text: string, usage: object}>} - Texto limpio + info de tokens
- */
-export async function sendMessage(conversation) {
+// interfaz de cada mensaje
+export interface ConversationMessage {
+    role: "system" | "user" | "assistant";
+    content: string;
+}
+
+// interfaz de la respuesta de la api
+export interface LLMAPIResponse {
+    choices: { message: { content: string } }[];
+    usage?: {
+        prompt_tokens: number;
+        completion_tokens: number;
+        total_tokens: number;
+    };
+}
+
+// lo que devuelve sendMessage
+export interface LLMResponse {
+    text: string;     // texto limpio
+    rawText: string;  // texto tal cual viene del modelo
+    usage?: LLMAPIResponse["usage"];
+}
+
+// función para enviar un mensaje al modelo y obtener la respuesta
+export async function sendMessage(conversation: ConversationMessage[]): Promise<LLMResponse> {
     const response = await fetch(API_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -24,7 +42,7 @@ export async function sendMessage(conversation) {
         throw new Error(`Error HTTP ${response.status}: ${errorText}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as LLMAPIResponse;
     const rawText = data?.choices?.[0]?.message?.content?.trim();
 
     if (!rawText) {

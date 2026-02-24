@@ -3,8 +3,18 @@
 import { useRef, useEffect } from "react";
 import ChatBubble from "./ChatBubble";
 
-export default function ChatWindow({ messages }) {
-    const bottomRef = useRef(null);
+interface Message {
+    id: number;
+    text: string;
+    type: "user" | "llm";
+}
+
+interface ChatWindowProps {
+    messages: Message[];
+}
+
+export default function ChatWindow({ messages }: ChatWindowProps) {
+    const bottomRef = useRef<HTMLDivElement>(null);
 
  
     useEffect(() => {
