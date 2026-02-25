@@ -1,10 +1,46 @@
 /* ============================
+   Shell + topbar
+   ============================ */
+.app-shell {
+  height: 100vh;
+  padding: 10px;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 10px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #f5f0ea;
+  border: 1px solid #e6dfd6;
+  border-radius: 10px 10px 0px 0px;
+  padding: 10px 12px;
+}
+
+.topbar-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1rem;
+  color: #3c3428;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.topbar-actions button {
+  min-height: 36px;
+}
+
+/* ============================
    Layout principal
    ============================ */
 .app-layout {
   display: grid;
   grid-template-columns: 1fr 800px;
-  height: 100vh;
   overflow: hidden;
 }
 
@@ -15,6 +51,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  border-radius: 10px 0px 0px 10px;
 }
 
 .code-editor {
@@ -28,7 +65,7 @@
 }
 
 /* ============================
-   Panel del chat (antes chat-container)
+   Panel del chat
    ============================ */
 .chat-panel {
   display: flex;
@@ -37,7 +74,7 @@
   padding: 28px 24px;
   overflow: hidden;
   background: #ffffff;
-  border-left: 1px solid #e6dfd6;
+  border-radius: 0px 10px 10px 0px;
 }
 
 /* ============================
@@ -225,9 +262,20 @@ button:disabled {
    Responsive
    ============================ */
 @media (max-width: 768px) {
+    .app-shell {
+      padding: 8px;
+      gap: 8px;
+    }
+
+    .topbar {
+      flex-wrap: wrap;
+      padding: 8px;
+    }
+
     .app-layout {
       grid-template-columns: 1fr;
       grid-template-rows: 1fr 1fr;
+      gap: 8px;
     }
 
     .chat-panel {

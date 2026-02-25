@@ -67,24 +67,59 @@ function App() {
         }
     }
 
+    function handleSendCode() {
+        if (loading) {
+            return;
+        }
+
+        const code = editorViewRef.current?.state.doc.toString().trim();
+
+        if (!code){
+            setStatus("El editor está vacío.");
+            return;
+        }
+
+        const prompt = [
+            "Analiza este código Python.",
+            "Se breve y práctico.",
+            "Indica: 1) errores, 2) mejoras, 3) versión corregida.",
+            "",
+            "```python",
+            code,
+            "```",
+        ].join("\n");
+
+        handleSend(prompt);
+    }
+
     return (
-        <div className="app-layout">
-            <section className="editor-panel">
-                <CodeEditor onEditorReady={handleEditorReady} />
-            </section>
+        <div className="app-shell">
+            <header className="topbar">
+                <div className="topbar-title">Asistente de aprendizaje</div>
+                <div className="topbar-actions">
+                    <button type="button" disabled>Opciones</button>
+                    <button type="button" onClick={handleSendCode} disabled={loading}>Enviar código</button>
+                </div>
+            </header>
 
-            <aside className="chat-panel">
-                <header className="chat-header">
-                    <h1 className="chat-title">Asistente local</h1>
-                    <p className="chat-subtitle">Demo simple.</p>
-                </header>
+            <div className="app-layout">
+                <section className="editor-panel">
+                    <CodeEditor onEditorReady={handleEditorReady} />
+                </section>
 
-                <ChatWindow messages={messages} />
+                <aside className="chat-panel">
+                    <header className="chat-header">
+                        <h1 className="chat-title">Asistente local</h1>
+                        <p className="chat-subtitle">Demo simple.</p>
+                    </header>
 
-                <ChatInput onSend={handleSend} disabled={loading} />
+                    <ChatWindow messages={messages} />
 
-                <p className="status">{status}</p>
-            </aside>
+                    <ChatInput onSend={handleSend} disabled={loading} />
+
+                    <p className="status">{status}</p>
+                </aside>
+            </div>
         </div>
     );
 }
