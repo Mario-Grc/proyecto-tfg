@@ -1,17 +1,43 @@
 /* ============================
    Layout principal
    ============================ */
-.chat-container {
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 28px 24px;
+.app-layout {
+  display: grid;
+  grid-template-columns: 1fr 800px;
   height: 100vh;
   overflow: hidden;
+}
+
+/* ============================
+   Panel del editor
+   ============================ */
+.editor-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.code-editor {
+  flex-grow: 1;
+  overflow: auto;
+}
+
+/* Hacer que CodeMirror llene todo su contenedor */
+.code-editor .cm-editor {
+  height: 100%;
+}
+
+/* ============================
+   Panel del chat (antes chat-container)
+   ============================ */
+.chat-panel {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  padding: 28px 24px;
+  overflow: hidden;
   background: #ffffff;
+  border-left: 1px solid #e6dfd6;
 }
 
 /* ============================
@@ -198,8 +224,15 @@ button:disabled {
 /* ============================
    Responsive
    ============================ */
-@media (max-width: 640px) {
-    .chat-container {
+@media (max-width: 768px) {
+    .app-layout {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+
+    .chat-panel {
+      border-left: none;
+      border-top: 1px solid #e6dfd6;
       padding: 16px;
     }
 

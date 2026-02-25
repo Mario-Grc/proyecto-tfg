@@ -1,6 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import ChatWindow from "./components/ChatWindow";
 import ChatInput from "./components/ChatInput";
+import CodeEditor from "./components/CodeEditor";
+import { EditorView } from "@codemirror/view";
 import { sendMessage, ConversationMessage } from "./services/llmService";
 import "./App.css";
 
@@ -19,6 +21,11 @@ function App() {
     const [loading, setLoading] = useState(false);
 
     const conversationRef = useRef<ConversationMessage[]>([SYSTEM_PROMPT]);
+    const editorViewRef = useRef<EditorView | null>(null);
+
+    const handleEditorReady = useCallback((view: EditorView) => {
+        editorViewRef.current = view;
+    }, []);
 
     // ids de los mensajes para identificarlso
     const nextIdRef = useRef(1);
@@ -61,18 +68,24 @@ function App() {
     }
 
     return (
-        <main className="chat-container">
-            <header className="chat-header">
-                <h1 className="chat-title">Asistente local</h1>
-                <p className="chat-subtitle">Demo simple.</p>
-            </header>
+        <div className="app-layout">
+            <section className="editor-panel">
+                <CodeEditor onEditorReady={handleEditorReady} />
+            </section>
 
-            <ChatWindow messages={messages} />
+            <aside className="chat-panel">
+                <header className="chat-header">
+                    <h1 className="chat-title">Asistente local</h1>
+                    <p className="chat-subtitle">Demo simple.</p>
+                </header>
 
-            <ChatInput onSend={handleSend} disabled={loading} />
+                <ChatWindow messages={messages} />
 
-            <p className="status">{status}</p>
-        </main>
+                <ChatInput onSend={handleSend} disabled={loading} />
+
+                <p className="status">{status}</p>
+            </aside>
+        </div>
     );
 }
 

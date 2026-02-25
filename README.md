@@ -1,4 +1,4 @@
-# TFT - Ayudante de aprendizaje
+# TFG - Ayudante de aprendizaje
 Actualmente en desarrollo ...
 
 # Autor
