@@ -110,7 +110,7 @@ function App() {
                 <aside className="chat-panel">
                     <header className="chat-header">
                         <h1 className="chat-title">Asistente local</h1>
-                        <p className="chat-subtitle">Demo simple.</p>
+                        <p className="chat-subtitle">Demo.</p>
                     </header>
 
                     <ChatWindow messages={messages} />
