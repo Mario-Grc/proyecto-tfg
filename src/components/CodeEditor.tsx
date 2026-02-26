@@ -3,6 +3,8 @@ import { EditorState } from "@codemirror/state";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { EditorView, basicSetup } from "codemirror";
 import { python } from "@codemirror/lang-python";
+import { keymap} from "@codemirror/view";
+import { insertTab } from "@codemirror/commands";
 
 const PLACEHOLDER = `# Escribe tu código aquí...
 def hola():
@@ -30,6 +32,7 @@ export default function CodeEditor({ onEditorReady}: CodeEditorProps) {
                 basicSetup,
                 python(), 
                 oneDark,
+                keymap.of([{ key: "Tab", run: insertTab }]),
                 // EditorView.lineWrapping
             ]
         });
