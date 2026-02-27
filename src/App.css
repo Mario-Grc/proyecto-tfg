@@ -53,6 +53,7 @@
 .code-editor {
   flex-grow: 1;
   overflow: auto;
+  font-size: 0.9rem;
 }
 
 .code-editor .cm-editor {
@@ -171,6 +172,26 @@
   margin: 0.5em 0;
   padding-left: 0.8em;
   color: #5a5248;
+}
+
+.llm-message table {
+    border-collapse: collapse;
+    margin: 1rem 0;
+    overflow: auto;
+}
+
+.llm-message th,
+.llm-message td {
+    border: 1px solid #555;
+    padding: 6px 10px;
+    text-align: left;
+    min-width: 50px;
+}
+
+.llm-message th {
+    background-color: rgb(182, 182, 182);
+    font-weight: bold;
+    text-align: center;
 }
 
 /* ============================
