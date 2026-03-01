@@ -53,6 +53,7 @@
 .code-editor {
   flex-grow: 1;
   overflow: auto;
+  font-size: 0.9rem;
 }
 
 .code-editor .cm-editor {
@@ -76,17 +77,36 @@
    ============================ */
 .chat-header {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 6px;
   border-bottom: 1px solid #e6dfd6;
   padding-bottom: 16px;
   align-items: center;
+  justify-content: space-between;
 }
 
 .chat-subtitle {
   margin: 0;
   color: #7a6e62;
   font-size: 0.9rem;
+}
+
+.clear-btn {
+  padding: 6px 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.clear-btn:hover:not(:disabled) {
+  background: #fdf0ee;
+  color: #c0392b;
+  border-color: #f0c0b8;
+}
+
+.clear-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 /* ============================
@@ -171,6 +191,26 @@
   margin: 0.5em 0;
   padding-left: 0.8em;
   color: #5a5248;
+}
+
+.llm-message table {
+    border-collapse: collapse;
+    margin: 1rem 0;
+    overflow: auto;
+}
+
+.llm-message th,
+.llm-message td {
+    border: 1px solid #555;
+    padding: 6px 10px;
+    text-align: left;
+    min-width: 50px;
+}
+
+.llm-message th {
+    background-color: rgb(182, 182, 182);
+    font-weight: bold;
+    text-align: center;
 }
 
 /* ============================

@@ -1,6 +1,8 @@
 // Un solo mensaje en el chat
-
 import ReactMarkdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/github-dark.css";
+import remarkGfm from "remark-gfm";
 
 interface ChatBubbleProps {
     text: string;
@@ -13,7 +15,12 @@ export default function ChatBubble({ text, type }: ChatBubbleProps) {
     return (
         <div className={className}>
             {type === "llm" ? (
-                <ReactMarkdown>{text}</ReactMarkdown>
+                <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeHighlight]}
+                    >
+                    {text}
+                </ReactMarkdown>
             ) : (
                 text
             )}

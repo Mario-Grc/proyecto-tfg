@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import ChatWindow from "./components/ChatWindow";
 import ChatInput from "./components/ChatInput";
 import CodeEditor from "./components/CodeEditor";
@@ -15,27 +15,46 @@ interface Message {
 // prompt inicial del sistema
 const SYSTEM_PROMPT: ConversationMessage = { role: "system", content: "Eres un asistente útil y breve." };
 
+function loadFromStorage<T>(key:string, fallback: T): T {
+    try {
+        const stored = localStorage.getItem(key);
+        return stored ? JSON.parse(stored): fallback;
+    } catch {
+        return fallback;
+    }
+}
+
 function App() {
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [messages, setMessages] = useState<Message[]>(() => loadFromStorage<Message[]>("chat_messages", []));
     const [status, setStatus] = useState("Listo para enviar.");
     const [loading, setLoading] = useState(false);
 
-    const conversationRef = useRef<ConversationMessage[]>([SYSTEM_PROMPT]);
     const editorViewRef = useRef<EditorView | null>(null);
+    const conversationRef = useRef<ConversationMessage[]>(
+        loadFromStorage<ConversationMessage[]>("full_conversation", [SYSTEM_PROMPT])
+    );
+    
+    // ids de los mensajes para identificarlos
+    const nextIdRef = useRef<number>(
+        loadFromStorage<number>("next_message_id", 1)
+    );
 
     const handleEditorReady = useCallback((view: EditorView) => {
         editorViewRef.current = view;
     }, []);
 
-    // ids de los mensajes para identificarlso
-    const nextIdRef = useRef(1);
+    useEffect(() => {
+        localStorage.setItem("chat_messages", JSON.stringify(messages));
+        localStorage.setItem("full_conversation", JSON.stringify(conversationRef.current));
+        localStorage.setItem("next_message_id", JSON.stringify(nextIdRef.current));
+    }, [messages]);
 
     async function handleSend(text: string) {
         const userId = nextIdRef.current++;
         setMessages((prev) => [...prev, { id: userId, text, type: "user" }]);
 
         // pasar el mensaje al llm
-        conversationRef.current.push({ role: "user", content: text });
+        conversationRef.current.push({ role: "user", content: text.trim() });
 
         setLoading(true);
         setStatus("Consultando al modelo...");
@@ -92,6 +111,16 @@ function App() {
         handleSend(prompt);
     }
 
+    function handleClearConversation() {
+        setMessages([]);
+        nextIdRef.current = 1;
+        conversationRef.current = [SYSTEM_PROMPT];
+        localStorage.removeItem("chat_messages"); 
+        localStorage.removeItem("full_conversation"); 
+        localStorage.removeItem("next_message_id");
+        setStatus("Conversación borrada.");
+    }
+
     return (
         <div className="app-shell">
             <header className="topbar">
@@ -110,6 +139,7 @@ function App() {
                 <aside className="chat-panel">
                     <header className="chat-header">
                         <p className="chat-subtitle">Demo chat.</p>
+                        <button type="button" className="clear-btn" onClick={handleClearConversation}>Borrar conversación</button>
                     </header>
 
                     <ChatWindow messages={messages} />
