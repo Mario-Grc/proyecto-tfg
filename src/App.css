@@ -77,17 +77,36 @@
    ============================ */
 .chat-header {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 6px;
   border-bottom: 1px solid #e6dfd6;
   padding-bottom: 16px;
   align-items: center;
+  justify-content: space-between;
 }
 
 .chat-subtitle {
   margin: 0;
   color: #7a6e62;
   font-size: 0.9rem;
+}
+
+.clear-btn {
+  padding: 6px 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.clear-btn:hover:not(:disabled) {
+  background: #fdf0ee;
+  color: #c0392b;
+  border-color: #f0c0b8;
+}
+
+.clear-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 /* ============================
