@@ -11,25 +11,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  background: #f5f0ea;
-  border: 1px solid #e6dfd6;
-  padding: 10px 12px;
+  gap: var(--space-5);
+  background: var(--color-bg-surface);
+  border: var(--border-width) solid var(--color-border-soft);
+  padding: var(--space-4) var(--space-5);
 }
 
 .topbar-title {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--font-family-heading);
   font-size: 1rem;
-  color: #3c3428;
+  color: var(--color-text-heading);
 }
 
 .topbar-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--space-3);
 }
 
 .topbar-actions button {
-  min-height: 36px;
+  min-height: var(--min-height-button);
 }
 
 /* ============================
@@ -66,10 +66,10 @@
 .chat-panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 12px;
+  gap: var(--space-5);
+  padding: var(--space-5);
   overflow: hidden;
-  background: #ffffff;
+  background: var(--color-bg-panel);
 }
 
 /* ============================
@@ -78,30 +78,30 @@
 .chat-header {
   display: flex;
   flex-direction: row;
-  gap: 6px;
-  border-bottom: 1px solid #e6dfd6;
-  padding-bottom: 16px;
+  gap: var(--space-2);
+  border-bottom: var(--border-width) solid var(--color-border-soft);
+  padding-bottom: var(--space-7);
   align-items: center;
   justify-content: space-between;
 }
 
 .chat-subtitle {
   margin: 0;
-  color: #7a6e62;
-  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
 }
 
 .clear-btn {
-  padding: 6px 10px;
-  font-size: 14px;
-  border-radius: 6px;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-md);
   cursor: pointer;
 }
 
 .clear-btn:hover:not(:disabled) {
-  background: #fdf0ee;
-  color: #c0392b;
-  border-color: #f0c0b8;
+  background: var(--color-bg-danger-soft);
+  color: var(--color-text-danger);
+  border-color: var(--color-border-danger);
 }
 
 .clear-btn:disabled {
@@ -113,13 +113,13 @@
    Zona de mensajes
    ============================ */
 .chat-messages {
-  min-height: 300px;
+  min-height: var(--min-height-messages);
   flex-grow: 1;
   overflow-y: auto;
-  padding: 4px 10px 4px;
+  padding: var(--space-1) var(--space-4) var(--space-1);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-5);
 }
 
 /* ============================
@@ -127,27 +127,27 @@
    ============================ */
 .llm-message,
 .user-message {
-  padding: 10px 14px;
-  max-width: 90%;
-  line-height: 1.55;
+  padding: var(--space-4) var(--space-6);
+  max-width: var(--max-width-message);
+  line-height: var(--line-height-message);
   overflow-wrap: break-word;
   word-break: break-word;
-  font-size: 0.9375rem;
+  font-size: var(--font-size-body);
 }
 
 .user-message {
   white-space: pre-wrap;
-  background: #2e7d6b;
-  color: #ffffff;
-  border-radius: 16px 4px 16px 16px;
+  background: var(--color-bg-accent);
+  color: var(--color-text-inverse);
+  border-radius: var(--radius-message-user);
   align-self: flex-end;
 }
 
 .llm-message {
-  background: #eeebe5;
-  border-radius: 4px 16px 16px 16px;
+  background: var(--color-bg-message);
+  border-radius: var(--radius-message-llm);
   align-self: flex-start;
-  color: #2a2a2a;
+  color: var(--color-text-base);
 }
 
 /* Markdown dentro de mensajes LLM */
@@ -163,16 +163,16 @@
   padding-left: 1.4em;
 }
 .llm-message pre {
-  background: #1e1e1e;
-  color: #d4d4d4;
-  border-radius: 6px;
-  padding: 10px 12px;
+  background: var(--color-bg-app);
+  color: var(--color-text-code);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
   overflow-x: auto;
-  font-size: 0.85rem;
+  font-size: var(--font-size-code);
   margin: 0.5em 0;
 }
 .llm-message code {
-  font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  font-family: var(--font-family-mono);
   font-size: 0.875em;
 }
 .llm-message pre code {
@@ -181,16 +181,16 @@
   color: inherit;
 }
 .llm-message :not(pre) > code {
-  background: #e4e0d8;
-  border-radius: 3px;
-  padding: 1px 5px;
-  color: #2a2a2a;
+  background: var(--color-bg-code-inline);
+  border-radius: var(--radius-sm);
+  padding: 1px var(--space-1);
+  color: var(--color-text-base);
 }
 .llm-message blockquote {
-  border-left: 3px solid #c8c0b4;
+  border-left: var(--border-strong) solid var(--color-border-muted);
   margin: 0.5em 0;
   padding-left: 0.8em;
-  color: #5a5248;
+  color: var(--color-text-muted);
 }
 
 .llm-message table {
@@ -201,14 +201,14 @@
 
 .llm-message th,
 .llm-message td {
-    border: 1px solid #555;
-    padding: 6px 10px;
+  border: var(--border-width) solid var(--color-border-table);
+  padding: var(--space-2) var(--space-4);
     text-align: left;
-    min-width: 50px;
+  min-width: var(--table-min-width);
 }
 
 .llm-message th {
-    background-color: rgb(182, 182, 182);
+  background-color: var(--color-bg-table-header);
     font-weight: bold;
     text-align: center;
 }
@@ -220,53 +220,53 @@
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: end;
-  gap: 8px;
-  border-top: 1px solid #e6dfd6;
-  padding-top: 18px;
+  gap: var(--space-3);
+  border-top: var(--border-width) solid var(--color-border-soft);
+  padding-top: var(--space-8);
 }
 
 textarea,
 button {
-  padding: 10px 14px;
-  border: 1px solid #cec8c0;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: var(--space-4) var(--space-6);
+  border: var(--border-width) solid var(--color-border-muted);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
   font-family: inherit;
-  min-height: 44px;
+  min-height: var(--min-height-control);
 }
 
 textarea {
-  background: #faf8f5;
-  color: #1c1c1c;
+  background: var(--color-bg-surface-muted);
+  color: var(--color-text-base);
   resize: none;
-  max-height: 260px;
+  max-height: var(--max-height-textarea);
   overflow-y: auto;
-  line-height: 1.5;
+  line-height: var(--line-height-base);
   display: block;
 }
 
 textarea::placeholder {
-  color: #b0a898;
+  color: var(--color-text-placeholder);
 }
 
 textarea:focus,
 button:focus-visible {
   outline: none;
-  border-color: #2e7d6b;
+  border-color: var(--color-bg-accent);
 }
 
 button {
   cursor: pointer;
-  background: #2e7d6b;
-  color: #ffffff;
-  border-color: #2e7d6b;
+  background: var(--color-bg-accent);
+  color: var(--color-text-inverse);
+  border-color: var(--color-bg-accent);
   font-weight: 500;
   letter-spacing: 0.01em;
 }
 
 button:hover:not(:disabled) {
-  background: #255f53;
-  border-color: #255f53;
+  background: var(--color-bg-accent-hover);
+  border-color: var(--color-bg-accent-hover);
 }
 
 button:disabled {
@@ -279,8 +279,8 @@ button:disabled {
    ============================ */
 .status {
   margin: 0;
-  color: #9a8e82;
-  font-size: 13px;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
 }
 
 /* ============================
@@ -289,7 +289,7 @@ button:disabled {
 @media (max-width: 768px) {
     .topbar {
       flex-wrap: wrap;
-      padding: 8px;
+      padding: var(--space-3);
     }
 
     .app-layout {
@@ -299,8 +299,8 @@ button:disabled {
 
     .chat-panel {
       border-left: none;
-      border-top: 1px solid #e6dfd6;
-      padding: 16px;
+      border-top: var(--border-width) solid var(--color-border-soft);
+      padding: var(--space-7);
     }
 
     .chat-form {
