@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useLayoutEffect } from "react";
 import ChatWindow from "./components/ChatWindow";
 import ChatInput from "./components/ChatInput";
 import CodeEditor from "./components/CodeEditor";
@@ -28,6 +28,41 @@ function App() {
     const [messages, setMessages] = useState<Message[]>(() => loadFromStorage<Message[]>("chat_messages", []));
     const [status, setStatus] = useState("Listo para enviar.");
     const [loading, setLoading] = useState(false);
+
+    const [chatWidth, setChatWidth] = useState<number>(() => {
+        const saved = localStorage.getItem("chat_panel_width");
+        return saved ? Number(saved) : 380;
+    });
+    const isDragging = useRef(false);
+    const dragStartX = useRef(0);
+    const dragStartWidth = useRef(0);
+
+    const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
+        isDragging.current = true;
+        dragStartX.current = e.clientX;
+        dragStartWidth.current = chatWidth;
+        e.preventDefault();
+    }, [chatWidth]);
+
+    useEffect(() => {
+        const onMouseMove = (e: MouseEvent) => {
+            if (!isDragging.current) return;
+            const delta = dragStartX.current - e.clientX;
+            const newWidth = Math.max(220, Math.min(dragStartWidth.current + delta, window.innerWidth - 300));
+            setChatWidth(newWidth);
+        };
+        const onMouseUp = () => { isDragging.current = false; };
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+        return () => {
+            document.removeEventListener("mousemove", onMouseMove);
+            document.removeEventListener("mouseup", onMouseUp);
+        };
+    }, []);
+
+    useLayoutEffect(() => {
+        localStorage.setItem("chat_panel_width", String(chatWidth));
+    }, [chatWidth]);
 
     const editorViewRef = useRef<EditorView | null>(null);
     const conversationRef = useRef<ConversationMessage[]>(
@@ -136,7 +171,13 @@ function App() {
                     <CodeEditor onEditorReady={handleEditorReady} />
                 </section>
 
-                <aside className="chat-panel">
+                <div
+                    className="resize-handle"
+                    onMouseDown={handleResizeMouseDown}
+                    title="Arrastra para redimensionar"
+                />
+
+                <aside className="chat-panel" style={{ width: chatWidth, flexShrink: 0 }}>
                     <header className="chat-header">
                         <p className="chat-subtitle">Demo chat.</p>
                         <button type="button" className="clear-btn" onClick={handleClearConversation}>Borrar conversación</button>

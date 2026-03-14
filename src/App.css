@@ -36,8 +36,7 @@
    Layout principal
    ============================ */
 .app-layout {
-  display: grid;
-  grid-template-columns: 1fr 40%;
+  display: flex;
   overflow: hidden;
 }
 
@@ -45,6 +44,8 @@
    Panel del editor
    ============================ */
 .editor-panel {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -58,6 +59,28 @@
 
 .code-editor .cm-editor {
   height: 100%;
+}
+
+/* ============================
+   Handle de redimensionado
+   ============================ */
+.resize-handle {
+  width: 5px;
+  flex-shrink: 0;
+  background: var(--color-border-soft);
+  cursor: col-resize;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.resize-handle::after {
+  content: '';
+  position: absolute;
+  inset: 0 -4px;
+}
+
+.resize-handle:hover {
+  background: var(--color-bg-accent);
 }
 
 /* ============================
