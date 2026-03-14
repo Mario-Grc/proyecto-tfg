@@ -30,9 +30,13 @@ function App() {
     const [loading, setLoading] = useState(false);
 
     const [chatWidth, setChatWidth] = useState<number>(() => {
-        const saved = localStorage.getItem("chat_panel_width");
-        return saved ? Number(saved) : 380;
+        const savedAndParsed = Number(localStorage.getItem("chat_panel_width"));
+
+        const size = Number.isInteger(savedAndParsed) && savedAndParsed >= 260 && savedAndParsed <= window.innerWidth - 300 ? savedAndParsed : 380;
+
+        return size;
     });
+
     const isDragging = useRef(false);
     const dragStartX = useRef(0);
     const dragStartWidth = useRef(0);
@@ -48,7 +52,7 @@ function App() {
         const onMouseMove = (e: MouseEvent) => {
             if (!isDragging.current) return;
             const delta = dragStartX.current - e.clientX;
-            const newWidth = Math.max(220, Math.min(dragStartWidth.current + delta, window.innerWidth - 300));
+            const newWidth = Math.max(260, Math.min(dragStartWidth.current + delta, window.innerWidth - 300));
             setChatWidth(newWidth);
         };
         const onMouseUp = () => { isDragging.current = false; };
