@@ -5,11 +5,75 @@
     box-sizing: border-box;
 }
 
+:root {
+    --font-family-base: system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+    --font-family-heading: Georgia, 'Times New Roman', serif;
+    --font-family-mono: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+
+    --color-bg-app: #1e1e1e;
+    --color-bg-panel: #ffffff;
+    --color-bg-surface: #f5f0ea;
+    --color-bg-surface-muted: #faf8f5;
+    --color-bg-message: #eeebe5;
+    --color-bg-code-inline: #e4e0d8;
+    --color-bg-danger-soft: #fdf0ee;
+    --color-bg-table-header: rgb(182, 182, 182);
+    --color-bg-accent: #2e7d6b;
+    --color-bg-accent-hover: #255f53;
+
+    --color-text-base: #1c1c1c;
+    --color-text-heading: #3c3428;
+    --color-text-muted: #7a6e62;
+    --color-text-inverse: #ffffff;
+    --color-text-code: #d4d4d4;
+    --color-text-danger: #c0392b;
+    --color-text-placeholder: #b0a898;
+
+    --color-border-soft: #e6dfd6;
+    --color-border-muted: #cec8c0;
+    --color-border-danger: #f0c0b8;
+    --color-border-table: #555;
+
+    --space-1: 4px;
+    --space-2: 6px;
+    --space-3: 8px;
+    --space-4: 10px;
+    --space-5: 12px;
+    --space-6: 14px;
+    --space-7: 16px;
+    --space-8: 18px;
+
+    --radius-sm: 3px;
+    --radius-md: 6px;
+    --radius-lg: 16px;
+    --radius-message-user: var(--radius-lg) var(--space-1) var(--radius-lg) var(--radius-lg);
+    --radius-message-llm: var(--space-1) var(--radius-lg) var(--radius-lg) var(--radius-lg);
+
+    --font-size-xs: 13px;
+    --font-size-sm: 14px;
+    --font-size-md: 0.9rem;
+    --font-size-body: 0.9375rem;
+    --font-size-code: 0.85rem;
+
+    --line-height-base: 1.5;
+    --line-height-message: 1.55;
+
+    --min-height-control: 44px;
+    --min-height-button: 36px;
+    --min-height-messages: 300px;
+    --max-height-textarea: 260px;
+    --max-width-message: 90%;
+    --table-min-width: 50px;
+
+    --border-width: 1px;
+    --border-strong: 3px;
+}
+
 body {
     margin: 0;
     min-height: 100vh;
-    background: #1e1e1e;
-    color: #1c1c1c;
-    font-family: system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+    background: var(--color-bg-app);
+    color: var(--color-text-base);
+    font-family: var(--font-family-base);
     overflow: hidden;
 }
