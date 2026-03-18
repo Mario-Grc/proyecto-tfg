@@ -1,16 +1,16 @@
 // Textarea + botón de enviar
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect } from "react";
 
 interface ChatInputProps {
+    value: string;
+    onChange: (value: string) => void;
     onSend: (text: string) => void;
     disabled: boolean;
+    textareaRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
-export default function ChatInput({ onSend, disabled }: ChatInputProps) {
-    // Estado local: solo el texto que el usuario está escribiendo
-    const [input, setInput] = useState("");
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
+export default function ChatInput({ value, onChange, onSend, disabled, textareaRef }: ChatInputProps) {
 
     // resize del textarea cuando cambia el contenido
     useEffect(() => {
@@ -19,15 +19,14 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
             el.style.height = "auto";
             el.style.height = el.scrollHeight + "px";
         }
-    }, [input]);
+    }, [value, textareaRef]);
 
     // Lógica de envío separada del evento, para poder llamarla desde el form y desde el teclado
     function submit() {
-        const trimmed = input.trim();
+        const trimmed = value.trim();
         if (!trimmed || disabled) return;
 
         onSend(trimmed);
-        setInput("");
     }
 
     function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
@@ -47,8 +46,8 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
         <form className="chat-form" onSubmit={handleSubmit} autoComplete="off">
             <textarea
                 ref={textareaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}  // Actualiza el estado
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Escribe tu mensaje..."
                 rows={1}
