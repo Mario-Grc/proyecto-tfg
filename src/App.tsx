@@ -28,6 +28,7 @@ function App() {
     const [messages, setMessages] = useState<Message[]>(() => loadFromStorage<Message[]>("chat_messages", []));
     const [status, setStatus] = useState("Listo para enviar.");
     const [loading, setLoading] = useState(false);
+    const [inputText, setInputText] = useState("");
 
     const [chatWidth, setChatWidth] = useState<number>(() => {
         const savedAndParsed = Number(localStorage.getItem("chat_panel_width"));
@@ -69,6 +70,7 @@ function App() {
     }, [chatWidth]);
 
     const editorViewRef = useRef<EditorView | null>(null);
+    const chatTextareaRef = useRef<HTMLTextAreaElement | null>(null);
     const conversationRef = useRef<ConversationMessage[]>(
         loadFromStorage<ConversationMessage[]>("full_conversation", [SYSTEM_PROMPT])
     );
@@ -125,7 +127,7 @@ function App() {
         }
     }
 
-    function handleSendCode() {
+    function insertCodeIntoPrompt() {
         if (loading) {
             return;
         }
@@ -137,18 +139,52 @@ function App() {
             return;
         }
 
-        const prompt = [
-            "Analiza este código Python.",
-            "Se breve y práctico.",
-            "Indica: 1) errores, 2) mejoras, 3) versión corregida.",
-            "",
-            "```python",
-            code,
-            "```",
-        ].join("\n");
+        const textarea = chatTextareaRef.current;
+        const current = inputText;
 
-        handleSend(prompt);
+        const selectionStart = textarea?.selectionStart ?? current.length;
+        const selectionEnd = textarea?.selectionEnd ?? current.length;
+
+        const before = current.slice(0, selectionStart);
+        const after = current.slice(selectionEnd);
+
+        const needsLeadingBreak = before.length > 0 && !before.endsWith("\n");
+        const needsTrailingBreak = after.length > 0 && !after.startsWith("\n");
+        const insertion = `${needsLeadingBreak ? "\n" : ""}${code}${needsTrailingBreak ? "\n" : ""}`;
+
+        const nextText = `${before}${insertion}${after}`;
+        const nextCursorPos = before.length + insertion.length;
+
+        setInputText(nextText);
+        setStatus("Código añadido al prompt.");
+
+        if (textarea) {
+            requestAnimationFrame(() => {
+                textarea.focus();
+                textarea.setSelectionRange(nextCursorPos, nextCursorPos);
+            });
+        }
     }
+
+    function handlePromptSend(text: string) {
+        handleSend(text);
+        setInputText("");
+    }
+
+    useEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.altKey && e.shiftKey && e.key.toLowerCase() === "l") {
+                e.preventDefault();
+                insertCodeIntoPrompt();
+            }
+        };
+
+        window.addEventListener("keydown", onKeyDown);
+
+        return () => {
+            window.removeEventListener("keydown", onKeyDown);
+        };
+    }, [inputText, loading]);
 
     function handleClearConversation() {
         setMessages([]);
@@ -166,7 +202,7 @@ function App() {
                 <div className="topbar-title">Asistente de aprendizaje</div>
                 <div className="topbar-actions">
                     <button type="button" disabled>Opciones</button>
-                    <button type="button" onClick={handleSendCode} disabled={loading}>Enviar código</button>
+                    <button type="button" onClick={insertCodeIntoPrompt} disabled={loading} title="Alt+Shift+L">Añadir código</button>
                 </div>
             </header>
 
@@ -189,7 +225,13 @@ function App() {
 
                     <ChatWindow messages={messages} />
 
-                    <ChatInput onSend={handleSend} disabled={loading} />
+                    <ChatInput
+                        value={inputText}
+                        onChange={setInputText}
+                        onSend={handlePromptSend}
+                        disabled={loading}
+                        textareaRef={chatTextareaRef}
+                    />
 
                     <p className="status">{status}</p>
                 </aside>

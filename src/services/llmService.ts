@@ -33,7 +33,7 @@ export async function sendMessage(conversation: ConversationMessage[]): Promise<
         body: JSON.stringify({
             model: MODEL_NAME,
             messages: conversation,
-            temperature: 0.7,
+            temperature: 0.6,
         }),
     });
 
