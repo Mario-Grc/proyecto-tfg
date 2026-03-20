@@ -12,6 +12,8 @@ interface Message {
     type: "user" | "llm";
 }
 
+type ThemeMode = "dark" | "light";
+
 // prompt inicial del sistema
 const SYSTEM_PROMPT: ConversationMessage = { role: "system", content: "Eres un asistente útil y breve." };
 
@@ -29,6 +31,7 @@ function App() {
     const [status, setStatus] = useState("Listo para enviar.");
     const [loading, setLoading] = useState(false);
     const [inputText, setInputText] = useState("");
+    const [themeMode, setThemeMode] = useState<ThemeMode>(() => loadFromStorage<ThemeMode>("theme_mode", "dark"));
 
     const [chatWidth, setChatWidth] = useState<number>(() => {
         const savedAndParsed = Number(localStorage.getItem("chat_panel_width"));
@@ -89,6 +92,11 @@ function App() {
         localStorage.setItem("full_conversation", JSON.stringify(conversationRef.current));
         localStorage.setItem("next_message_id", JSON.stringify(nextIdRef.current));
     }, [messages]);
+
+    useEffect(() => {
+        document.documentElement.setAttribute("data-theme", themeMode);
+        localStorage.setItem("theme_mode", JSON.stringify(themeMode));
+    }, [themeMode]);
 
     async function handleSend(text: string) {
         const userId = nextIdRef.current++;
@@ -196,45 +204,53 @@ function App() {
         setStatus("Conversación borrada.");
     }
 
+    function toggleTheme() {
+        setThemeMode((prev) => (prev === "dark" ? "light" : "dark"));
+    }
+
     return (
         <div className="app-shell">
-            <header className="topbar">
-                <div className="topbar-title">Asistente de aprendizaje</div>
-                <div className="topbar-actions">
-                    <button type="button" disabled>Opciones</button>
-                    <button type="button" onClick={insertCodeIntoPrompt} disabled={loading} title="Alt+Shift+L">Añadir código</button>
-                </div>
-            </header>
+            <div className="workspace-frame">
+                <header className="topbar">
+                    <div className="topbar-title">Asistente de aprendizaje</div>
+                    <div className="topbar-actions">
+                        <button type="button" onClick={toggleTheme}>
+                            {themeMode === "dark" ? "Modo claro" : "Modo oscuro"}
+                        </button>
+                        <button type="button" onClick={insertCodeIntoPrompt} disabled={loading} title="Alt+Shift+L">Añadir código</button>
+                    </div>
+                </header>
 
-            <div className="app-layout">
-                <section className="editor-panel">
-                    <CodeEditor onEditorReady={handleEditorReady} />
-                </section>
+                <div className="app-layout">
+                    <section className="editor-panel">
+                        <CodeEditor onEditorReady={handleEditorReady} />
+                    </section>
 
-                <div
-                    className="resize-handle"
-                    onMouseDown={handleResizeMouseDown}
-                    title="Arrastra para redimensionar"
-                />
-
-                <aside className="chat-panel" style={{ width: chatWidth, flexShrink: 0 }}>
-                    <header className="chat-header">
-                        <p className="chat-subtitle">Demo chat.</p>
-                        <button type="button" className="clear-btn" onClick={handleClearConversation}>Borrar conversación</button>
-                    </header>
-
-                    <ChatWindow messages={messages} />
-
-                    <ChatInput
-                        value={inputText}
-                        onChange={setInputText}
-                        onSend={handlePromptSend}
-                        disabled={loading}
-                        textareaRef={chatTextareaRef}
+                    <div
+                        className="resize-handle"
+                        onMouseDown={handleResizeMouseDown}
+                        title="Arrastra para redimensionar"
                     />
 
-                    <p className="status">{status}</p>
-                </aside>
+                    <aside className="chat-panel" style={{ width: chatWidth, flexShrink: 0 }}>
+                        <header className="chat-header">
+                            <p className="chat-subtitle">Demo chat.</p>
+                            <button type="button" className="clear-btn" onClick={handleClearConversation}>Borrar conversación</button>
+                        </header>
+
+                        <ChatWindow messages={messages} />
+
+                        <ChatInput
+                            value={inputText}
+                            onChange={setInputText}
+                            onSend={handlePromptSend}
+                            disabled={loading}
+                            textareaRef={chatTextareaRef}
+                        />
+
+                        <p className="status">{status}</p>
+                    </aside>
+                </div>
             </div>
         </div>
     );

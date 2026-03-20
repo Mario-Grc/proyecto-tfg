@@ -3,8 +3,16 @@
    ============================ */
 .app-shell {
   height: 100vh;
+  padding: 0;
+}
+
+.workspace-frame {
+  height: 100%;
   display: grid;
   grid-template-rows: auto 1fr;
+  border: var(--border-width) solid var(--color-border-soft);
+  background: var(--color-bg-panel);
+  box-shadow: 0 14px 30px var(--color-shadow-soft);
 }
 
 .topbar {
@@ -13,13 +21,13 @@
   justify-content: space-between;
   gap: var(--space-5);
   background: var(--color-bg-surface);
-  border: var(--border-width) solid var(--color-border-soft);
+  border-bottom: var(--border-width) solid var(--color-border-soft);
   padding: var(--space-4) var(--space-5);
 }
 
 .topbar-title {
   font-family: var(--font-family-heading);
-  font-size: 1rem;
+  font-size: 1.06rem;
   color: var(--color-text-heading);
 }
 
@@ -38,6 +46,7 @@
 .app-layout {
   display: flex;
   overflow: hidden;
+  min-height: 0;
 }
 
 /* ============================
@@ -65,7 +74,7 @@
    Handle de redimensionado
    ============================ */
 .resize-handle {
-  width: 5px;
+  width: 6px;
   flex-shrink: 0;
   background: var(--color-border-soft);
   cursor: col-resize;
@@ -74,13 +83,13 @@
 }
 
 .resize-handle::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0 -4px;
 }
 
 .resize-handle:hover {
-  background: var(--color-bg-accent);
+  background: var(--color-tertiary);
 }
 
 /* ============================
@@ -93,6 +102,7 @@
   padding: var(--space-5);
   overflow: hidden;
   background: var(--color-bg-panel);
+  border-left: var(--border-width) solid var(--color-border-soft);
 }
 
 /* ============================
@@ -160,33 +170,36 @@
 
 .user-message {
   white-space: pre-wrap;
-  background: var(--color-bg-accent);
-  color: var(--color-text-inverse);
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
   border-radius: var(--radius-message-user);
   align-self: flex-end;
 }
 
 .llm-message {
   background: var(--color-bg-message);
+  border: var(--border-width) solid var(--color-border-soft);
   border-radius: var(--radius-message-llm);
   align-self: flex-start;
   color: var(--color-text-base);
 }
 
-/* Markdown dentro de mensajes LLM */
 .llm-message p {
   margin: 0 0 0.5em 0;
 }
+
 .llm-message p:last-child {
   margin-bottom: 0;
 }
+
 .llm-message ul,
 .llm-message ol {
   margin: 0.4em 0;
   padding-left: 1.4em;
 }
+
 .llm-message pre {
-  background: var(--color-bg-app);
+  background: var(--color-bg-code-block);
   color: var(--color-text-code);
   border-radius: var(--radius-md);
   padding: var(--space-4) var(--space-5);
@@ -194,21 +207,25 @@
   font-size: var(--font-size-code);
   margin: 0.5em 0;
 }
+
 .llm-message code {
   font-family: var(--font-family-mono);
   font-size: 0.875em;
 }
+
 .llm-message pre code {
   background: none;
   padding: 0;
   color: inherit;
 }
+
 .llm-message :not(pre) > code {
   background: var(--color-bg-code-inline);
   border-radius: var(--radius-sm);
   padding: 1px var(--space-1);
   color: var(--color-text-base);
 }
+
 .llm-message blockquote {
   border-left: var(--border-strong) solid var(--color-border-muted);
   margin: 0.5em 0;
@@ -217,23 +234,23 @@
 }
 
 .llm-message table {
-    border-collapse: collapse;
-    margin: 1rem 0;
-    overflow: auto;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  overflow: auto;
 }
 
 .llm-message th,
 .llm-message td {
   border: var(--border-width) solid var(--color-border-table);
   padding: var(--space-2) var(--space-4);
-    text-align: left;
+  text-align: left;
   min-width: var(--table-min-width);
 }
 
 .llm-message th {
   background-color: var(--color-bg-table-header);
-    font-weight: bold;
-    text-align: center;
+  font-weight: bold;
+  text-align: center;
 }
 
 /* ============================
@@ -275,21 +292,21 @@ textarea::placeholder {
 textarea:focus,
 button:focus-visible {
   outline: none;
-  border-color: var(--color-bg-accent);
+  border-color: var(--color-tertiary);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 button {
   cursor: pointer;
-  background: var(--color-bg-accent);
-  color: var(--color-text-inverse);
-  border-color: var(--color-bg-accent);
-  font-weight: 500;
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+  border-color: var(--color-primary-border);
+  font-weight: 600;
   letter-spacing: 0.01em;
 }
 
 button:hover:not(:disabled) {
-  background: var(--color-bg-accent-hover);
-  border-color: var(--color-bg-accent-hover);
+  filter: brightness(1.03);
 }
 
 button:disabled {
@@ -310,23 +327,33 @@ button:disabled {
    Responsive
    ============================ */
 @media (max-width: 768px) {
-    .topbar {
-      flex-wrap: wrap;
-      padding: var(--space-3);
-    }
+  .app-shell {
+    padding: 0;
+  }
 
-    .app-layout {
-      grid-template-columns: 1fr;
-      grid-template-rows: 1fr 1fr;
-    }
+  .topbar {
+    flex-wrap: wrap;
+    padding: var(--space-3);
+  }
 
-    .chat-panel {
-      border-left: none;
-      border-top: var(--border-width) solid var(--color-border-soft);
-      padding: var(--space-7);
-    }
+  .app-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
 
-    .chat-form {
-      grid-template-columns: 1fr;
-    }
+  .resize-handle {
+    display: none;
+  }
+
+  .chat-panel {
+    width: auto !important;
+    border-left: none;
+    border-top: var(--border-width) solid var(--color-border-soft);
+    padding: var(--space-7);
+  }
+
+  .chat-form {
+    grid-template-columns: 1fr;
+  }
 }
