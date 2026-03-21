@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect, useLayoutEffect } from "react
 import ChatWindow from "./components/ChatWindow";
 import ChatInput from "./components/ChatInput";
 import CodeEditor from "./components/CodeEditor";
+import OptionsMenu from "./components/OptionsMenu";
 import { EditorView } from "@codemirror/view";
 import { sendMessage, ConversationMessage } from "./services/llmService";
 import "./App.css";
@@ -212,12 +213,13 @@ function App() {
         <div className="app-shell">
             <div className="workspace-frame">
                 <header className="topbar">
-                    <div className="topbar-title">Asistente de aprendizaje</div>
+                    <div className="topbar-title">QuackCode</div>
                     <div className="topbar-actions">
-                        <button type="button" onClick={toggleTheme}>
-                            {themeMode === "dark" ? "Modo claro" : "Modo oscuro"}
-                        </button>
-                        <button type="button" onClick={insertCodeIntoPrompt} disabled={loading} title="Alt+Shift+L">Añadir código</button>
+                        <OptionsMenu
+                            themeMode={themeMode}
+                            onToggleTheme={toggleTheme}
+                            onClearConversation={handleClearConversation}
+                        />
                     </div>
                 </header>
 
@@ -235,7 +237,6 @@ function App() {
                     <aside className="chat-panel" style={{ width: chatWidth, flexShrink: 0 }}>
                         <header className="chat-header">
                             <p className="chat-subtitle">Demo chat.</p>
-                            <button type="button" className="clear-btn" onClick={handleClearConversation}>Borrar conversación</button>
                         </header>
 
                         <ChatWindow messages={messages} />
@@ -246,6 +247,7 @@ function App() {
                             onSend={handlePromptSend}
                             disabled={loading}
                             textareaRef={chatTextareaRef}
+                            onInsertCode={insertCodeIntoPrompt}
                         />
 
                         <p className="status">{status}</p>

@@ -6,11 +6,12 @@ interface ChatInputProps {
     value: string;
     onChange: (value: string) => void;
     onSend: (text: string) => void;
+    onInsertCode: () => void;
     disabled: boolean;
     textareaRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
-export default function ChatInput({ value, onChange, onSend, disabled, textareaRef }: ChatInputProps) {
+export default function ChatInput({ value, onChange, onSend, onInsertCode, disabled, textareaRef }: ChatInputProps) {
 
     // resize del textarea cuando cambia el contenido
     useEffect(() => {
@@ -54,9 +55,22 @@ export default function ChatInput({ value, onChange, onSend, disabled, textareaR
                 disabled={disabled}
                 required
             />
-            <button type="submit" disabled={disabled}>
-                Enviar
-            </button>
+
+            <div className="chat-form-actions">
+                <button
+                    type="button"
+                    className="insert-code-btn"
+                    onClick={onInsertCode}
+                    disabled={disabled}
+                    title="Alt+Shift+L"
+                >
+                    Insertar codigo
+                </button>
+
+                <button type="submit" disabled={disabled}>
+                    Enviar
+                </button>
+            </div>
         </form>
     );
 }
