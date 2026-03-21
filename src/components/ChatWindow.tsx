@@ -2,12 +2,7 @@
 
 import { useRef, useEffect } from "react";
 import ChatBubble from "./ChatBubble";
-
-interface Message {
-    id: number;
-    text: string;
-    type: "user" | "llm";
-}
+import { Message } from "../types";
 
 interface ChatWindowProps {
     messages: Message[];

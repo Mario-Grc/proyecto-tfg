@@ -11,6 +11,8 @@ export default function OptionsMenu({ themeMode, onToggleTheme, onClearConversat
     const menuRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
+        if (!open) return;
+
         function handleDocumentClick(e: MouseEvent) {
             const target = e.target as Node;
             if (!menuRef.current?.contains(target)) {
@@ -31,7 +33,7 @@ export default function OptionsMenu({ themeMode, onToggleTheme, onClearConversat
             document.removeEventListener("mousedown", handleDocumentClick);
             document.removeEventListener("keydown", handleEscape);
         };
-    }, []);
+    }, [open]);
 
     return (
         <div className="options-menu" ref={menuRef}>

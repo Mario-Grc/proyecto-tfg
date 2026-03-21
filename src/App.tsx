@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect, useLayoutEffect } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import ChatWindow from "./components/ChatWindow";
 import ChatInput from "./components/ChatInput";
 import CodeEditor from "./components/CodeEditor";
@@ -6,13 +6,8 @@ import OptionsMenu from "./components/OptionsMenu";
 import ProblemPanel from "./components/ProblemPanel";
 import { EditorView } from "@codemirror/view";
 import { sendMessage, ConversationMessage } from "./services/llmService";
+import { Message } from "./types";
 import "./App.css";
-
-interface Message {
-    id: number;
-    text: string;
-    type: "user" | "llm";
-}
 
 type ThemeMode = "dark" | "light";
 
@@ -158,11 +153,11 @@ function App() {
         return () => window.removeEventListener("resize", onResize);
     }, []);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         localStorage.setItem("chat_panel_width", String(chatWidth));
     }, [chatWidth]);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         localStorage.setItem("problem_panel_width", String(problemWidth));
     }, [problemWidth]);
 
