@@ -1,15 +1,15 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import ChatWindow from "./components/ChatWindow";
-import ChatInput from "./components/ChatInput";
-import CodeEditor from "./components/CodeEditor";
-import OptionsMenu from "./components/OptionsMenu";
-import ProblemPanel from "./components/ProblemPanel";
 import { EditorView } from "@codemirror/view";
 import { sendMessage, ConversationMessage } from "./services/llmService";
 import { Message } from "./types";
+import { PROBLEM_CATALOG, ProblemDefinition } from "./data/problems";
+import LandingPage from "./pages/LandingPage";
+import ProblemSelectorPage from "./pages/ProblemSelectorPage";
+import WorkspacePage from "./pages/WorkspacePage";
 import "./App.css";
 
 type ThemeMode = "dark" | "light";
+type AppView = "landing" | "selector" | "workspace";
 
 // prompt inicial del sistema
 const SYSTEM_PROMPT: ConversationMessage = { role: "system", content: "Eres un asistente útil y breve." };
@@ -34,6 +34,11 @@ function App() {
     const [inputText, setInputText] = useState("");
     const [themeMode, setThemeMode] = useState<ThemeMode>(() => loadFromStorage<ThemeMode>("theme_mode", "dark"));
     const [problemText, setProblemText] = useState<string>(() => loadFromStorage<string>("problem_text", ""));
+    const [selectedProblemId, setSelectedProblemId] = useState<string | null>(() => loadFromStorage<string | null>("selected_problem_id", null));
+    const [currentView, setCurrentView] = useState<AppView>(() => {
+        const selected = loadFromStorage<string | null>("selected_problem_id", null);
+        return selected ? "workspace" : "landing";
+    });
     const [chatVisible, setChatVisible] = useState<boolean>(() => loadFromStorage<boolean>("chat_panel_visible", true));
     const [problemVisible, setProblemVisible] = useState<boolean>(() => loadFromStorage<boolean>("problem_panel_visible", true));
     const [problemWidth, setProblemWidth] = useState<number>(() => {
@@ -192,6 +197,10 @@ function App() {
     }, [problemText]);
 
     useEffect(() => {
+        localStorage.setItem("selected_problem_id", JSON.stringify(selectedProblemId));
+    }, [selectedProblemId]);
+
+    useEffect(() => {
         localStorage.setItem("chat_panel_visible", JSON.stringify(chatVisible));
     }, [chatVisible]);
 
@@ -309,87 +318,60 @@ function App() {
         setThemeMode((prev) => (prev === "dark" ? "light" : "dark"));
     }
 
+    function handleSelectProblem(problem: ProblemDefinition) {
+        setSelectedProblemId(problem.id);
+        setProblemText(problem.statement);
+        setProblemVisible(true);
+        setCurrentView("workspace");
+        setStatus(`Problema cargado: ${problem.title}`);
+    }
+
+    const selectedProblemTitle = PROBLEM_CATALOG.find((problem) => problem.id === selectedProblemId)?.title ?? "Problema seleccionado";
+
+    if (currentView === "landing") {
+        return <LandingPage onStart={() => setCurrentView("selector")} />;
+    }
+
+    if (currentView === "selector") {
+        return (
+            <ProblemSelectorPage
+                problems={PROBLEM_CATALOG}
+                onBack={() => setCurrentView("landing")}
+                onSelect={handleSelectProblem}
+            />
+        );
+    }
+
     return (
-        <div className="app-shell">
-            <div className="workspace-frame">
-                <header className="topbar">
-                    <div className="topbar-title">QuackCode</div>
-                    <div className="topbar-actions">
-                        <button type="button" className="panel-quick-btn" onClick={() => setChatVisible((prev) => !prev)}>
-                            {chatVisible ? "Ocultar chat" : "Mostrar chat"}
-                        </button>
-                        <button type="button" className="panel-quick-btn" onClick={() => setProblemVisible((prev) => !prev)}>
-                            {problemVisible ? "Ocultar enunciado" : "Mostrar enunciado"}
-                        </button>
-                        <OptionsMenu
-                            themeMode={themeMode}
-                            onToggleTheme={toggleTheme}
-                            onClearConversation={handleClearConversation}
-                        />
-                    </div>
-                </header>
-
-                <div className="app-layout">
-                    {chatVisible && (
-                        <>
-                            <aside className="chat-panel" style={{ width: chatWidth, flexShrink: 0 }}>
-                                <header className="chat-header">
-                                    <div className="chat-header-main">
-                                        <p className="chat-subtitle">Chat de apoyo.</p>
-                                        <span className="duck-indicator" aria-label="Mascota pato">Pato</span>
-                                    </div>
-
-                                    <button type="button" className="panel-toggle-btn" onClick={() => setChatVisible(false)}>
-                                        Ocultar
-                                    </button>
-                                </header>
-
-                                <ChatWindow messages={messages} />
-
-                                <ChatInput
-                                    value={inputText}
-                                    onChange={setInputText}
-                                    onSend={handlePromptSend}
-                                    disabled={loading}
-                                    textareaRef={chatTextareaRef}
-                                    onInsertCode={insertCodeIntoPrompt}
-                                />
-
-                                <p className="status">{status}</p>
-                            </aside>
-
-                            <div
-                                className="resize-handle"
-                                onMouseDown={handleResizeMouseDown}
-                                title="Arrastra para redimensionar"
-                            />
-                        </>
-                    )}
-
-                    <section className="editor-panel">
-                        <CodeEditor onEditorReady={handleEditorReady} />
-                    </section>
-
-                    {problemVisible && (
-                        <>
-                            <div
-                                className="resize-handle"
-                                onMouseDown={handleProblemResizeMouseDown}
-                                title="Arrastra para redimensionar"
-                            />
-
-                            <aside className="problem-side" style={{ width: problemWidth, flexShrink: 0 }}>
-                                <ProblemPanel
-                                    value={problemText}
-                                    onChange={setProblemText}
-                                    onHide={() => setProblemVisible(false)}
-                                />
-                            </aside>
-                        </>
-                    )}
-                </div>
-            </div>
-        </div>
+        <WorkspacePage
+            selectedProblemTitle={selectedProblemTitle}
+            messages={messages}
+            status={status}
+            loading={loading}
+            inputText={inputText}
+            chatVisible={chatVisible}
+            problemVisible={problemVisible}
+            chatWidth={chatWidth}
+            problemWidth={problemWidth}
+            problemText={problemText}
+            chatTextareaRef={chatTextareaRef}
+            themeMode={themeMode}
+            onEditorReady={handleEditorReady}
+            onInputChange={setInputText}
+            onPromptSend={handlePromptSend}
+            onInsertCode={insertCodeIntoPrompt}
+            onToggleTheme={toggleTheme}
+            onClearConversation={handleClearConversation}
+            onToggleChat={() => setChatVisible((prev) => !prev)}
+            onToggleProblem={() => setProblemVisible((prev) => !prev)}
+            onHideChat={() => setChatVisible(false)}
+            onHideProblem={() => setProblemVisible(false)}
+            onProblemTextChange={setProblemText}
+            onChatResizeMouseDown={handleResizeMouseDown}
+            onProblemResizeMouseDown={handleProblemResizeMouseDown}
+            onGoSelector={() => setCurrentView("selector")}
+            onGoHome={() => setCurrentView("landing")}
+        />
     );
 }
 

@@ -1,18 +1,19 @@
 interface ProblemPanelProps {
+    title: string;
     value: string;
     onChange: (value: string) => void;
     onHide: () => void;
 }
 
-export default function ProblemPanel({ value, onChange, onHide }: ProblemPanelProps) {
+export default function ProblemPanel({ title, value, onChange, onHide }: ProblemPanelProps) {
     return (
         <section className="problem-panel" aria-label="Enunciado del problema">
             <header className="problem-panel-header">
                 <div className="problem-panel-header-top">
-                    <h3>Enunciado</h3>
+                    <h2 className="problem-panel-title">{title}</h2>
                     <button type="button" className="panel-toggle-btn" onClick={onHide}>Ocultar</button>
                 </div>
-                <p>Este texto se guarda en tu navegador y sirve como referencia durante la sesion.</p>
+                <p>Enunciado editable guardado en tu navegador para esta sesion de trabajo.</p>
             </header>
 
             <textarea
