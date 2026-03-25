@@ -1,0 +1,56 @@
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .app-shell {
+    padding: 0;
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+    padding: var(--space-3);
+  }
+
+  .topbar-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .options-dropdown {
+    right: auto;
+    left: 0;
+    min-width: 210px;
+    max-width: min(90vw, 260px);
+  }
+
+  .app-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .resize-handle {
+    display: none;
+  }
+
+  .chat-panel {
+    width: auto !important;
+    border-right: none;
+    border-top: var(--border-width) solid var(--color-border-soft);
+    padding: var(--space-7);
+  }
+
+  .problem-side {
+    width: auto !important;
+    border-left: none;
+    border-top: var(--border-width) solid var(--color-border-soft);
+    padding: var(--space-7);
+  }
+
+  .chat-form {
+    grid-template-columns: 1fr;
+  }
+
+  .chat-form-actions {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+}

@@ -1,16 +1,15 @@
-import { useState, useRef, useCallback, useEffect, useLayoutEffect } from "react";
-import ChatWindow from "./components/ChatWindow";
-import ChatInput from "./components/ChatInput";
-import CodeEditor from "./components/CodeEditor";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { EditorView } from "@codemirror/view";
 import { sendMessage, ConversationMessage } from "./services/llmService";
+import { Message } from "./types";
+import { PROBLEM_CATALOG, ProblemDefinition } from "./data/problems";
+import LandingPage from "./pages/LandingPage";
+import ProblemSelectorPage from "./pages/ProblemSelectorPage";
+import WorkspacePage from "./pages/WorkspacePage";
 import "./App.css";
 
-interface Message {
-    id: number;
-    text: string;
-    type: "user" | "llm";
-}
+type ThemeMode = "dark" | "light";
+type AppView = "landing" | "selector" | "workspace";
 
 // prompt inicial del sistema
 const SYSTEM_PROMPT: ConversationMessage = { role: "system", content: "Eres un asistente útil y breve." };
@@ -25,10 +24,24 @@ function loadFromStorage<T>(key:string, fallback: T): T {
 }
 
 function App() {
+    const MIN_SIDE_PANEL_WIDTH = 260;
+    const MIN_EDITOR_WIDTH = 420;
+    const RESIZE_HANDLE_WIDTH = 6;
+
     const [messages, setMessages] = useState<Message[]>(() => loadFromStorage<Message[]>("chat_messages", []));
     const [status, setStatus] = useState("Listo para enviar.");
     const [loading, setLoading] = useState(false);
     const [inputText, setInputText] = useState("");
+    const [themeMode, setThemeMode] = useState<ThemeMode>(() => loadFromStorage<ThemeMode>("theme_mode", "dark"));
+    const [problemText, setProblemText] = useState<string>(() => loadFromStorage<string>("problem_text", ""));
+    const [selectedProblemId, setSelectedProblemId] = useState<string | null>(() => loadFromStorage<string | null>("selected_problem_id", null));
+    const [currentView, setCurrentView] = useState<AppView>("landing");
+    const [chatVisible, setChatVisible] = useState<boolean>(() => loadFromStorage<boolean>("chat_panel_visible", true));
+    const [problemVisible, setProblemVisible] = useState<boolean>(() => loadFromStorage<boolean>("problem_panel_visible", true));
+    const [problemWidth, setProblemWidth] = useState<number>(() => {
+        const savedAndParsed = Number(localStorage.getItem("problem_panel_width"));
+        return Number.isInteger(savedAndParsed) && savedAndParsed >= 260 && savedAndParsed <= 560 ? savedAndParsed : 360;
+    });
 
     const [chatWidth, setChatWidth] = useState<number>(() => {
         const savedAndParsed = Number(localStorage.getItem("chat_panel_width"));
@@ -41,6 +54,27 @@ function App() {
     const isDragging = useRef(false);
     const dragStartX = useRef(0);
     const dragStartWidth = useRef(0);
+    const isProblemDragging = useRef(false);
+    const problemDragStartX = useRef(0);
+    const problemDragStartWidth = useRef(0);
+    const chatWidthRef = useRef(chatWidth);
+    const problemWidthRef = useRef(problemWidth);
+    const chatVisibleRef = useRef(chatVisible);
+    const problemVisibleRef = useRef(problemVisible);
+
+    function getMaxChatWidth(currentProblemWidth: number, isProblemVisible: boolean) {
+        const reservedProblem = isProblemVisible ? currentProblemWidth + RESIZE_HANDLE_WIDTH : 0;
+        const reservedHandles = RESIZE_HANDLE_WIDTH;
+        const max = window.innerWidth - MIN_EDITOR_WIDTH - reservedProblem - reservedHandles - 24;
+        return Math.max(MIN_SIDE_PANEL_WIDTH, max);
+    }
+
+    function getMaxProblemWidth(currentChatWidth: number, isChatVisible: boolean) {
+        const reservedChat = isChatVisible ? currentChatWidth + RESIZE_HANDLE_WIDTH : 0;
+        const reservedHandles = RESIZE_HANDLE_WIDTH;
+        const max = window.innerWidth - MIN_EDITOR_WIDTH - reservedChat - reservedHandles - 24;
+        return Math.max(MIN_SIDE_PANEL_WIDTH, max);
+    }
 
     const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
         isDragging.current = true;
@@ -49,14 +83,52 @@ function App() {
         e.preventDefault();
     }, [chatWidth]);
 
+    const handleProblemResizeMouseDown = useCallback((e: React.MouseEvent) => {
+        isProblemDragging.current = true;
+        problemDragStartX.current = e.clientX;
+        problemDragStartWidth.current = problemWidth;
+        e.preventDefault();
+    }, [problemWidth]);
+
+    useEffect(() => {
+        chatWidthRef.current = chatWidth;
+    }, [chatWidth]);
+
+    useEffect(() => {
+        problemWidthRef.current = problemWidth;
+    }, [problemWidth]);
+
+    useEffect(() => {
+        chatVisibleRef.current = chatVisible;
+    }, [chatVisible]);
+
+    useEffect(() => {
+        problemVisibleRef.current = problemVisible;
+    }, [problemVisible]);
+
     useEffect(() => {
         const onMouseMove = (e: MouseEvent) => {
-            if (!isDragging.current) return;
-            const delta = dragStartX.current - e.clientX;
-            const newWidth = Math.max(260, Math.min(dragStartWidth.current + delta, window.innerWidth - 300));
-            setChatWidth(newWidth);
+            if (isDragging.current) {
+                const delta = e.clientX - dragStartX.current;
+                const proposed = dragStartWidth.current + delta;
+                const maxWidth = getMaxChatWidth(problemWidthRef.current, problemVisibleRef.current);
+                const newWidth = Math.max(MIN_SIDE_PANEL_WIDTH, Math.min(proposed, maxWidth));
+                setChatWidth(newWidth);
+            }
+
+            if (isProblemDragging.current) {
+                // El panel derecho debe crecer al arrastrar hacia la izquierda.
+                const problemDelta = problemDragStartX.current - e.clientX;
+                const proposed = problemDragStartWidth.current + problemDelta;
+                const maxWidth = getMaxProblemWidth(chatWidthRef.current, chatVisibleRef.current);
+                const newProblemWidth = Math.max(MIN_SIDE_PANEL_WIDTH, Math.min(proposed, maxWidth));
+                setProblemWidth(newProblemWidth);
+            }
         };
-        const onMouseUp = () => { isDragging.current = false; };
+        const onMouseUp = () => {
+            isDragging.current = false;
+            isProblemDragging.current = false;
+        };
         document.addEventListener("mousemove", onMouseMove);
         document.addEventListener("mouseup", onMouseUp);
         return () => {
@@ -65,9 +137,31 @@ function App() {
         };
     }, []);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
+        const onResize = () => {
+            const chatMax = getMaxChatWidth(problemWidthRef.current, problemVisibleRef.current);
+            const problemMax = getMaxProblemWidth(chatWidthRef.current, chatVisibleRef.current);
+
+            if (chatWidthRef.current > chatMax) {
+                setChatWidth(chatMax);
+            }
+
+            if (problemWidthRef.current > problemMax) {
+                setProblemWidth(problemMax);
+            }
+        };
+
+        window.addEventListener("resize", onResize);
+        return () => window.removeEventListener("resize", onResize);
+    }, []);
+
+    useEffect(() => {
         localStorage.setItem("chat_panel_width", String(chatWidth));
     }, [chatWidth]);
+
+    useEffect(() => {
+        localStorage.setItem("problem_panel_width", String(problemWidth));
+    }, [problemWidth]);
 
     const editorViewRef = useRef<EditorView | null>(null);
     const chatTextareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -89,6 +183,27 @@ function App() {
         localStorage.setItem("full_conversation", JSON.stringify(conversationRef.current));
         localStorage.setItem("next_message_id", JSON.stringify(nextIdRef.current));
     }, [messages]);
+
+    useEffect(() => {
+        document.documentElement.setAttribute("data-theme", themeMode);
+        localStorage.setItem("theme_mode", JSON.stringify(themeMode));
+    }, [themeMode]);
+
+    useEffect(() => {
+        localStorage.setItem("problem_text", JSON.stringify(problemText));
+    }, [problemText]);
+
+    useEffect(() => {
+        localStorage.setItem("selected_problem_id", JSON.stringify(selectedProblemId));
+    }, [selectedProblemId]);
+
+    useEffect(() => {
+        localStorage.setItem("chat_panel_visible", JSON.stringify(chatVisible));
+    }, [chatVisible]);
+
+    useEffect(() => {
+        localStorage.setItem("problem_panel_visible", JSON.stringify(problemVisible));
+    }, [problemVisible]);
 
     async function handleSend(text: string) {
         const userId = nextIdRef.current++;
@@ -196,47 +311,71 @@ function App() {
         setStatus("Conversación borrada.");
     }
 
+    function toggleTheme() {
+        setThemeMode((prev) => (prev === "dark" ? "light" : "dark"));
+    }
+
+    function handleSelectProblem(problem: ProblemDefinition) {
+        setSelectedProblemId(problem.id);
+        setProblemText(problem.statement);
+        setProblemVisible(true);
+        setCurrentView("workspace");
+        setStatus(`Problema cargado: ${problem.title}`);
+    }
+
+    const selectedProblemTitle = PROBLEM_CATALOG.find((problem) => problem.id === selectedProblemId)?.title ?? "Problema seleccionado";
+    const canContinueSession = Boolean(selectedProblemId && problemText.trim().length > 0);
+
+    if (currentView === "landing") {
+        return (
+            <LandingPage
+                onStart={() => setCurrentView("selector")}
+                canContinue={canContinueSession}
+                onContinue={() => setCurrentView("workspace")}
+            />
+        );
+    }
+
+    if (currentView === "selector") {
+        return (
+            <ProblemSelectorPage
+                problems={PROBLEM_CATALOG}
+                onBack={() => setCurrentView("landing")}
+                onSelect={handleSelectProblem}
+            />
+        );
+    }
+
     return (
-        <div className="app-shell">
-            <header className="topbar">
-                <div className="topbar-title">Asistente de aprendizaje</div>
-                <div className="topbar-actions">
-                    <button type="button" disabled>Opciones</button>
-                    <button type="button" onClick={insertCodeIntoPrompt} disabled={loading} title="Alt+Shift+L">Añadir código</button>
-                </div>
-            </header>
-
-            <div className="app-layout">
-                <section className="editor-panel">
-                    <CodeEditor onEditorReady={handleEditorReady} />
-                </section>
-
-                <div
-                    className="resize-handle"
-                    onMouseDown={handleResizeMouseDown}
-                    title="Arrastra para redimensionar"
-                />
-
-                <aside className="chat-panel" style={{ width: chatWidth, flexShrink: 0 }}>
-                    <header className="chat-header">
-                        <p className="chat-subtitle">Demo chat.</p>
-                        <button type="button" className="clear-btn" onClick={handleClearConversation}>Borrar conversación</button>
-                    </header>
-
-                    <ChatWindow messages={messages} />
-
-                    <ChatInput
-                        value={inputText}
-                        onChange={setInputText}
-                        onSend={handlePromptSend}
-                        disabled={loading}
-                        textareaRef={chatTextareaRef}
-                    />
-
-                    <p className="status">{status}</p>
-                </aside>
-            </div>
-        </div>
+        <WorkspacePage
+            selectedProblemTitle={selectedProblemTitle}
+            messages={messages}
+            status={status}
+            loading={loading}
+            inputText={inputText}
+            chatVisible={chatVisible}
+            problemVisible={problemVisible}
+            chatWidth={chatWidth}
+            problemWidth={problemWidth}
+            problemText={problemText}
+            chatTextareaRef={chatTextareaRef}
+            themeMode={themeMode}
+            onEditorReady={handleEditorReady}
+            onInputChange={setInputText}
+            onPromptSend={handlePromptSend}
+            onInsertCode={insertCodeIntoPrompt}
+            onToggleTheme={toggleTheme}
+            onClearConversation={handleClearConversation}
+            onToggleChat={() => setChatVisible((prev) => !prev)}
+            onToggleProblem={() => setProblemVisible((prev) => !prev)}
+            onHideChat={() => setChatVisible(false)}
+            onHideProblem={() => setProblemVisible(false)}
+            onProblemTextChange={setProblemText}
+            onChatResizeMouseDown={handleResizeMouseDown}
+            onProblemResizeMouseDown={handleProblemResizeMouseDown}
+            onGoSelector={() => setCurrentView("selector")}
+            onGoHome={() => setCurrentView("landing")}
+        />
     );
 }
 
