@@ -35,10 +35,7 @@ function App() {
     const [themeMode, setThemeMode] = useState<ThemeMode>(() => loadFromStorage<ThemeMode>("theme_mode", "dark"));
     const [problemText, setProblemText] = useState<string>(() => loadFromStorage<string>("problem_text", ""));
     const [selectedProblemId, setSelectedProblemId] = useState<string | null>(() => loadFromStorage<string | null>("selected_problem_id", null));
-    const [currentView, setCurrentView] = useState<AppView>(() => {
-        const selected = loadFromStorage<string | null>("selected_problem_id", null);
-        return selected ? "workspace" : "landing";
-    });
+    const [currentView, setCurrentView] = useState<AppView>("landing");
     const [chatVisible, setChatVisible] = useState<boolean>(() => loadFromStorage<boolean>("chat_panel_visible", true));
     const [problemVisible, setProblemVisible] = useState<boolean>(() => loadFromStorage<boolean>("problem_panel_visible", true));
     const [problemWidth, setProblemWidth] = useState<number>(() => {
@@ -327,9 +324,16 @@ function App() {
     }
 
     const selectedProblemTitle = PROBLEM_CATALOG.find((problem) => problem.id === selectedProblemId)?.title ?? "Problema seleccionado";
+    const canContinueSession = Boolean(selectedProblemId && problemText.trim().length > 0);
 
     if (currentView === "landing") {
-        return <LandingPage onStart={() => setCurrentView("selector")} />;
+        return (
+            <LandingPage
+                onStart={() => setCurrentView("selector")}
+                canContinue={canContinueSession}
+                onContinue={() => setCurrentView("workspace")}
+            />
+        );
     }
 
     if (currentView === "selector") {

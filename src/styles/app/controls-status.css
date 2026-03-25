@@ -1,0 +1,55 @@
+/* Shared controls + status */
+textarea,
+button {
+  padding: var(--space-4) var(--space-6);
+  border: var(--border-width) solid var(--color-border-muted);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  min-height: var(--min-height-control);
+}
+
+textarea {
+  background: var(--color-bg-surface-muted);
+  color: var(--color-text-base);
+  resize: none;
+  max-height: var(--max-height-textarea);
+  overflow-y: auto;
+  line-height: var(--line-height-base);
+  display: block;
+}
+
+textarea::placeholder {
+  color: var(--color-text-placeholder);
+}
+
+textarea:focus,
+button:focus-visible {
+  outline: none;
+  border-color: var(--color-tertiary);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+button {
+  cursor: pointer;
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+  border-color: var(--color-primary-border);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.03);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.status {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
