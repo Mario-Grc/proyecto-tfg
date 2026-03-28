@@ -11,8 +11,28 @@ import "./App.css";
 type ThemeMode = "dark" | "light";
 type AppView = "landing" | "selector" | "workspace";
 
-// prompt inicial del sistema
-const SYSTEM_PROMPT: ConversationMessage = { role: "system", content: "Eres un asistente útil y breve." };
+const BASE_SYSTEM_PROMPT = [
+    "Eres un asistente util y breve para resolver problemas de programacion.",
+    "Si no tienes suficiente contexto de codigo para responder con precision, pide al usuario un fragmento concreto del editor.",
+].join(" ");
+
+function buildSystemPrompt(problemTitle?: string, problemStatement?: string): ConversationMessage {
+    const statement = problemStatement?.trim();
+
+    if (!problemTitle && !statement) {
+        return { role: "system", content: BASE_SYSTEM_PROMPT };
+    }
+
+    const parts = [
+        BASE_SYSTEM_PROMPT,
+        "Contexto del problema activo:",
+        `Titulo: ${problemTitle ?? "Sin titulo"}`,
+        `Enunciado:\n${statement || "Sin enunciado."}`,
+        "No inventes requisitos que no esten en el enunciado.",
+    ];
+
+    return { role: "system", content: parts.join("\n\n") };
+}
 
 function loadFromStorage<T>(key:string, fallback: T): T {
     try {
@@ -166,7 +186,7 @@ function App() {
     const editorViewRef = useRef<EditorView | null>(null);
     const chatTextareaRef = useRef<HTMLTextAreaElement | null>(null);
     const conversationRef = useRef<ConversationMessage[]>(
-        loadFromStorage<ConversationMessage[]>("full_conversation", [SYSTEM_PROMPT])
+        loadFromStorage<ConversationMessage[]>("full_conversation", [buildSystemPrompt()])
     );
     
     // ids de los mensajes para identificarlos
@@ -205,15 +225,50 @@ function App() {
         localStorage.setItem("problem_panel_visible", JSON.stringify(problemVisible));
     }, [problemVisible]);
 
+    const selectedProblem = selectedProblemId ? PROBLEM_CATALOG.find((problem) => problem.id === selectedProblemId) : undefined;
+
+    function getSelectedCodeFromEditor() {
+        const view = editorViewRef.current;
+
+        if (!view) {
+            return "";
+        }
+
+        const mainSelection = view.state.selection.main;
+
+        if (mainSelection.empty) {
+            return "";
+        }
+
+        return view.state.doc.sliceString(mainSelection.from, mainSelection.to).trim();
+    }
+
     async function handleSend(text: string) {
+        const trimmedText = text.trim();
+        const selectedCode = getSelectedCodeFromEditor();
+        const userContentForModel = selectedCode
+            ? [
+                trimmedText,
+                "",
+                "Contexto de codigo seleccionado automaticamente:",
+                "```python",
+                selectedCode,
+                "```",
+            ].join("\n")
+            : trimmedText;
+
+        const userContentForChat = selectedCode
+            ? `${trimmedText}\n\n(Se adjunto automaticamente tu seleccion de codigo al modelo.)`
+            : trimmedText;
+
         const userId = nextIdRef.current++;
-        setMessages((prev) => [...prev, { id: userId, text, type: "user" }]);
+        setMessages((prev) => [...prev, { id: userId, text: userContentForChat, type: "user" }]);
 
         // pasar el mensaje al llm
-        conversationRef.current.push({ role: "user", content: text.trim() });
+        conversationRef.current.push({ role: "user", content: userContentForModel });
 
         setLoading(true);
-        setStatus("Consultando al modelo...");
+        setStatus(selectedCode ? "Consultando al modelo con tu seleccion de codigo..." : "Consultando al modelo...");
 
         try {
             // pasar mensaje a lm studio
@@ -302,11 +357,13 @@ function App() {
     }, [inputText, loading]);
 
     function handleClearConversation() {
+        const nextSystemPrompt = buildSystemPrompt(selectedProblem?.title, problemText);
+
         setMessages([]);
         nextIdRef.current = 1;
-        conversationRef.current = [SYSTEM_PROMPT];
+        conversationRef.current = [nextSystemPrompt];
         localStorage.removeItem("chat_messages"); 
-        localStorage.removeItem("full_conversation"); 
+        localStorage.setItem("full_conversation", JSON.stringify([nextSystemPrompt]));
         localStorage.removeItem("next_message_id");
         setStatus("Conversación borrada.");
     }
@@ -316,14 +373,23 @@ function App() {
     }
 
     function handleSelectProblem(problem: ProblemDefinition) {
+        const nextSystemPrompt = buildSystemPrompt(problem.title, problem.statement);
+
         setSelectedProblemId(problem.id);
         setProblemText(problem.statement);
+        setMessages([]);
+        setInputText("");
+        nextIdRef.current = 1;
+        conversationRef.current = [nextSystemPrompt];
+        localStorage.removeItem("chat_messages");
+        localStorage.setItem("full_conversation", JSON.stringify([nextSystemPrompt]));
+        localStorage.removeItem("next_message_id");
         setProblemVisible(true);
         setCurrentView("workspace");
         setStatus(`Problema cargado: ${problem.title}`);
     }
 
-    const selectedProblemTitle = PROBLEM_CATALOG.find((problem) => problem.id === selectedProblemId)?.title ?? "Problema seleccionado";
+    const selectedProblemTitle = selectedProblem?.title ?? "Problema seleccionado";
     const canContinueSession = Boolean(selectedProblemId && problemText.trim().length > 0);
 
     if (currentView === "landing") {
