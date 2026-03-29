@@ -38,6 +38,22 @@
     padding: var(--space-7);
   }
 
+  .collapsed-rail {
+    width: auto;
+    border-left: none;
+    border-right: none;
+    border-top: var(--border-width) solid var(--color-border-soft);
+    padding: var(--space-2) var(--space-3);
+    justify-content: flex-start;
+  }
+
+  .collapsed-rail-btn {
+    writing-mode: horizontal-tb;
+    transform: none;
+    padding: var(--space-2) var(--space-3);
+    min-height: 34px;
+  }
+
   .problem-side {
     width: auto !important;
     border-left: none;

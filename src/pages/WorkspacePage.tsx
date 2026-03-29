@@ -78,12 +78,6 @@ export default function WorkspacePage({
                         <button type="button" className="panel-quick-btn" onClick={onGoSelector}>
                             Cambiar problema
                         </button>
-                        <button type="button" className="panel-quick-btn" onClick={onToggleChat}>
-                            {chatVisible ? "Ocultar chat" : "Mostrar chat"}
-                        </button>
-                        <button type="button" className="panel-quick-btn" onClick={onToggleProblem}>
-                            {problemVisible ? "Ocultar enunciado" : "Mostrar enunciado"}
-                        </button>
                         <OptionsMenu
                             themeMode={themeMode}
                             onToggleTheme={onToggleTheme}
@@ -93,7 +87,7 @@ export default function WorkspacePage({
                 </header>
 
                 <div className="app-layout">
-                    {chatVisible && (
+                    {chatVisible ? (
                         <>
                             <aside className="chat-panel" style={{ width: chatWidth, flexShrink: 0 }}>
                                 <header className="chat-header">
@@ -127,13 +121,19 @@ export default function WorkspacePage({
                                 title="Arrastra para redimensionar"
                             />
                         </>
+                    ) : (
+                        <aside className="collapsed-rail collapsed-rail-left">
+                            <button type="button" className="collapsed-rail-btn" onClick={onToggleChat} title="Mostrar chat">
+                                Chat
+                            </button>
+                        </aside>
                     )}
 
                     <section className="editor-panel">
                         <CodeEditor onEditorReady={onEditorReady} />
                     </section>
 
-                    {problemVisible && (
+                    {problemVisible ? (
                         <>
                             <div
                                 className="resize-handle"
@@ -150,6 +150,12 @@ export default function WorkspacePage({
                                 />
                             </aside>
                         </>
+                    ) : (
+                        <aside className="collapsed-rail collapsed-rail-right">
+                            <button type="button" className="collapsed-rail-btn" onClick={onToggleProblem} title="Mostrar enunciado">
+                                Enunciado
+                            </button>
+                        </aside>
                     )}
                 </div>
             </div>
