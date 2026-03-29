@@ -259,13 +259,11 @@ function App() {
 
         if (!code.trim()) {
             setRunOutput("Salida de ejecucion JS:\nNo hay codigo en el editor.");
-            setStatus("No hay codigo para ejecutar.");
             return;
         }
 
         setRunningCode(true);
         setRunOutput("Salida de ejecucion JS:\nEjecutando...");
-        setStatus("Ejecutando JavaScript...");
 
         try {
             const result = await runJavaScriptCode(code, 4500);
@@ -287,11 +285,9 @@ function App() {
 
             const nextOutput = `Salida de ejecucion JS:\n${blocks.join("\n\n")}`;
             setRunOutput(nextOutput);
-            setStatus(result.error ? "Ejecucion JS finalizada con error." : "Ejecucion JS completada.");
         } catch (error) {
             const message = error instanceof Error ? error.message : "Error desconocido al ejecutar JavaScript.";
             setRunOutput(`Salida de ejecucion JS:\nError:\n${message}`);
-            setStatus(`Fallo al ejecutar JS: ${message}`);
         } finally {
             setRunningCode(false);
         }

@@ -158,9 +158,12 @@
 }
 
 .insert-code-btn {
-  background: var(--color-secondary);
-  border-color: var(--color-secondary);
-  color: #ffffff;
+  background: var(--color-tertiary);
+  border-color: var(--color-tertiary);
+  color: var(--color-text-on-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease-in-out;
 }
 
 .insert-code-btn:hover:not(:disabled) {

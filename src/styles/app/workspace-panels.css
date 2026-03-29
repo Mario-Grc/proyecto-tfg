@@ -31,9 +31,16 @@
 .run-js-btn {
   min-height: 34px;
   padding: var(--space-2) var(--space-4);
-  background: var(--color-secondary);
-  border-color: var(--color-secondary);
-  color: #ffffff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease-in-out;
+}
+
+.run-js-btn:hover {
+  filter: brightness(1.1);
 }
 
 /* CodeMirror container */
