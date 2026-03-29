@@ -38,6 +38,14 @@
     padding: var(--space-7);
   }
 
+  .editor-runner-toolbar {
+    justify-content: flex-start;
+  }
+
+  .editor-output {
+    max-height: 150px;
+  }
+
   .collapsed-rail {
     width: auto;
     border-left: none;

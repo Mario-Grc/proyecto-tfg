@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { EditorView } from "@codemirror/view";
 import { sendMessage, ConversationMessage } from "./services/llmService";
+import { runJavaScriptCode } from "./services/jsRunner.ts";
 import { Message } from "./types";
 import { PROBLEM_CATALOG, ProblemDefinition } from "./data/problems";
 import LandingPage from "./pages/LandingPage";
@@ -52,6 +53,8 @@ function App() {
     const [status, setStatus] = useState("Listo para enviar.");
     const [loading, setLoading] = useState(false);
     const [inputText, setInputText] = useState("");
+    const [runningCode, setRunningCode] = useState(false);
+    const [runOutput, setRunOutput] = useState("Salida de ejecucion JS: aun no has ejecutado codigo.");
     const [themeMode, setThemeMode] = useState<ThemeMode>(() => loadFromStorage<ThemeMode>("theme_mode", "dark"));
     const [problemText, setProblemText] = useState<string>(() => loadFromStorage<string>("problem_text", ""));
     const [selectedProblemId, setSelectedProblemId] = useState<string | null>(() => loadFromStorage<string | null>("selected_problem_id", null));
@@ -243,6 +246,57 @@ function App() {
         return view.state.doc.sliceString(mainSelection.from, mainSelection.to).trim();
     }
 
+    function getEditorCode() {
+        return editorViewRef.current?.state.doc.toString() ?? "";
+    }
+
+    async function handleRunJavaScript() {
+        if (runningCode) {
+            return;
+        }
+
+        const code = getEditorCode();
+
+        if (!code.trim()) {
+            setRunOutput("Salida de ejecucion JS:\nNo hay codigo en el editor.");
+            setStatus("No hay codigo para ejecutar.");
+            return;
+        }
+
+        setRunningCode(true);
+        setRunOutput("Salida de ejecucion JS:\nEjecutando...");
+        setStatus("Ejecutando JavaScript...");
+
+        try {
+            const result = await runJavaScriptCode(code, 4500);
+            const blocks: string[] = [];
+
+            if (result.logs.length > 0) {
+                blocks.push(`Console:\n${result.logs.join("\n")}`);
+            }
+
+            if (result.error) {
+                blocks.push(`Error:\n${result.error}`);
+            } else if (result.result && result.result !== "undefined") {
+                blocks.push(`Return:\n${result.result}`);
+            }
+
+            if (blocks.length === 0) {
+                blocks.push("Ejecucion completada sin salida.");
+            }
+
+            const nextOutput = `Salida de ejecucion JS:\n${blocks.join("\n\n")}`;
+            setRunOutput(nextOutput);
+            setStatus(result.error ? "Ejecucion JS finalizada con error." : "Ejecucion JS completada.");
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Error desconocido al ejecutar JavaScript.";
+            setRunOutput(`Salida de ejecucion JS:\nError:\n${message}`);
+            setStatus(`Fallo al ejecutar JS: ${message}`);
+        } finally {
+            setRunningCode(false);
+        }
+    }
+
     async function handleSend(text: string) {
         const trimmedText = text.trim();
         const selectedCode = getSelectedCodeFromEditor();
@@ -251,7 +305,7 @@ function App() {
                 trimmedText,
                 "",
                 "Contexto de codigo seleccionado automaticamente:",
-                "```python",
+                "```javascript",
                 selectedCode,
                 "```",
             ].join("\n")
@@ -418,6 +472,8 @@ function App() {
             messages={messages}
             status={status}
             loading={loading}
+            runningCode={runningCode}
+            runOutput={runOutput}
             inputText={inputText}
             chatVisible={chatVisible}
             problemVisible={problemVisible}
@@ -430,6 +486,7 @@ function App() {
             onInputChange={setInputText}
             onPromptSend={handlePromptSend}
             onInsertCode={insertCodeIntoPrompt}
+            onRunJavaScript={handleRunJavaScript}
             onToggleTheme={toggleTheme}
             onClearConversation={handleClearConversation}
             onToggleChat={() => setChatVisible((prev) => !prev)}

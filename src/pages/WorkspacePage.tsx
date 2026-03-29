@@ -13,6 +13,8 @@ interface WorkspacePageProps {
     messages: Message[];
     status: string;
     loading: boolean;
+    runningCode: boolean;
+    runOutput: string;
     inputText: string;
     chatVisible: boolean;
     problemVisible: boolean;
@@ -25,6 +27,7 @@ interface WorkspacePageProps {
     onInputChange: (value: string) => void;
     onPromptSend: (text: string) => void;
     onInsertCode: () => void;
+    onRunJavaScript: () => void;
     onToggleTheme: () => void;
     onClearConversation: () => void;
     onToggleChat: () => void;
@@ -43,6 +46,8 @@ export default function WorkspacePage({
     messages,
     status,
     loading,
+    runningCode,
+    runOutput,
     inputText,
     chatVisible,
     problemVisible,
@@ -55,6 +60,7 @@ export default function WorkspacePage({
     onInputChange,
     onPromptSend,
     onInsertCode,
+    onRunJavaScript,
     onToggleTheme,
     onClearConversation,
     onToggleChat,
@@ -130,7 +136,18 @@ export default function WorkspacePage({
                     )}
 
                     <section className="editor-panel">
+                        <div className="editor-runner-toolbar">
+                            <button type="button" className="run-js-btn" onClick={onRunJavaScript} disabled={runningCode}>
+                                {runningCode ? "Ejecutando JS..." : "Ejecutar JS"}
+                            </button>
+                        </div>
+
                         <CodeEditor onEditorReady={onEditorReady} />
+
+                        <section className="editor-output" aria-label="Salida de ejecucion JavaScript">
+                            <p className="editor-output-title">Salida</p>
+                            <pre className="editor-output-content">{runOutput}</pre>
+                        </section>
                     </section>
 
                     {problemVisible ? (

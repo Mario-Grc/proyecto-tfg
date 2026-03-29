@@ -2,15 +2,16 @@ import { useEffect, useRef } from "react";
 import { EditorState } from "@codemirror/state";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { EditorView, basicSetup } from "codemirror";
-import { python } from "@codemirror/lang-python";
-import { keymap} from "@codemirror/view";
+import { javascript } from "@codemirror/lang-javascript";
+import { keymap } from "@codemirror/view";
 import { insertTab } from "@codemirror/commands";
 
-const PLACEHOLDER = `# Escribe tu código aquí...
-def hola():
-    print("Hola")
+const PLACEHOLDER = `// Escribe tu codigo JavaScript aqui...
+function saludar(nombre) {
+    console.log("Hola, " + nombre + "!");
+}
 
-hola()
+saludar("Usuario");
 `
 
 interface CodeEditorProps {
@@ -30,7 +31,7 @@ export default function CodeEditor({ onEditorReady}: CodeEditorProps) {
             doc: PLACEHOLDER,
             extensions: [
                 basicSetup,
-                python(), 
+                javascript(),
                 oneDark,
                 keymap.of([{ key: "Tab", run: insertTab }]),
                 // EditorView.lineWrapping

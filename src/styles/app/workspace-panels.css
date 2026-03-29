@@ -1,10 +1,15 @@
-/* Main workspace layout + editor + panel resizer + problem panel */
+/* ============================
+  Workspace Layout Base
+  ============================ */
 .app-layout {
   display: flex;
   overflow: hidden;
   min-height: 0;
 }
 
+/* ============================
+  Editor Panel
+  ============================ */
 .editor-panel {
   flex: 1;
   min-width: 0;
@@ -13,6 +18,25 @@
   overflow: hidden;
 }
 
+.editor-runner-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border-soft);
+  background: var(--color-bg-surface);
+}
+
+.run-js-btn {
+  min-height: 34px;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-secondary);
+  border-color: var(--color-secondary);
+  color: #ffffff;
+}
+
+/* CodeMirror container */
 .code-editor {
   flex-grow: 1;
   overflow: auto;
@@ -23,6 +47,38 @@
   height: 100%;
 }
 
+/* ============================
+   Console / Runner Output
+   ============================ */
+.editor-output {
+  border-top: var(--border-width) solid var(--color-border-soft);
+  background: var(--color-bg-surface);
+  padding: var(--space-3) var(--space-4);
+  max-height: 180px;
+  overflow: auto;
+}
+
+.editor-output-title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.editor-output-content {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+  color: var(--color-text-base);
+}
+
+/* ============================
+   Resizer + Collapsed Rails
+   ============================ */
 .resize-handle {
   width: 6px;
   flex-shrink: 0;
@@ -70,6 +126,9 @@
   color: var(--color-text-base);
 }
 
+/* ============================
+   Chat Panel
+   ============================ */
 .chat-panel {
   display: flex;
   flex-direction: column;
@@ -122,6 +181,9 @@
   font-size: var(--font-size-md);
 }
 
+/* ============================
+   Problem Statement Panel
+   ============================ */
 .problem-side {
   min-height: 0;
   padding: var(--space-5);
