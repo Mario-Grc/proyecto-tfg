@@ -145,7 +145,9 @@ export default function WorkspacePage({
                         <CodeEditor onEditorReady={onEditorReady} />
 
                         <section className="editor-output" aria-label="Salida de ejecucion JavaScript">
-                            <p className="editor-output-title">Salida</p>
+                            <div className="editor-output-head">
+                                <p className="editor-output-title">Consola</p>
+                            </div>
                             <pre className="editor-output-content">{runOutput}</pre>
                         </section>
                     </section>

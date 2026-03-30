@@ -59,28 +59,35 @@
    ============================ */
 .editor-output {
   border-top: var(--border-width) solid var(--color-border-soft);
-  background: var(--color-bg-surface);
-  padding: var(--space-3) var(--space-4);
+  background: color-mix(in srgb, var(--color-bg-code-block) 78%, var(--color-bg-surface) 22%);
   max-height: 180px;
   overflow: auto;
 }
 
+.editor-output-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-bottom: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 70%, transparent 30%);
+}
+
 .editor-output-title {
-  margin: 0 0 var(--space-2);
+  margin: 0;
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
 }
 
 .editor-output-content {
   margin: 0;
+  padding: var(--space-3) var(--space-4);
   white-space: pre-wrap;
   word-break: break-word;
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-base);
-  color: var(--color-text-base);
+  color: var(--color-text-code);
 }
 
 /* ============================

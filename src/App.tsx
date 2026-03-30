@@ -57,7 +57,7 @@ function App() {
     const [loading, setLoading] = useState(false);
     const [inputText, setInputText] = useState("");
     const [runningCode, setRunningCode] = useState(false);
-    const [runOutput, setRunOutput] = useState("Salida de ejecucion JS: aun no has ejecutado codigo.");
+    const [runOutput, setRunOutput] = useState("Aun no has ejecutado codigo.");
     const [themeMode, setThemeMode] = useState<ThemeMode>(() => loadFromStorage<ThemeMode>("theme_mode", "dark"));
     const [problemText, setProblemText] = useState<string>(() => loadFromStorage<string>("problem_text", ""));
     const [selectedProblemId, setSelectedProblemId] = useState<string | null>(() => loadFromStorage<string | null>("selected_problem_id", null));
@@ -261,36 +261,36 @@ function App() {
         const code = getEditorCode();
 
         if (!code.trim()) {
-            setRunOutput("Salida de ejecucion JS:\nNo hay codigo en el editor.");
+            setRunOutput("No hay codigo en el editor.");
             return;
         }
 
         setRunningCode(true);
-        setRunOutput("Salida de ejecucion JS:\nEjecutando...");
+        setRunOutput("Ejecutando...");
 
         try {
             const result = await runJavaScriptCode(code, 4500);
             const blocks: string[] = [];
 
             if (result.logs.length > 0) {
-                blocks.push(`Console:\n${result.logs.join("\n")}`);
+                blocks.push(result.logs.join("\n"));
             }
 
             if (result.error) {
-                blocks.push(`Error:\n${result.error}`);
+                blocks.push(`Error: ${result.error}`);
             } else if (result.result && result.result !== "undefined") {
-                blocks.push(`Return:\n${result.result}`);
+                blocks.push(`=> ${result.result}`);
             }
 
             if (blocks.length === 0) {
-                blocks.push("Ejecucion completada sin salida.");
+                blocks.push("Sin salida.");
             }
 
-            const nextOutput = `Salida de ejecucion JS:\n${blocks.join("\n\n")}`;
+            const nextOutput = blocks.join("\n\n");
             setRunOutput(nextOutput);
         } catch (error) {
             const message = error instanceof Error ? error.message : "Error desconocido al ejecutar JavaScript.";
-            setRunOutput(`Salida de ejecucion JS:\nError:\n${message}`);
+            setRunOutput(`Error: ${message}`);
         } finally {
             setRunningCode(false);
         }
