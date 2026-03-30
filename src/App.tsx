@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { EditorView } from "@codemirror/view";
 import { sendMessage, ConversationMessage } from "./services/llmService";
+import { runJavaScriptCode } from "./services/jsRunner.ts";
 import { Message } from "./types";
 import { PROBLEM_CATALOG, ProblemDefinition } from "./data/problems";
 import LandingPage from "./pages/LandingPage";
@@ -11,8 +12,31 @@ import "./App.css";
 type ThemeMode = "dark" | "light";
 type AppView = "landing" | "selector" | "workspace";
 
-// prompt inicial del sistema
-const SYSTEM_PROMPT: ConversationMessage = { role: "system", content: "Eres un asistente útil y breve." };
+const BASE_SYSTEM_PROMPT = [
+    "Eres un asistente tutor para aprender programacion.",
+    "Tu objetivo principal es ayudar al usuario a entender, no solo dar la respuesta final.",
+    "Explica el razonamiento paso a paso cuando sea util, resuelve dudas concretas y propone ejemplos pequenos.",
+    "Adapta el nivel de detalle a las preguntas del usuario y verifica que los conceptos queden claros.",
+    "Si no tienes suficiente contexto de codigo para responder con precision, pide al usuario un fragmento concreto del editor.",
+].join(" ");
+
+function buildSystemPrompt(problemTitle?: string, problemStatement?: string): ConversationMessage {
+    const statement = problemStatement?.trim();
+
+    if (!problemTitle && !statement) {
+        return { role: "system", content: BASE_SYSTEM_PROMPT };
+    }
+
+    const parts = [
+        BASE_SYSTEM_PROMPT,
+        "Contexto del problema activo:",
+        `Titulo: ${problemTitle ?? "Sin titulo"}`,
+        `Enunciado:\n${statement || "Sin enunciado."}`,
+        "No inventes requisitos que no esten en el enunciado.",
+    ];
+
+    return { role: "system", content: parts.join("\n\n") };
+}
 
 function loadFromStorage<T>(key:string, fallback: T): T {
     try {
@@ -32,6 +56,8 @@ function App() {
     const [status, setStatus] = useState("Listo para enviar.");
     const [loading, setLoading] = useState(false);
     const [inputText, setInputText] = useState("");
+    const [runningCode, setRunningCode] = useState(false);
+    const [runOutput, setRunOutput] = useState("Aun no has ejecutado codigo.");
     const [themeMode, setThemeMode] = useState<ThemeMode>(() => loadFromStorage<ThemeMode>("theme_mode", "dark"));
     const [problemText, setProblemText] = useState<string>(() => loadFromStorage<string>("problem_text", ""));
     const [selectedProblemId, setSelectedProblemId] = useState<string | null>(() => loadFromStorage<string | null>("selected_problem_id", null));
@@ -166,7 +192,7 @@ function App() {
     const editorViewRef = useRef<EditorView | null>(null);
     const chatTextareaRef = useRef<HTMLTextAreaElement | null>(null);
     const conversationRef = useRef<ConversationMessage[]>(
-        loadFromStorage<ConversationMessage[]>("full_conversation", [SYSTEM_PROMPT])
+        loadFromStorage<ConversationMessage[]>("full_conversation", [buildSystemPrompt()])
     );
     
     // ids de los mensajes para identificarlos
@@ -205,15 +231,97 @@ function App() {
         localStorage.setItem("problem_panel_visible", JSON.stringify(problemVisible));
     }, [problemVisible]);
 
+    const selectedProblem = selectedProblemId ? PROBLEM_CATALOG.find((problem) => problem.id === selectedProblemId) : undefined;
+
+    function getSelectedCodeFromEditor() {
+        const view = editorViewRef.current;
+
+        if (!view) {
+            return "";
+        }
+
+        const mainSelection = view.state.selection.main;
+
+        if (mainSelection.empty) {
+            return "";
+        }
+
+        return view.state.doc.sliceString(mainSelection.from, mainSelection.to).trim();
+    }
+
+    function getEditorCode() {
+        return editorViewRef.current?.state.doc.toString() ?? "";
+    }
+
+    async function handleRunJavaScript() {
+        if (runningCode) {
+            return;
+        }
+
+        const code = getEditorCode();
+
+        if (!code.trim()) {
+            setRunOutput("No hay codigo en el editor.");
+            return;
+        }
+
+        setRunningCode(true);
+        setRunOutput("Ejecutando...");
+
+        try {
+            const result = await runJavaScriptCode(code, 4500);
+            const blocks: string[] = [];
+
+            if (result.logs.length > 0) {
+                blocks.push(result.logs.join("\n"));
+            }
+
+            if (result.error) {
+                blocks.push(`Error: ${result.error}`);
+            } else if (result.result && result.result !== "undefined") {
+                blocks.push(`=> ${result.result}`);
+            }
+
+            if (blocks.length === 0) {
+                blocks.push("Sin salida.");
+            }
+
+            const nextOutput = blocks.join("\n\n");
+            setRunOutput(nextOutput);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Error desconocido al ejecutar JavaScript.";
+            setRunOutput(`Error: ${message}`);
+        } finally {
+            setRunningCode(false);
+        }
+    }
+
     async function handleSend(text: string) {
+        const trimmedText = text.trim();
+        const selectedCode = getSelectedCodeFromEditor();
+        const userContentForModel = selectedCode
+            ? [
+                trimmedText,
+                "",
+                "Contexto de codigo seleccionado automaticamente:",
+                "```javascript",
+                selectedCode,
+                "```",
+            ].join("\n")
+            : trimmedText;
+
+        const userContentForChat = selectedCode
+            ? `${trimmedText}\n\n(Se adjunto automaticamente tu seleccion de codigo al modelo.)`
+            : trimmedText;
+
         const userId = nextIdRef.current++;
-        setMessages((prev) => [...prev, { id: userId, text, type: "user" }]);
+        setMessages((prev) => [...prev, { id: userId, text: userContentForChat, type: "user" }]);
 
         // pasar el mensaje al llm
-        conversationRef.current.push({ role: "user", content: text.trim() });
+        conversationRef.current.push({ role: "user", content: userContentForModel });
 
         setLoading(true);
-        setStatus("Consultando al modelo...");
+        setStatus(selectedCode ? "Consultando al modelo con tu seleccion de codigo..." : "Consultando al modelo...");
 
         try {
             // pasar mensaje a lm studio
@@ -302,11 +410,13 @@ function App() {
     }, [inputText, loading]);
 
     function handleClearConversation() {
+        const nextSystemPrompt = buildSystemPrompt(selectedProblem?.title, problemText);
+
         setMessages([]);
         nextIdRef.current = 1;
-        conversationRef.current = [SYSTEM_PROMPT];
+        conversationRef.current = [nextSystemPrompt];
         localStorage.removeItem("chat_messages"); 
-        localStorage.removeItem("full_conversation"); 
+        localStorage.setItem("full_conversation", JSON.stringify([nextSystemPrompt]));
         localStorage.removeItem("next_message_id");
         setStatus("Conversación borrada.");
     }
@@ -316,14 +426,23 @@ function App() {
     }
 
     function handleSelectProblem(problem: ProblemDefinition) {
+        const nextSystemPrompt = buildSystemPrompt(problem.title, problem.statement);
+
         setSelectedProblemId(problem.id);
         setProblemText(problem.statement);
+        setMessages([]);
+        setInputText("");
+        nextIdRef.current = 1;
+        conversationRef.current = [nextSystemPrompt];
+        localStorage.removeItem("chat_messages");
+        localStorage.setItem("full_conversation", JSON.stringify([nextSystemPrompt]));
+        localStorage.removeItem("next_message_id");
         setProblemVisible(true);
         setCurrentView("workspace");
         setStatus(`Problema cargado: ${problem.title}`);
     }
 
-    const selectedProblemTitle = PROBLEM_CATALOG.find((problem) => problem.id === selectedProblemId)?.title ?? "Problema seleccionado";
+    const selectedProblemTitle = selectedProblem?.title ?? "Problema seleccionado";
     const canContinueSession = Boolean(selectedProblemId && problemText.trim().length > 0);
 
     if (currentView === "landing") {
@@ -352,6 +471,8 @@ function App() {
             messages={messages}
             status={status}
             loading={loading}
+            runningCode={runningCode}
+            runOutput={runOutput}
             inputText={inputText}
             chatVisible={chatVisible}
             problemVisible={problemVisible}
@@ -364,6 +485,7 @@ function App() {
             onInputChange={setInputText}
             onPromptSend={handlePromptSend}
             onInsertCode={insertCodeIntoPrompt}
+            onRunJavaScript={handleRunJavaScript}
             onToggleTheme={toggleTheme}
             onClearConversation={handleClearConversation}
             onToggleChat={() => setChatVisible((prev) => !prev)}

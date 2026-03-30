@@ -59,6 +59,43 @@
   margin: 0.5em 0;
 }
 
+.code-block-shell {
+  position: relative;
+}
+
+.llm-message .code-block-shell pre {
+  padding-top: calc(var(--space-8) + var(--space-2));
+}
+
+.copy-code-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  min-height: 28px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  background: var(--color-bg-surface-muted);
+  border: var(--border-width) solid var(--color-border-soft);
+  color: var(--color-text-base);
+  z-index: 1;
+}
+
+.copy-code-btn:hover:not(:disabled) {
+  filter: none;
+  background: var(--color-bg-panel);
+}
+
+.copy-code-btn.is-copied {
+  background: color-mix(in srgb, var(--color-secondary) 18%, var(--color-bg-surface-muted));
+  border-color: var(--color-secondary);
+}
+
+.copy-code-btn.is-error {
+  background: color-mix(in srgb, var(--color-bg-danger-soft) 70%, var(--color-bg-surface-muted));
+  border-color: var(--color-border-danger);
+}
+
 .llm-message code {
   font-family: var(--font-family-mono);
   font-size: 0.875em;
@@ -67,6 +104,7 @@
 .llm-message pre code {
   background: none;
   padding: 0;
+  padding-bottom: 12px;
   color: inherit;
 }
 
@@ -120,9 +158,12 @@
 }
 
 .insert-code-btn {
-  background: var(--color-secondary);
-  border-color: var(--color-secondary);
-  color: #ffffff;
+  background: var(--color-tertiary);
+  border-color: var(--color-tertiary);
+  color: var(--color-text-on-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease-in-out;
 }
 
 .insert-code-btn:hover:not(:disabled) {

@@ -13,6 +13,8 @@ interface WorkspacePageProps {
     messages: Message[];
     status: string;
     loading: boolean;
+    runningCode: boolean;
+    runOutput: string;
     inputText: string;
     chatVisible: boolean;
     problemVisible: boolean;
@@ -25,6 +27,7 @@ interface WorkspacePageProps {
     onInputChange: (value: string) => void;
     onPromptSend: (text: string) => void;
     onInsertCode: () => void;
+    onRunJavaScript: () => void;
     onToggleTheme: () => void;
     onClearConversation: () => void;
     onToggleChat: () => void;
@@ -43,6 +46,8 @@ export default function WorkspacePage({
     messages,
     status,
     loading,
+    runningCode,
+    runOutput,
     inputText,
     chatVisible,
     problemVisible,
@@ -55,6 +60,7 @@ export default function WorkspacePage({
     onInputChange,
     onPromptSend,
     onInsertCode,
+    onRunJavaScript,
     onToggleTheme,
     onClearConversation,
     onToggleChat,
@@ -78,12 +84,6 @@ export default function WorkspacePage({
                         <button type="button" className="panel-quick-btn" onClick={onGoSelector}>
                             Cambiar problema
                         </button>
-                        <button type="button" className="panel-quick-btn" onClick={onToggleChat}>
-                            {chatVisible ? "Ocultar chat" : "Mostrar chat"}
-                        </button>
-                        <button type="button" className="panel-quick-btn" onClick={onToggleProblem}>
-                            {problemVisible ? "Ocultar enunciado" : "Mostrar enunciado"}
-                        </button>
                         <OptionsMenu
                             themeMode={themeMode}
                             onToggleTheme={onToggleTheme}
@@ -93,7 +93,7 @@ export default function WorkspacePage({
                 </header>
 
                 <div className="app-layout">
-                    {chatVisible && (
+                    {chatVisible ? (
                         <>
                             <aside className="chat-panel" style={{ width: chatWidth, flexShrink: 0 }}>
                                 <header className="chat-header">
@@ -127,13 +127,32 @@ export default function WorkspacePage({
                                 title="Arrastra para redimensionar"
                             />
                         </>
+                    ) : (
+                        <aside className="collapsed-rail collapsed-rail-left">
+                            <button type="button" className="collapsed-rail-btn" onClick={onToggleChat} title="Mostrar chat">
+                                Chat
+                            </button>
+                        </aside>
                     )}
 
                     <section className="editor-panel">
+                        <div className="editor-runner-toolbar">
+                            <button type="button" className="run-js-btn" onClick={onRunJavaScript} disabled={runningCode}>
+                                {runningCode ? "Ejecutando JS..." : "Ejecutar JS"}
+                            </button>
+                        </div>
+
                         <CodeEditor onEditorReady={onEditorReady} />
+
+                        <section className="editor-output" aria-label="Salida de ejecucion JavaScript">
+                            <div className="editor-output-head">
+                                <p className="editor-output-title">Consola</p>
+                            </div>
+                            <pre className="editor-output-content">{runOutput}</pre>
+                        </section>
                     </section>
 
-                    {problemVisible && (
+                    {problemVisible ? (
                         <>
                             <div
                                 className="resize-handle"
@@ -150,6 +169,12 @@ export default function WorkspacePage({
                                 />
                             </aside>
                         </>
+                    ) : (
+                        <aside className="collapsed-rail collapsed-rail-right">
+                            <button type="button" className="collapsed-rail-btn" onClick={onToggleProblem} title="Mostrar enunciado">
+                                Enunciado
+                            </button>
+                        </aside>
                     )}
                 </div>
             </div>

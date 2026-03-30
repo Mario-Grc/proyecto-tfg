@@ -1,10 +1,15 @@
-/* Main workspace layout + editor + panel resizer + problem panel */
+/* ============================
+  Workspace Layout Base
+  ============================ */
 .app-layout {
   display: flex;
   overflow: hidden;
   min-height: 0;
 }
 
+/* ============================
+  Editor Panel
+  ============================ */
 .editor-panel {
   flex: 1;
   min-width: 0;
@@ -13,6 +18,32 @@
   overflow: hidden;
 }
 
+.editor-runner-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border-soft);
+  background: var(--color-bg-surface);
+}
+
+.run-js-btn {
+  min-height: 34px;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease-in-out;
+}
+
+.run-js-btn:hover {
+  filter: brightness(1.1);
+}
+
+/* CodeMirror container */
 .code-editor {
   flex-grow: 1;
   overflow: auto;
@@ -23,6 +54,45 @@
   height: 100%;
 }
 
+/* ============================
+   Console / Runner Output
+   ============================ */
+.editor-output {
+  border-top: var(--border-width) solid var(--color-border-soft);
+  background: color-mix(in srgb, var(--color-bg-code-block) 78%, var(--color-bg-surface) 22%);
+  max-height: 180px;
+  overflow: auto;
+}
+
+.editor-output-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-bottom: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 70%, transparent 30%);
+}
+
+.editor-output-title {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  letter-spacing: 0.03em;
+}
+
+.editor-output-content {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+  color: var(--color-text-code);
+}
+
+/* ============================
+   Resizer + Collapsed Rails
+   ============================ */
 .resize-handle {
   width: 6px;
   flex-shrink: 0;
@@ -42,6 +112,37 @@
   background: var(--color-tertiary);
 }
 
+.collapsed-rail {
+  width: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-panel);
+}
+
+.collapsed-rail-left {
+  border-right: var(--border-width) solid var(--color-border-soft);
+}
+
+.collapsed-rail-right {
+  border-left: var(--border-width) solid var(--color-border-soft);
+}
+
+.collapsed-rail-btn {
+  min-height: 0;
+  padding: var(--space-4) 6px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  letter-spacing: 0.02em;
+  background: var(--color-bg-surface-muted);
+  border: var(--border-width) solid var(--color-border-soft);
+  color: var(--color-text-base);
+}
+
+/* ============================
+   Chat Panel
+   ============================ */
 .chat-panel {
   display: flex;
   flex-direction: column;
@@ -94,6 +195,9 @@
   font-size: var(--font-size-md);
 }
 
+/* ============================
+   Problem Statement Panel
+   ============================ */
 .problem-side {
   min-height: 0;
   padding: var(--space-5);
@@ -132,6 +236,19 @@
   gap: var(--space-2);
 }
 
+.problem-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.problem-save-btn {
+  background: var(--color-secondary);
+  border-color: var(--color-secondary);
+  color: #ffffff;
+}
+
 .problem-panel-header p {
   margin: var(--space-2) 0 0;
   font-size: var(--font-size-xs);
@@ -156,6 +273,12 @@
   outline: none;
   border-color: var(--color-tertiary);
   box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.problem-textarea[readonly] {
+  background: color-mix(in srgb, var(--color-bg-panel) 80%, var(--color-bg-surface) 20%);
+  border-style: dashed;
+  cursor: default;
 }
 
 .clear-btn {
