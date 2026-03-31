@@ -99,7 +99,7 @@ export default function WorkspacePage({
                                 <header className="chat-header">
                                     <div className="chat-header-main">
                                         <p className="chat-subtitle">Chat de apoyo.</p>
-                                        <span className="duck-indicator" aria-label="Mascota pato">Pato</span>
+                                        {/* <span className="duck-indicator" aria-label="Mascota pato">Pato</span> */}
                                     </div>
 
                                     <button type="button" className="panel-toggle-btn" onClick={onHideChat}>
