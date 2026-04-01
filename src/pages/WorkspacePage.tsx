@@ -23,6 +23,8 @@ interface WorkspacePageProps {
     problemText: string;
     chatTextareaRef: React.RefObject<HTMLTextAreaElement | null>;
     themeMode: ThemeMode;
+    apiEndpoint: string;
+    modelName: string;
     onEditorReady: (view: EditorView) => void;
     onInputChange: (value: string) => void;
     onPromptSend: (text: string) => void;
@@ -30,6 +32,7 @@ interface WorkspacePageProps {
     onRunJavaScript: () => void;
     onToggleTheme: () => void;
     onClearConversation: () => void;
+    onSaveLLMSettings: (endpoint: string, model: string) => void;
     onToggleChat: () => void;
     onToggleProblem: () => void;
     onHideChat: () => void;
@@ -56,6 +59,8 @@ export default function WorkspacePage({
     problemText,
     chatTextareaRef,
     themeMode,
+    apiEndpoint,
+    modelName,
     onEditorReady,
     onInputChange,
     onPromptSend,
@@ -63,6 +68,7 @@ export default function WorkspacePage({
     onRunJavaScript,
     onToggleTheme,
     onClearConversation,
+    onSaveLLMSettings,
     onToggleChat,
     onToggleProblem,
     onHideChat,
@@ -86,8 +92,11 @@ export default function WorkspacePage({
                         </button>
                         <OptionsMenu
                             themeMode={themeMode}
+                            apiEndpoint={apiEndpoint}
+                            modelName={modelName}
                             onToggleTheme={onToggleTheme}
                             onClearConversation={onClearConversation}
+                            onSaveLLMSettings={onSaveLLMSettings}
                         />
                     </div>
                 </header>

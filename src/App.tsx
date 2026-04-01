@@ -1,6 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { EditorView } from "@codemirror/view";
-import { sendMessage, ConversationMessage } from "./services/llmService";
+import {
+    sendMessage,
+    ConversationMessage,
+    DEFAULT_API_ENDPOINT,
+    DEFAULT_MODEL_NAME,
+} from "./services/llmService";
 import { runJavaScriptCode } from "./services/jsRunner.ts";
 import { Message } from "./types";
 import { PROBLEM_CATALOG, ProblemDefinition } from "./data/problems";
@@ -59,6 +64,8 @@ function App() {
     const [runningCode, setRunningCode] = useState(false);
     const [runOutput, setRunOutput] = useState("Aun no has ejecutado codigo.");
     const [themeMode, setThemeMode] = useState<ThemeMode>(() => loadFromStorage<ThemeMode>("theme_mode", "dark"));
+    const [apiEndpoint, setApiEndpoint] = useState<string>(() => loadFromStorage<string>("llm_api_endpoint", DEFAULT_API_ENDPOINT));
+    const [modelName, setModelName] = useState<string>(() => loadFromStorage<string>("llm_model_name", DEFAULT_MODEL_NAME));
     const [problemText, setProblemText] = useState<string>(() => loadFromStorage<string>("problem_text", ""));
     const [selectedProblemId, setSelectedProblemId] = useState<string | null>(() => loadFromStorage<string | null>("selected_problem_id", null));
     const [currentView, setCurrentView] = useState<AppView>("landing");
@@ -216,6 +223,14 @@ function App() {
     }, [themeMode]);
 
     useEffect(() => {
+        localStorage.setItem("llm_api_endpoint", JSON.stringify(apiEndpoint));
+    }, [apiEndpoint]);
+
+    useEffect(() => {
+        localStorage.setItem("llm_model_name", JSON.stringify(modelName));
+    }, [modelName]);
+
+    useEffect(() => {
         localStorage.setItem("problem_text", JSON.stringify(problemText));
     }, [problemText]);
 
@@ -325,7 +340,10 @@ function App() {
 
         try {
             // pasar mensaje a lm studio
-            const response = await sendMessage(conversationRef.current);
+            const response = await sendMessage(conversationRef.current, {
+                endpoint: apiEndpoint,
+                model: modelName,
+            });
 
             const llmId = nextIdRef.current++;
             setMessages((prev) => [...prev, { id: llmId, text: response.text, type: "llm" }]);
@@ -425,6 +443,12 @@ function App() {
         setThemeMode((prev) => (prev === "dark" ? "light" : "dark"));
     }
 
+    function handleSaveLLMSettings(endpoint: string, model: string) {
+        setApiEndpoint(endpoint);
+        setModelName(model);
+        setStatus("Configuracion LLM actualizada.");
+    }
+
     function handleSelectProblem(problem: ProblemDefinition) {
         const nextSystemPrompt = buildSystemPrompt(problem.title, problem.statement);
 
@@ -481,6 +505,8 @@ function App() {
             problemText={problemText}
             chatTextareaRef={chatTextareaRef}
             themeMode={themeMode}
+            apiEndpoint={apiEndpoint}
+            modelName={modelName}
             onEditorReady={handleEditorReady}
             onInputChange={setInputText}
             onPromptSend={handlePromptSend}
@@ -488,6 +514,7 @@ function App() {
             onRunJavaScript={handleRunJavaScript}
             onToggleTheme={toggleTheme}
             onClearConversation={handleClearConversation}
+            onSaveLLMSettings={handleSaveLLMSettings}
             onToggleChat={() => setChatVisible((prev) => !prev)}
             onToggleProblem={() => setProblemVisible((prev) => !prev)}
             onHideChat={() => setChatVisible(false)}

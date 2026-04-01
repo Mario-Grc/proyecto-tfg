@@ -1,6 +1,6 @@
-// comunicación con LM Studio
-const MODEL_NAME = "local-model";
-const API_ENDPOINT = "http://127.0.0.1:1234/v1/chat/completions";
+// comunicación con APIs compatibles con OpenAI (LM Studio por defecto)
+export const DEFAULT_MODEL_NAME = "local-model";
+export const DEFAULT_API_ENDPOINT = "http://127.0.0.1:1234/v1/chat/completions";
 
 // interfaz de cada mensaje
 export interface ConversationMessage {
@@ -25,13 +25,21 @@ export interface LLMResponse {
     usage?: LLMAPIResponse["usage"];
 }
 
+export interface LLMConnectionSettings {
+    endpoint: string;
+    model: string;
+}
+
 // función para enviar un mensaje al modelo y obtener la respuesta
-export async function sendMessage(conversation: ConversationMessage[]): Promise<LLMResponse> {
-    const response = await fetch(API_ENDPOINT, {
+export async function sendMessage(
+    conversation: ConversationMessage[],
+    settings: LLMConnectionSettings
+): Promise<LLMResponse> {
+    const response = await fetch(settings.endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            model: MODEL_NAME,
+            model: settings.model,
             messages: conversation,
             temperature: 0.6,
         }),
