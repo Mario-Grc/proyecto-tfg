@@ -1,0 +1,53 @@
+import { useCallback, useState } from "react";
+import { runJavaScriptCode } from "../services/jsRunner";
+
+export default function useJavaScriptRunner() {
+    const [runningCode, setRunningCode] = useState(false);
+    const [runOutput, setRunOutput] = useState("Aun no has ejecutado codigo.");
+
+    const runCode = useCallback(async (code: string) => {
+        if (runningCode) {
+            return;
+        }
+
+        if (!code.trim()) {
+            setRunOutput("No hay codigo en el editor.");
+            return;
+        }
+
+        setRunningCode(true);
+        setRunOutput("Ejecutando...");
+
+        try {
+            const result = await runJavaScriptCode(code, 4500);
+            const blocks: string[] = [];
+
+            if (result.logs.length > 0) {
+                blocks.push(result.logs.join("\n"));
+            }
+
+            if (result.error) {
+                blocks.push(`Error: ${result.error}`);
+            } else if (result.result && result.result !== "undefined") {
+                blocks.push(`=> ${result.result}`);
+            }
+
+            if (blocks.length === 0) {
+                blocks.push("Sin salida.");
+            }
+
+            setRunOutput(blocks.join("\n\n"));
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Error desconocido al ejecutar JavaScript.";
+            setRunOutput(`Error: ${message}`);
+        } finally {
+            setRunningCode(false);
+        }
+    }, [runningCode]);
+
+    return {
+        runningCode,
+        runOutput,
+        runCode,
+    };
+}

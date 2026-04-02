@@ -1,18 +1,13 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { EditorView } from "@codemirror/view";
-import {
-    sendMessage,
-    ConversationMessage,
-    DEFAULT_API_ENDPOINT,
-    DEFAULT_MODEL_NAME,
-} from "./services/llmService";
-import { runJavaScriptCode } from "./services/jsRunner.ts";
-import { Message } from "./types";
+import { ConversationMessage } from "./services/llmService";
 import { PROBLEM_CATALOG, ProblemDefinition } from "./data/problems";
 import LandingPage from "./pages/LandingPage";
 import ProblemSelectorPage from "./pages/ProblemSelectorPage";
 import WorkspacePage from "./pages/WorkspacePage";
+import useJavaScriptRunner from "./hooks/useJavaScriptRunner";
 import usePersistentState from "./hooks/usePersistentState";
+import useTutorChat from "./hooks/useTutorChat";
 import useWorkspacePanels from "./hooks/useWorkspacePanels";
 import "./App.css";
 
@@ -46,18 +41,26 @@ function buildSystemPrompt(problemTitle?: string, problemStatement?: string): Co
 }
 
 function App() {
-    const [messages, setMessages] = usePersistentState<Message[]>("chat_messages", []);
-    const [status, setStatus] = useState("Listo para enviar.");
-    const [loading, setLoading] = useState(false);
-    const [inputText, setInputText] = useState("");
-    const [runningCode, setRunningCode] = useState(false);
-    const [runOutput, setRunOutput] = useState("Aun no has ejecutado codigo.");
     const [themeMode, setThemeMode] = usePersistentState<ThemeMode>("theme_mode", "dark");
-    const [apiEndpoint, setApiEndpoint] = usePersistentState<string>("llm_api_endpoint", DEFAULT_API_ENDPOINT);
-    const [modelName, setModelName] = usePersistentState<string>("llm_model_name", DEFAULT_MODEL_NAME);
     const [problemText, setProblemText] = usePersistentState<string>("problem_text", "");
     const [selectedProblemId, setSelectedProblemId] = usePersistentState<string | null>("selected_problem_id", null);
     const [currentView, setCurrentView] = useState<AppView>("landing");
+    const initialSystemPromptRef = useRef<ConversationMessage>(buildSystemPrompt());
+    const {
+        messages,
+        status,
+        setStatus,
+        loading,
+        inputText,
+        setInputText,
+        apiEndpoint,
+        modelName,
+        sendPrompt,
+        clearConversation,
+        resetConversation,
+        saveLLMSettings,
+    } = useTutorChat({ initialSystemPrompt: initialSystemPromptRef.current });
+    const { runningCode, runOutput, runCode } = useJavaScriptRunner();
     const {
         chatVisible,
         setChatVisible,
@@ -71,37 +74,10 @@ function App() {
 
     const editorViewRef = useRef<EditorView | null>(null);
     const chatTextareaRef = useRef<HTMLTextAreaElement | null>(null);
-    const conversationRef = useRef<ConversationMessage[]>(
-        (() => {
-            try {
-                const stored = localStorage.getItem("full_conversation");
-                return stored ? (JSON.parse(stored) as ConversationMessage[]) : [buildSystemPrompt()];
-            } catch {
-                return [buildSystemPrompt()];
-            }
-        })()
-    );
-    
-    // ids de los mensajes para identificarlos
-    const nextIdRef = useRef<number>(
-        (() => {
-            try {
-                const stored = localStorage.getItem("next_message_id");
-                return stored ? (JSON.parse(stored) as number) : 1;
-            } catch {
-                return 1;
-            }
-        })()
-    );
 
     const handleEditorReady = useCallback((view: EditorView) => {
         editorViewRef.current = view;
     }, []);
-
-    useEffect(() => {
-        localStorage.setItem("full_conversation", JSON.stringify(conversationRef.current));
-        localStorage.setItem("next_message_id", JSON.stringify(nextIdRef.current));
-    }, [messages]);
 
     useEffect(() => {
         document.documentElement.setAttribute("data-theme", themeMode);
@@ -130,103 +106,14 @@ function App() {
     }
 
     async function handleRunJavaScript() {
-        if (runningCode) {
-            return;
-        }
-
-        const code = getEditorCode();
-
-        if (!code.trim()) {
-            setRunOutput("No hay codigo en el editor.");
-            return;
-        }
-
-        setRunningCode(true);
-        setRunOutput("Ejecutando...");
-
-        try {
-            const result = await runJavaScriptCode(code, 4500);
-            const blocks: string[] = [];
-
-            if (result.logs.length > 0) {
-                blocks.push(result.logs.join("\n"));
-            }
-
-            if (result.error) {
-                blocks.push(`Error: ${result.error}`);
-            } else if (result.result && result.result !== "undefined") {
-                blocks.push(`=> ${result.result}`);
-            }
-
-            if (blocks.length === 0) {
-                blocks.push("Sin salida.");
-            }
-
-            const nextOutput = blocks.join("\n\n");
-            setRunOutput(nextOutput);
-        } catch (error) {
-            const message = error instanceof Error ? error.message : "Error desconocido al ejecutar JavaScript.";
-            setRunOutput(`Error: ${message}`);
-        } finally {
-            setRunningCode(false);
-        }
+        await runCode(getEditorCode());
     }
 
     async function handleSend(text: string) {
-        const trimmedText = text.trim();
-        const selectedCode = getSelectedCodeFromEditor();
-        const userContentForModel = selectedCode
-            ? [
-                trimmedText,
-                "",
-                "Contexto de codigo seleccionado automaticamente:",
-                "```javascript",
-                selectedCode,
-                "```",
-            ].join("\n")
-            : trimmedText;
-
-        const userContentForChat = selectedCode
-            ? `${trimmedText}\n\n(Se adjunto automaticamente tu seleccion de codigo al modelo.)`
-            : trimmedText;
-
-        const userId = nextIdRef.current++;
-        setMessages((prev) => [...prev, { id: userId, text: userContentForChat, type: "user" }]);
-
-        // pasar el mensaje al llm
-        conversationRef.current.push({ role: "user", content: userContentForModel });
-
-        setLoading(true);
-        setStatus(selectedCode ? "Consultando al modelo con tu seleccion de codigo..." : "Consultando al modelo...");
-
-        try {
-            // pasar mensaje a lm studio
-            const response = await sendMessage(conversationRef.current, {
-                endpoint: apiEndpoint,
-                model: modelName,
-            });
-
-            const llmId = nextIdRef.current++;
-            setMessages((prev) => [...prev, { id: llmId, text: response.text, type: "llm" }]);
-
-            // en el historial guardo el texto completo con los think, por si luego quiero mostrarlo o analizarlo
-            conversationRef.current.push({ role: "assistant", content: response.rawText });
-
-            // uso de tokens para saber el contexto
-            if (response.usage) {
-                setStatus(`Respuesta recibida — ${response.usage.total_tokens} tokens usados`);
-            } else {
-                setStatus("Respuesta recibida.");
-            }
-        } catch (error) {
-            // muestro el error en el chat y en el status
-            const message = error instanceof Error ? error.message : "Error desconocido";
-            const errorId = nextIdRef.current++;
-            setMessages((prev) => [...prev, { id: errorId, text: message, type: "llm" }]);
-            setStatus(`Fallo: ${message}`);
-        } finally {
-            setLoading(false);
-        }
+        await sendPrompt({
+            text,
+            selectedCode: getSelectedCodeFromEditor(),
+        });
     }
 
     function insertCodeIntoPrompt() {
@@ -269,7 +156,7 @@ function App() {
     }
 
     function handlePromptSend(text: string) {
-        handleSend(text);
+        void handleSend(text);
         setInputText("");
     }
 
@@ -290,14 +177,7 @@ function App() {
 
     function handleClearConversation() {
         const nextSystemPrompt = buildSystemPrompt(selectedProblem?.title, problemText);
-
-        setMessages([]);
-        nextIdRef.current = 1;
-        conversationRef.current = [nextSystemPrompt];
-        localStorage.removeItem("chat_messages"); 
-        localStorage.setItem("full_conversation", JSON.stringify([nextSystemPrompt]));
-        localStorage.removeItem("next_message_id");
-        setStatus("Conversación borrada.");
+        clearConversation(nextSystemPrompt);
     }
 
     function toggleTheme() {
@@ -305,9 +185,7 @@ function App() {
     }
 
     function handleSaveLLMSettings(endpoint: string, model: string) {
-        setApiEndpoint(endpoint);
-        setModelName(model);
-        setStatus("Configuracion LLM actualizada.");
+        saveLLMSettings(endpoint, model);
     }
 
     function handleSelectProblem(problem: ProblemDefinition) {
@@ -315,13 +193,7 @@ function App() {
 
         setSelectedProblemId(problem.id);
         setProblemText(problem.statement);
-        setMessages([]);
-        setInputText("");
-        nextIdRef.current = 1;
-        conversationRef.current = [nextSystemPrompt];
-        localStorage.removeItem("chat_messages");
-        localStorage.setItem("full_conversation", JSON.stringify([nextSystemPrompt]));
-        localStorage.removeItem("next_message_id");
+        resetConversation(nextSystemPrompt);
         setProblemVisible(true);
         setCurrentView("workspace");
         setStatus(`Problema cargado: ${problem.title}`);
