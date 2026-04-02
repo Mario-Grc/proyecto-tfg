@@ -59,7 +59,7 @@
    ============================ */
 .editor-output {
   border-top: var(--border-width) solid var(--color-border-soft);
-  background: color-mix(in srgb, var(--color-bg-code-block) 78%, var(--color-bg-surface) 22%);
+  background: var(--color-bg-console);
   max-height: 180px;
   overflow: auto;
 }
@@ -69,6 +69,7 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-4);
+  background: var(--color-bg-console-head);
   border-bottom: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 70%, transparent 30%);
 }
 
@@ -87,7 +88,7 @@
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-base);
-  color: var(--color-text-code);
+  color: var(--color-text-console);
 }
 
 /* ============================

@@ -8,7 +8,7 @@ import { insertTab } from "@codemirror/commands";
 
 const PLACEHOLDER = `// Escribe tu codigo JavaScript aqui...
 function saludar(nombre) {
-    console.log("Hola, " + nombre + "!");
+    console.log("¡Hola, " + nombre + "!");
 }
 
 saludar("Usuario");
