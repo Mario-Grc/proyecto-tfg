@@ -64,7 +64,7 @@ export default function ChatInput({ value, onChange, onSend, onInsertCode, disab
                     disabled={disabled}
                     title="Alt+Shift+L"
                 >
-                    Insertar codigo
+                    &lt;/&gt;
                 </button>
 
                 <button type="submit" disabled={disabled}>
