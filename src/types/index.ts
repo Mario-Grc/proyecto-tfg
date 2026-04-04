@@ -3,3 +3,5 @@ export interface Message {
     text: string;
     type: "user" | "llm";
 }
+
+export type DuckState = "normal" | "thinking" | "confused";

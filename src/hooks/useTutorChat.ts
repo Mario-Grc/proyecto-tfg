@@ -17,6 +17,8 @@ interface UseTutorChatOptions {
     initialSystemPrompt: ConversationMessage;
 }
 
+export type ChatSendResult = "success" | "error" | "ignored";
+
 function readStoredConversation(initialSystemPrompt: ConversationMessage): ConversationMessage[] {
     try {
         const stored = localStorage.getItem("full_conversation");
@@ -74,11 +76,11 @@ export default function useTutorChat({ initialSystemPrompt }: UseTutorChatOption
         localStorage.setItem("next_message_id", JSON.stringify(nextIdRef.current));
     }, [messages]);
 
-    const sendPrompt = useCallback(async ({ text, selectedCode = "" }: SendPromptOptions) => {
+    const sendPrompt = useCallback(async ({ text, selectedCode = "" }: SendPromptOptions): Promise<ChatSendResult> => {
         const trimmedText = text.trim();
 
         if (!trimmedText || loading) {
-            return;
+            return "ignored";
         }
 
         const normalizedCode = selectedCode.trim();
@@ -107,11 +109,15 @@ export default function useTutorChat({ initialSystemPrompt }: UseTutorChatOption
             } else {
                 setStatus("Respuesta recibida.");
             }
+
+            return "success";
         } catch (error) {
             const message = error instanceof Error ? error.message : "Error desconocido";
             const errorId = nextIdRef.current++;
             setMessages((prev) => [...prev, { id: errorId, text: message, type: "llm" }]);
             setStatus(`Fallo: ${message}`);
+
+            return "error";
         } finally {
             setLoading(false);
         }

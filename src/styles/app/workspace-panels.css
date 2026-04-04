@@ -159,7 +159,7 @@
   gap: var(--space-2);
   border-bottom: var(--border-width) solid var(--color-border-soft);
   padding-bottom: var(--space-7);
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
 }
 
@@ -173,27 +173,105 @@
 
 .chat-header-main {
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  min-width: 0;
 }
 
-.duck-indicator {
-  display: inline-flex;
+.duck-widget {
+  position: relative;
+  display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 26px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: var(--color-primary);
-  color: var(--color-text-on-primary);
-  font-size: 12px;
-  font-weight: 700;
+  width: min(320px, 100%);
+  padding: var(--space-3) var(--space-2) var(--space-2);
+  border: var(--border-width) solid var(--color-border-soft);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
 }
 
-.chat-subtitle {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-md);
+.duck-compact-btn {
+  min-width: 24px;
+  min-height: 28px;
+  padding: 0;
+  border: var(--border-width) solid var(--color-border-soft);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface-muted);
+  color: var(--color-text-base);
+}
+
+.duck-collapse-btn {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 2;
+}
+
+.duck-avatar {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  justify-self: center;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 10px color-mix(in srgb, var(--color-shadow-soft) 70%, transparent));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.duck-widget.duck-thinking .duck-avatar {
+  animation: duck-thinking-float 1.2s ease-in-out infinite;
+}
+
+.duck-widget.duck-confused .duck-avatar {
+  animation: duck-confused-shake 0.34s ease-in-out 2;
+}
+
+.duck-widget.is-compact {
+  position: static;
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+}
+
+.duck-widget.is-compact .duck-avatar {
+  width: 46px;
+  height: 46px;
+}
+
+.duck-widget.is-compact .duck-compact-btn {
+  position: static;
+  min-height: 24px;
+  min-width: 22px;
+  padding: 0;
+  font-size: var(--font-size-xs);
+}
+
+@keyframes duck-thinking-float {
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+  }
+
+  50% {
+    transform: translateY(-4px) scale(1.02);
+  }
+}
+
+@keyframes duck-confused-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
 }
 
 /* ============================

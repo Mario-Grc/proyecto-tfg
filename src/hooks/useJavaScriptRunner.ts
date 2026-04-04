@@ -1,18 +1,20 @@
 import { useCallback, useState } from "react";
 import { runJavaScriptCode } from "../services/jsRunner";
 
+export type JavaScriptRunStatus = "success" | "error" | "ignored";
+
 export default function useJavaScriptRunner() {
     const [runningCode, setRunningCode] = useState(false);
     const [runOutput, setRunOutput] = useState("Aun no has ejecutado codigo.");
 
-    const runCode = useCallback(async (code: string) => {
+    const runCode = useCallback(async (code: string): Promise<JavaScriptRunStatus> => {
         if (runningCode) {
-            return;
+            return "ignored";
         }
 
         if (!code.trim()) {
             setRunOutput("No hay codigo en el editor.");
-            return;
+            return "ignored";
         }
 
         setRunningCode(true);
@@ -26,7 +28,9 @@ export default function useJavaScriptRunner() {
                 blocks.push(result.logs.join("\n"));
             }
 
-            if (result.error) {
+            const hasError = Boolean(result.error);
+
+            if (hasError) {
                 blocks.push(`Error: ${result.error}`);
             } else if (result.result && result.result !== "undefined") {
                 blocks.push(`=> ${result.result}`);
@@ -37,9 +41,12 @@ export default function useJavaScriptRunner() {
             }
 
             setRunOutput(blocks.join("\n\n"));
+
+            return hasError ? "error" : "success";
         } catch (error) {
             const message = error instanceof Error ? error.message : "Error desconocido al ejecutar JavaScript.";
             setRunOutput(`Error: ${message}`);
+            return "error";
         } finally {
             setRunningCode(false);
         }

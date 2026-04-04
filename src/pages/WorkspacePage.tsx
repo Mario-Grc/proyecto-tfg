@@ -2,9 +2,10 @@ import { EditorView } from "@codemirror/view";
 import ChatWindow from "../components/ChatWindow";
 import ChatInput from "../components/ChatInput";
 import CodeEditor from "../components/CodeEditor";
+import DuckAssistant from "../components/DuckAssistant";
 import OptionsMenu from "../components/OptionsMenu";
 import ProblemPanel from "../components/ProblemPanel";
-import { Message } from "../types";
+import { DuckState, Message } from "../types";
 
 type ThemeMode = "dark" | "light";
 
@@ -13,6 +14,8 @@ interface WorkspacePageProps {
     messages: Message[];
     status: string;
     loading: boolean;
+    duckState: DuckState;
+    duckCompact: boolean;
     runningCode: boolean;
     runOutput: string;
     inputText: string;
@@ -28,6 +31,7 @@ interface WorkspacePageProps {
     onEditorReady: (view: EditorView) => void;
     onInputChange: (value: string) => void;
     onPromptSend: (text: string) => void;
+    onToggleDuckCompact: () => void;
     onInsertCode: () => void;
     onRunJavaScript: () => void;
     onToggleTheme: () => void;
@@ -49,6 +53,8 @@ export default function WorkspacePage({
     messages,
     status,
     loading,
+    duckState,
+    duckCompact,
     runningCode,
     runOutput,
     inputText,
@@ -64,6 +70,7 @@ export default function WorkspacePage({
     onEditorReady,
     onInputChange,
     onPromptSend,
+    onToggleDuckCompact,
     onInsertCode,
     onRunJavaScript,
     onToggleTheme,
@@ -107,8 +114,11 @@ export default function WorkspacePage({
                             <aside className="chat-panel" style={{ width: chatWidth, flexShrink: 0 }}>
                                 <header className="chat-header">
                                     <div className="chat-header-main">
-                                        <p className="chat-subtitle">Chat de apoyo.</p>
-                                        {/* <span className="duck-indicator" aria-label="Mascota pato">Pato</span> */}
+                                        <DuckAssistant
+                                            state={duckState}
+                                            compact={duckCompact}
+                                            onToggleCompact={onToggleDuckCompact}
+                                        />
                                     </div>
 
                                     <button type="button" className="panel-toggle-btn" onClick={onHideChat}>
