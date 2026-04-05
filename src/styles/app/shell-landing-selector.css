@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
 /* Shell + landing + selector */
 .app-shell {
   height: 100vh;
@@ -7,57 +9,235 @@
 .landing-screen,
 .selector-screen {
   min-height: 100%;
-  padding: clamp(16px, 2.5vw, 32px);
+  padding: clamp(18px, 2.6vw, 32px);
   background:
-    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--color-tertiary) 18%, transparent), transparent 38%),
-    linear-gradient(120deg, var(--color-bg-panel) 0%, var(--color-bg-surface) 100%);
+    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--color-tertiary) 24%, transparent), transparent 42%),
+    radial-gradient(circle at 88% 10%, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent 34%),
+    linear-gradient(132deg, color-mix(in srgb, var(--color-bg-panel) 92%, black 8%), var(--color-bg-surface));
 }
 
 .landing-screen {
-  display: grid;
-  place-items: center;
+  overflow: auto;
 }
 
-.landing-card {
-  width: min(720px, 100%);
-  padding: clamp(20px, 4vw, 40px);
-  border: var(--border-width) solid var(--color-border-soft);
-  border-radius: 24px;
-  background: color-mix(in srgb, var(--color-bg-surface) 88%, transparent);
-  box-shadow: 0 20px 46px var(--color-shadow-soft);
+.landing-surface {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: var(--space-6);
+}
+
+.landing-hero {
+  display: grid;
+  gap: var(--space-4);
+  padding: clamp(18px, 2.6vw, 28px);
+  border: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 86%, transparent);
+  border-radius: 20px;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--color-bg-surface) 90%, transparent),
+    color-mix(in srgb, var(--color-bg-panel) 94%, transparent)
+  );
+  box-shadow: 0 16px 30px color-mix(in srgb, var(--color-shadow-soft) 46%, transparent);
 }
 
 .landing-kicker {
   margin: 0;
-  font-size: var(--font-size-xs);
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  width: fit-content;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 82%, transparent);
+  background: color-mix(in srgb, var(--color-bg-surface-muted) 76%, transparent);
+  font-size: 0.7rem;
   text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-weight: 700;
   color: var(--color-text-muted);
+  font-family: "Space Grotesk", "Trebuchet MS", sans-serif;
 }
 
-.landing-card h1 {
-  margin: var(--space-5) 0 var(--space-4);
-  font-size: clamp(2rem, 5vw, 3.1rem);
-  color: var(--color-text-heading);
-}
-
-.landing-card p {
+.landing-hero h1 {
   margin: 0;
-  max-width: 55ch;
+  max-width: 22ch;
+  font-family: "Space Grotesk", "Trebuchet MS", sans-serif;
+  font-size: clamp(2rem, 4.2vw, 3.4rem);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  color: color-mix(in srgb, var(--color-text-heading) 68%, white 32%);
+}
+
+.landing-lead {
+  margin: 0;
+  max-width: 62ch;
   color: var(--color-text-base);
-  line-height: var(--line-height-base);
+  line-height: 1.62;
+  font-size: clamp(0.97rem, 1.05vw, 1.07rem);
+}
+
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.landing-cta,
+.landing-continue {
+  min-width: 210px;
+  min-height: 46px;
 }
 
 .landing-cta {
-  margin-top: var(--space-8);
-  min-width: 200px;
+  border-radius: 12px;
+  border-color: color-mix(in srgb, var(--color-primary) 70%, black 30%);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--color-primary) 26%, transparent);
 }
 
-.landing-continue {
-  display: block;
-  margin-top: var(--space-3);
-  min-width: 200px;
+.landing-pillars {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.landing-pillar {
+  padding: 12px;
+  border-radius: 12px;
+  border: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 78%, transparent);
+  background: color-mix(in srgb, var(--color-bg-surface-muted) 48%, transparent);
+}
+
+.landing-pillar h2 {
+  margin: 0;
+  font-size: 0.98rem;
+  font-family: "Space Grotesk", "Trebuchet MS", sans-serif;
+  color: color-mix(in srgb, var(--color-text-heading) 60%, white 40%);
+}
+
+.landing-pillar p {
+  margin: 7px 0 0;
+  font-size: 0.86rem;
+  line-height: 1.56;
+  color: var(--color-text-muted);
+}
+
+.landing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.landing-card {
+  display: grid;
+  gap: var(--space-4);
+  padding: clamp(14px, 1.9vw, 20px);
+  border-radius: 16px;
+  border: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 82%, transparent);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-bg-surface) 90%, transparent),
+    color-mix(in srgb, var(--color-bg-panel) 94%, transparent)
+  );
+}
+
+.landing-card h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
+  font-family: "Space Grotesk", "Trebuchet MS", sans-serif;
+  color: color-mix(in srgb, var(--color-text-heading) 64%, white 36%);
+}
+
+.landing-card-copy {
+  margin: 0;
+  line-height: 1.56;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+
+.landing-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.landing-list li {
+  padding: 10px;
+  border-radius: 10px;
+  border: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 80%, transparent);
+  background: color-mix(in srgb, var(--color-bg-surface-muted) 52%, transparent);
+}
+
+.landing-list h3 {
+  margin: 0;
+  font-size: 0.92rem;
+  color: color-mix(in srgb, var(--color-text-base) 82%, white 18%);
+}
+
+.landing-list p {
+  margin: 6px 0 0;
+  font-size: 0.83rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.landing-list-ordered li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 10px;
+}
+
+.landing-step-index {
+  min-width: 36px;
+  padding: 5px 7px;
+  text-align: center;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  letter-spacing: 0.07em;
+  font-family: var(--font-family-mono);
+  color: color-mix(in srgb, var(--color-primary) 90%, black 10%);
+  border: var(--border-width) solid color-mix(in srgb, var(--color-primary) 42%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+.landing-card-highlight {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--color-tertiary) 8%, var(--color-bg-surface)),
+    color-mix(in srgb, var(--color-bg-panel) 90%, transparent)
+  );
+}
+
+.landing-badges {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.landing-badges li {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 84%, transparent);
+  background: color-mix(in srgb, var(--color-bg-surface-muted) 54%, transparent);
+  color: var(--color-text-base);
+  font-size: 0.78rem;
+}
+
+.landing-snippet {
+  margin: 0;
+  padding: 12px;
+  border-radius: 10px;
+  border: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 74%, transparent);
+  background: color-mix(in srgb, var(--color-bg-code-block) 86%, black 14%);
+  color: var(--color-text-code);
+  font-family: var(--font-family-mono);
+  font-size: 0.78rem;
+  line-height: 1.52;
+  overflow-x: auto;
 }
 
 .selector-screen {
@@ -134,4 +314,38 @@
   color: var(--color-text-heading);
   background: var(--color-bg-surface-muted);
   font-weight: 700;
+}
+
+@media (max-width: 1080px) {
+  .landing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .landing-card-highlight {
+    grid-column: 1 / -1;
+  }
+
+  .landing-hero h1 {
+    max-width: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .landing-screen,
+  .selector-screen {
+    padding: 14px;
+  }
+
+  .landing-pillars,
+  .landing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-actions {
+    width: 100%;
+  }
+
+  .landing-actions button {
+    width: 100%;
+  }
 }
