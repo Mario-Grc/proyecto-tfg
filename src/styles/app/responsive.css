@@ -14,11 +14,31 @@
     justify-content: flex-end;
   }
 
-  .options-dropdown {
-    right: auto;
-    left: 0;
-    min-width: 210px;
-    max-width: min(90vw, 260px);
+  .options-overlay {
+    padding: var(--space-5);
+    align-items: flex-start;
+    overflow-y: auto;
+  }
+
+  .options-modal {
+    width: min(560px, 100%);
+    max-height: none;
+  }
+
+  .options-modal-header,
+  .options-modal-body {
+    padding: var(--space-5);
+  }
+
+  .options-close-btn,
+  .options-item {
+    width: 100%;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .options-form-actions {
+    justify-content: stretch;
   }
 
   .app-layout {
@@ -36,6 +56,25 @@
     border-right: none;
     border-top: var(--border-width) solid var(--color-border-soft);
     padding: var(--space-7);
+  }
+
+  .chat-header-main {
+    width: 100%;
+  }
+
+  .duck-widget {
+    width: 100%;
+    max-width: 260px;
+  }
+
+  .duck-avatar {
+    width: 138px;
+    height: 138px;
+  }
+
+  .duck-widget.is-compact .duck-avatar {
+    width: 46px;
+    height: 46px;
   }
 
   .editor-runner-toolbar {

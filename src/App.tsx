@@ -1,12 +1,15 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { EditorView } from "@codemirror/view";
-import { sendMessage, ConversationMessage } from "./services/llmService";
-import { runJavaScriptCode } from "./services/jsRunner.ts";
-import { Message } from "./types";
+import { ConversationMessage } from "./services/llmService";
 import { PROBLEM_CATALOG, ProblemDefinition } from "./data/problems";
 import LandingPage from "./pages/LandingPage";
 import ProblemSelectorPage from "./pages/ProblemSelectorPage";
 import WorkspacePage from "./pages/WorkspacePage";
+import useDuckState from "./hooks/useDuckState";
+import useJavaScriptRunner from "./hooks/useJavaScriptRunner";
+import usePersistentState from "./hooks/usePersistentState";
+import useTutorChat from "./hooks/useTutorChat";
+import useWorkspacePanels from "./hooks/useWorkspacePanels";
 import "./App.css";
 
 type ThemeMode = "dark" | "light";
@@ -38,198 +41,56 @@ function buildSystemPrompt(problemTitle?: string, problemStatement?: string): Co
     return { role: "system", content: parts.join("\n\n") };
 }
 
-function loadFromStorage<T>(key:string, fallback: T): T {
-    try {
-        const stored = localStorage.getItem(key);
-        return stored ? JSON.parse(stored): fallback;
-    } catch {
-        return fallback;
-    }
-}
-
 function App() {
-    const MIN_SIDE_PANEL_WIDTH = 260;
-    const MIN_EDITOR_WIDTH = 420;
-    const RESIZE_HANDLE_WIDTH = 6;
-
-    const [messages, setMessages] = useState<Message[]>(() => loadFromStorage<Message[]>("chat_messages", []));
-    const [status, setStatus] = useState("Listo para enviar.");
-    const [loading, setLoading] = useState(false);
-    const [inputText, setInputText] = useState("");
-    const [runningCode, setRunningCode] = useState(false);
-    const [runOutput, setRunOutput] = useState("Aun no has ejecutado codigo.");
-    const [themeMode, setThemeMode] = useState<ThemeMode>(() => loadFromStorage<ThemeMode>("theme_mode", "dark"));
-    const [problemText, setProblemText] = useState<string>(() => loadFromStorage<string>("problem_text", ""));
-    const [selectedProblemId, setSelectedProblemId] = useState<string | null>(() => loadFromStorage<string | null>("selected_problem_id", null));
+    const [themeMode, setThemeMode] = usePersistentState<ThemeMode>("theme_mode", "dark");
+    const [problemText, setProblemText] = usePersistentState<string>("problem_text", "");
+    const [selectedProblemId, setSelectedProblemId] = usePersistentState<string | null>("selected_problem_id", null);
     const [currentView, setCurrentView] = useState<AppView>("landing");
-    const [chatVisible, setChatVisible] = useState<boolean>(() => loadFromStorage<boolean>("chat_panel_visible", true));
-    const [problemVisible, setProblemVisible] = useState<boolean>(() => loadFromStorage<boolean>("problem_panel_visible", true));
-    const [problemWidth, setProblemWidth] = useState<number>(() => {
-        const savedAndParsed = Number(localStorage.getItem("problem_panel_width"));
-        return Number.isInteger(savedAndParsed) && savedAndParsed >= 260 && savedAndParsed <= 560 ? savedAndParsed : 360;
-    });
-
-    const [chatWidth, setChatWidth] = useState<number>(() => {
-        const savedAndParsed = Number(localStorage.getItem("chat_panel_width"));
-
-        const size = Number.isInteger(savedAndParsed) && savedAndParsed >= 260 && savedAndParsed <= window.innerWidth - 300 ? savedAndParsed : 380;
-
-        return size;
-    });
-
-    const isDragging = useRef(false);
-    const dragStartX = useRef(0);
-    const dragStartWidth = useRef(0);
-    const isProblemDragging = useRef(false);
-    const problemDragStartX = useRef(0);
-    const problemDragStartWidth = useRef(0);
-    const chatWidthRef = useRef(chatWidth);
-    const problemWidthRef = useRef(problemWidth);
-    const chatVisibleRef = useRef(chatVisible);
-    const problemVisibleRef = useRef(problemVisible);
-
-    function getMaxChatWidth(currentProblemWidth: number, isProblemVisible: boolean) {
-        const reservedProblem = isProblemVisible ? currentProblemWidth + RESIZE_HANDLE_WIDTH : 0;
-        const reservedHandles = RESIZE_HANDLE_WIDTH;
-        const max = window.innerWidth - MIN_EDITOR_WIDTH - reservedProblem - reservedHandles - 24;
-        return Math.max(MIN_SIDE_PANEL_WIDTH, max);
-    }
-
-    function getMaxProblemWidth(currentChatWidth: number, isChatVisible: boolean) {
-        const reservedChat = isChatVisible ? currentChatWidth + RESIZE_HANDLE_WIDTH : 0;
-        const reservedHandles = RESIZE_HANDLE_WIDTH;
-        const max = window.innerWidth - MIN_EDITOR_WIDTH - reservedChat - reservedHandles - 24;
-        return Math.max(MIN_SIDE_PANEL_WIDTH, max);
-    }
-
-    const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
-        isDragging.current = true;
-        dragStartX.current = e.clientX;
-        dragStartWidth.current = chatWidth;
-        e.preventDefault();
-    }, [chatWidth]);
-
-    const handleProblemResizeMouseDown = useCallback((e: React.MouseEvent) => {
-        isProblemDragging.current = true;
-        problemDragStartX.current = e.clientX;
-        problemDragStartWidth.current = problemWidth;
-        e.preventDefault();
-    }, [problemWidth]);
-
-    useEffect(() => {
-        chatWidthRef.current = chatWidth;
-    }, [chatWidth]);
-
-    useEffect(() => {
-        problemWidthRef.current = problemWidth;
-    }, [problemWidth]);
-
-    useEffect(() => {
-        chatVisibleRef.current = chatVisible;
-    }, [chatVisible]);
-
-    useEffect(() => {
-        problemVisibleRef.current = problemVisible;
-    }, [problemVisible]);
-
-    useEffect(() => {
-        const onMouseMove = (e: MouseEvent) => {
-            if (isDragging.current) {
-                const delta = e.clientX - dragStartX.current;
-                const proposed = dragStartWidth.current + delta;
-                const maxWidth = getMaxChatWidth(problemWidthRef.current, problemVisibleRef.current);
-                const newWidth = Math.max(MIN_SIDE_PANEL_WIDTH, Math.min(proposed, maxWidth));
-                setChatWidth(newWidth);
-            }
-
-            if (isProblemDragging.current) {
-                // El panel derecho debe crecer al arrastrar hacia la izquierda.
-                const problemDelta = problemDragStartX.current - e.clientX;
-                const proposed = problemDragStartWidth.current + problemDelta;
-                const maxWidth = getMaxProblemWidth(chatWidthRef.current, chatVisibleRef.current);
-                const newProblemWidth = Math.max(MIN_SIDE_PANEL_WIDTH, Math.min(proposed, maxWidth));
-                setProblemWidth(newProblemWidth);
-            }
-        };
-        const onMouseUp = () => {
-            isDragging.current = false;
-            isProblemDragging.current = false;
-        };
-        document.addEventListener("mousemove", onMouseMove);
-        document.addEventListener("mouseup", onMouseUp);
-        return () => {
-            document.removeEventListener("mousemove", onMouseMove);
-            document.removeEventListener("mouseup", onMouseUp);
-        };
-    }, []);
-
-    useEffect(() => {
-        const onResize = () => {
-            const chatMax = getMaxChatWidth(problemWidthRef.current, problemVisibleRef.current);
-            const problemMax = getMaxProblemWidth(chatWidthRef.current, chatVisibleRef.current);
-
-            if (chatWidthRef.current > chatMax) {
-                setChatWidth(chatMax);
-            }
-
-            if (problemWidthRef.current > problemMax) {
-                setProblemWidth(problemMax);
-            }
-        };
-
-        window.addEventListener("resize", onResize);
-        return () => window.removeEventListener("resize", onResize);
-    }, []);
-
-    useEffect(() => {
-        localStorage.setItem("chat_panel_width", String(chatWidth));
-    }, [chatWidth]);
-
-    useEffect(() => {
-        localStorage.setItem("problem_panel_width", String(problemWidth));
-    }, [problemWidth]);
+    const initialSystemPromptRef = useRef<ConversationMessage>(buildSystemPrompt());
+    const {
+        messages,
+        status,
+        setStatus,
+        loading,
+        inputText,
+        setInputText,
+        apiEndpoint,
+        modelName,
+        sendPrompt,
+        clearConversation,
+        resetConversation,
+        saveLLMSettings,
+    } = useTutorChat({ initialSystemPrompt: initialSystemPromptRef.current });
+    const {
+        duckState,
+        duckCompact,
+        toggleCompact,
+        setNormal,
+        setThinking,
+        setConfused,
+    } = useDuckState();
+    const { runningCode, runOutput, runCode } = useJavaScriptRunner();
+    const {
+        chatVisible,
+        setChatVisible,
+        problemVisible,
+        setProblemVisible,
+        chatWidth,
+        problemWidth,
+        handleChatResizeMouseDown,
+        handleProblemResizeMouseDown,
+    } = useWorkspacePanels();
 
     const editorViewRef = useRef<EditorView | null>(null);
     const chatTextareaRef = useRef<HTMLTextAreaElement | null>(null);
-    const conversationRef = useRef<ConversationMessage[]>(
-        loadFromStorage<ConversationMessage[]>("full_conversation", [buildSystemPrompt()])
-    );
-    
-    // ids de los mensajes para identificarlos
-    const nextIdRef = useRef<number>(
-        loadFromStorage<number>("next_message_id", 1)
-    );
 
     const handleEditorReady = useCallback((view: EditorView) => {
         editorViewRef.current = view;
     }, []);
 
     useEffect(() => {
-        localStorage.setItem("chat_messages", JSON.stringify(messages));
-        localStorage.setItem("full_conversation", JSON.stringify(conversationRef.current));
-        localStorage.setItem("next_message_id", JSON.stringify(nextIdRef.current));
-    }, [messages]);
-
-    useEffect(() => {
         document.documentElement.setAttribute("data-theme", themeMode);
-        localStorage.setItem("theme_mode", JSON.stringify(themeMode));
     }, [themeMode]);
-
-    useEffect(() => {
-        localStorage.setItem("problem_text", JSON.stringify(problemText));
-    }, [problemText]);
-
-    useEffect(() => {
-        localStorage.setItem("selected_problem_id", JSON.stringify(selectedProblemId));
-    }, [selectedProblemId]);
-
-    useEffect(() => {
-        localStorage.setItem("chat_panel_visible", JSON.stringify(chatVisible));
-    }, [chatVisible]);
-
-    useEffect(() => {
-        localStorage.setItem("problem_panel_visible", JSON.stringify(problemVisible));
-    }, [problemVisible]);
 
     const selectedProblem = selectedProblemId ? PROBLEM_CATALOG.find((problem) => problem.id === selectedProblemId) : undefined;
 
@@ -254,99 +115,33 @@ function App() {
     }
 
     async function handleRunJavaScript() {
-        if (runningCode) {
+        const runStatus = await runCode(getEditorCode());
+
+        if (runStatus === "error") {
+            setConfused();
             return;
         }
 
-        const code = getEditorCode();
-
-        if (!code.trim()) {
-            setRunOutput("No hay codigo en el editor.");
-            return;
-        }
-
-        setRunningCode(true);
-        setRunOutput("Ejecutando...");
-
-        try {
-            const result = await runJavaScriptCode(code, 4500);
-            const blocks: string[] = [];
-
-            if (result.logs.length > 0) {
-                blocks.push(result.logs.join("\n"));
-            }
-
-            if (result.error) {
-                blocks.push(`Error: ${result.error}`);
-            } else if (result.result && result.result !== "undefined") {
-                blocks.push(`=> ${result.result}`);
-            }
-
-            if (blocks.length === 0) {
-                blocks.push("Sin salida.");
-            }
-
-            const nextOutput = blocks.join("\n\n");
-            setRunOutput(nextOutput);
-        } catch (error) {
-            const message = error instanceof Error ? error.message : "Error desconocido al ejecutar JavaScript.";
-            setRunOutput(`Error: ${message}`);
-        } finally {
-            setRunningCode(false);
+        if (runStatus === "success") {
+            setNormal();
         }
     }
 
     async function handleSend(text: string) {
-        const trimmedText = text.trim();
-        const selectedCode = getSelectedCodeFromEditor();
-        const userContentForModel = selectedCode
-            ? [
-                trimmedText,
-                "",
-                "Contexto de codigo seleccionado automaticamente:",
-                "```javascript",
-                selectedCode,
-                "```",
-            ].join("\n")
-            : trimmedText;
+        setThinking();
 
-        const userContentForChat = selectedCode
-            ? `${trimmedText}\n\n(Se adjunto automaticamente tu seleccion de codigo al modelo.)`
-            : trimmedText;
+        const sendStatus = await sendPrompt({
+            text,
+            selectedCode: getSelectedCodeFromEditor(),
+        });
 
-        const userId = nextIdRef.current++;
-        setMessages((prev) => [...prev, { id: userId, text: userContentForChat, type: "user" }]);
+        if (sendStatus === "error") {
+            setConfused();
+            return;
+        }
 
-        // pasar el mensaje al llm
-        conversationRef.current.push({ role: "user", content: userContentForModel });
-
-        setLoading(true);
-        setStatus(selectedCode ? "Consultando al modelo con tu seleccion de codigo..." : "Consultando al modelo...");
-
-        try {
-            // pasar mensaje a lm studio
-            const response = await sendMessage(conversationRef.current);
-
-            const llmId = nextIdRef.current++;
-            setMessages((prev) => [...prev, { id: llmId, text: response.text, type: "llm" }]);
-
-            // en el historial guardo el texto completo con los think, por si luego quiero mostrarlo o analizarlo
-            conversationRef.current.push({ role: "assistant", content: response.rawText });
-
-            // uso de tokens para saber el contexto
-            if (response.usage) {
-                setStatus(`Respuesta recibida — ${response.usage.total_tokens} tokens usados`);
-            } else {
-                setStatus("Respuesta recibida.");
-            }
-        } catch (error) {
-            // muestro el error en el chat y en el status
-            const message = error instanceof Error ? error.message : "Error desconocido";
-            const errorId = nextIdRef.current++;
-            setMessages((prev) => [...prev, { id: errorId, text: message, type: "llm" }]);
-            setStatus(`Fallo: ${message}`);
-        } finally {
-            setLoading(false);
+        if (sendStatus === "success") {
+            setNormal();
         }
     }
 
@@ -390,7 +185,7 @@ function App() {
     }
 
     function handlePromptSend(text: string) {
-        handleSend(text);
+        void handleSend(text);
         setInputText("");
     }
 
@@ -411,18 +206,16 @@ function App() {
 
     function handleClearConversation() {
         const nextSystemPrompt = buildSystemPrompt(selectedProblem?.title, problemText);
-
-        setMessages([]);
-        nextIdRef.current = 1;
-        conversationRef.current = [nextSystemPrompt];
-        localStorage.removeItem("chat_messages"); 
-        localStorage.setItem("full_conversation", JSON.stringify([nextSystemPrompt]));
-        localStorage.removeItem("next_message_id");
-        setStatus("Conversación borrada.");
+        clearConversation(nextSystemPrompt);
+        setNormal();
     }
 
     function toggleTheme() {
         setThemeMode((prev) => (prev === "dark" ? "light" : "dark"));
+    }
+
+    function handleSaveLLMSettings(endpoint: string, model: string) {
+        saveLLMSettings(endpoint, model);
     }
 
     function handleSelectProblem(problem: ProblemDefinition) {
@@ -430,16 +223,11 @@ function App() {
 
         setSelectedProblemId(problem.id);
         setProblemText(problem.statement);
-        setMessages([]);
-        setInputText("");
-        nextIdRef.current = 1;
-        conversationRef.current = [nextSystemPrompt];
-        localStorage.removeItem("chat_messages");
-        localStorage.setItem("full_conversation", JSON.stringify([nextSystemPrompt]));
-        localStorage.removeItem("next_message_id");
+        resetConversation(nextSystemPrompt);
         setProblemVisible(true);
         setCurrentView("workspace");
         setStatus(`Problema cargado: ${problem.title}`);
+        setNormal();
     }
 
     const selectedProblemTitle = selectedProblem?.title ?? "Problema seleccionado";
@@ -471,6 +259,8 @@ function App() {
             messages={messages}
             status={status}
             loading={loading}
+            duckState={duckState}
+            duckCompact={duckCompact}
             runningCode={runningCode}
             runOutput={runOutput}
             inputText={inputText}
@@ -481,19 +271,23 @@ function App() {
             problemText={problemText}
             chatTextareaRef={chatTextareaRef}
             themeMode={themeMode}
+            apiEndpoint={apiEndpoint}
+            modelName={modelName}
             onEditorReady={handleEditorReady}
             onInputChange={setInputText}
             onPromptSend={handlePromptSend}
+            onToggleDuckCompact={toggleCompact}
             onInsertCode={insertCodeIntoPrompt}
             onRunJavaScript={handleRunJavaScript}
             onToggleTheme={toggleTheme}
             onClearConversation={handleClearConversation}
+            onSaveLLMSettings={handleSaveLLMSettings}
             onToggleChat={() => setChatVisible((prev) => !prev)}
             onToggleProblem={() => setProblemVisible((prev) => !prev)}
             onHideChat={() => setChatVisible(false)}
             onHideProblem={() => setProblemVisible(false)}
             onProblemTextChange={setProblemText}
-            onChatResizeMouseDown={handleResizeMouseDown}
+            onChatResizeMouseDown={handleChatResizeMouseDown}
             onProblemResizeMouseDown={handleProblemResizeMouseDown}
             onGoSelector={() => setCurrentView("selector")}
             onGoHome={() => setCurrentView("landing")}
