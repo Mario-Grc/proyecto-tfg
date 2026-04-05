@@ -56,7 +56,7 @@ export default function LandingPage({ onStart, canContinue, onContinue }: Landin
                 <div className="landing-surface">
                     <header className="landing-hero">
                         <p className="landing-kicker">Asistente de programacion con LLM local</p>
-                        <h1>Practica algoritmos con una ayuda clara, directa y dentro de tu propio entorno.</h1>
+                        <h1>Practica problemas con una ayuda clara, directa y dentro de tu propio entorno.</h1>
                         <p className="landing-lead">
                             QuackCode integra editor, consola y tutor conversacional en una sola vista para
                             practicar con metodo. El objetivo es que entiendas el por que de cada decision mientras

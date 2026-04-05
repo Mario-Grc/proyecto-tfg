@@ -8,6 +8,8 @@ Aplicación web para practicar problemas de programación con tres elementos pri
 
 Esta aplicación implementa un entorno de apoyo al aprendizaje de programación basado en práctica guiada. El usuario selecciona un problema, desarrolla su solución en el editor, consulta dudas al asistente LLM local y valida su razonamiento mediante ejecución JavaScript básica.
 
+Además, el entorno cuenta con un compañero interactivo (un **pato de goma virtual**) que reacciona a tus acciones de forma dinámica. Dependiendo de si estás pensando un problema, ejecutando código o hablando por el chat, el pato cambiará su estado y expresiones para acompañarte, haciendo la experiencia de aprendizaje (y el famoso *Rubber Duck Debugging*) mucho más amena visualmente.
+
 ### Landing
 
 ![Landing](./public/capturas/landing.png)
@@ -51,5 +53,5 @@ Para ejecutar el proyecto en tu máquina, sigue estos pasos:
     npm run dev
     ```
 
-# Autor
+## Autor
 Mario García Abellán
