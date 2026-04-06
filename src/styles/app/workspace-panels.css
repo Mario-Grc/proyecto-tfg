@@ -156,7 +156,7 @@
 
 .chat-header {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--space-4);
   border-bottom: var(--border-width) solid var(--color-border-soft);
   padding-bottom: var(--space-7);
   align-items: flex-start;
@@ -176,6 +176,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 0;
+  flex: 1 1 auto;
   min-width: 0;
 }
 
@@ -184,7 +185,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: min(320px, 100%);
+  width: min(100%, 22rem);
   padding: var(--space-3) var(--space-2) var(--space-2);
   border: var(--border-width) solid var(--color-border-soft);
   border-radius: var(--radius-md);
@@ -209,8 +210,9 @@
 }
 
 .duck-avatar {
-  width: 200px;
-  height: 200px;
+  width: clamp(104px, 70%, 196px);
+  height: auto;
+  max-width: 100%;
   object-fit: contain;
   justify-self: center;
   pointer-events: none;

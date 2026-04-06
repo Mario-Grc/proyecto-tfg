@@ -58,18 +58,17 @@
     padding: var(--space-7);
   }
 
+  .chat-header {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
   .chat-header-main {
-    width: 100%;
+    flex: 1 1 210px;
   }
 
   .duck-widget {
-    width: 100%;
-    max-width: 260px;
-  }
-
-  .duck-avatar {
-    width: 138px;
-    height: 138px;
+    width: min(100%, 18rem);
   }
 
   .duck-widget.is-compact .duck-avatar {
