@@ -15,11 +15,16 @@ const WORKER_SOURCE = `
 const toText = (value) => {
   if (typeof value === "string") return value;
   if (value === undefined) return "undefined";
+  if (value instanceof Error) return value.name + ": " + value.message;
+
   try {
-    return JSON.stringify(value, null, 2);
+    const json = JSON.stringify(value);
+    if (json !== undefined) return json;
   } catch {
-    return String(value);
+    return "[Circular]";
   }
+
+  return String(value);
 };
 
 self.onmessage = async (event) => {
