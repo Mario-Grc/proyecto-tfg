@@ -29,12 +29,13 @@ export default function ProblemSelectorPage({ problems, onBack, onSelect }: Prob
                 <div className="problem-grid">
                     {problems.map((problem) => (
                         <article key={problem.id} className="problem-card">
-                            <div className="problem-meta">
-                                <span className="problem-difficulty">{problem.difficulty}</span>
-                                <span>{problem.topic}</span>
+                            <div className="problem-main">
+                                <h3>{problem.title}</h3>
+                                <div className="problem-meta">
+                                    <span className="problem-difficulty">{problem.difficulty}</span>
+                                    <span>{problem.topic}</span>
+                                </div>
                             </div>
-                            <h3>{problem.title}</h3>
-                            <p>{problem.statement}</p>
                             <button type="button" onClick={() => onSelect(problem)}>
                                 Seleccionar
                             </button>

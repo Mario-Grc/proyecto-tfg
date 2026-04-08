@@ -297,12 +297,6 @@
   padding: var(--space-4);
 }
 
-.problem-panel-header h3 {
-  margin: 0;
-  font-size: var(--font-size-md);
-  color: var(--color-text-heading);
-}
-
 .problem-panel-title {
   margin: 0;
   font-size: clamp(1.2rem, 1.8vw, 1.55rem);
@@ -354,12 +348,6 @@
   outline: none;
   border-color: var(--color-tertiary);
   box-shadow: 0 0 0 3px var(--color-focus-ring);
-}
-
-.problem-textarea[readonly] {
-  background: color-mix(in srgb, var(--color-bg-panel) 80%, var(--color-bg-surface) 20%);
-  border-style: dashed;
-  cursor: default;
 }
 
 .problem-markdown {
@@ -457,15 +445,3 @@
   color: var(--color-text-muted);
 }
 
-.clear-btn {
-  padding: var(--space-2) var(--space-4);
-  font-size: var(--font-size-sm);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-}
-
-.clear-btn:hover:not(:disabled) {
-  background: var(--color-bg-danger-soft);
-  color: var(--color-text-danger);
-  border-color: var(--color-border-danger);
-}

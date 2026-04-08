@@ -1,9 +1,5 @@
 /* Responsive tweaks */
 @media (max-width: 768px) {
-  .app-shell {
-    padding: 0;
-  }
-
   .topbar {
     flex-wrap: wrap;
     padding: var(--space-3);
@@ -69,11 +65,6 @@
 
   .duck-widget {
     width: min(100%, 18rem);
-  }
-
-  .duck-widget.is-compact .duck-avatar {
-    width: 46px;
-    height: 46px;
   }
 
   .editor-runner-toolbar {
