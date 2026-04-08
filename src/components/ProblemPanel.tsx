@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
 
 interface ProblemPanelProps {
     title: string;
@@ -53,18 +56,29 @@ export default function ProblemPanel({ title, value, onChange, onHide }: Problem
                 <p>
                     {isEditing
                         ? "Modo edicion activado. Los cambios se guardan al pulsar Guardar."
-                        : "Enunciado bloqueado. Pulsa Editar para modificarlo."}
+                        : "Vista previa Markdown activa. Pulsa Editar para modificar el enunciado."}
                 </p>
             </header>
 
-            <textarea
-                className="problem-textarea"
-                value={draftValue}
-                onChange={(e) => setDraftValue(e.target.value)}
-                placeholder="Escribe o pega aqui el enunciado, restricciones, ejemplos y pistas del problema..."
-                spellCheck={false}
-                readOnly={!isEditing}
-            />
+            {isEditing ? (
+                <textarea
+                    className="problem-textarea"
+                    value={draftValue}
+                    onChange={(e) => setDraftValue(e.target.value)}
+                    placeholder="Escribe o pega aqui el enunciado en Markdown (titulos, listas, ejemplos, tablas, codigo)..."
+                    spellCheck={false}
+                />
+            ) : (
+                <article className="problem-markdown" aria-label="Vista previa del enunciado en Markdown">
+                    {value.trim() ? (
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                            {value}
+                        </ReactMarkdown>
+                    ) : (
+                        <p className="problem-markdown-empty">No hay enunciado cargado.</p>
+                    )}
+                </article>
+            )}
         </section>
     );
 }

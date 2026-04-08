@@ -13,7 +13,16 @@ export const PROBLEM_CATALOG: ProblemDefinition[] = [
         difficulty: "Facil",
         topic: "Arrays",
         statement:
-            "Dado un array de enteros nums y un entero target, devuelve los indices de dos numeros tales que su suma sea target. Puedes asumir que existe exactamente una solucion y no puedes usar el mismo elemento dos veces.\n\nEjemplo:\nEntrada: nums = [2, 7, 11, 15], target = 9\nSalida: [0, 1]\nExplicacion: nums[0] + nums[1] = 2 + 7 = 9.",
+            "## Objetivo\n" +
+            "Dado un array de enteros `nums` y un entero `target`, devuelve los indices de dos numeros tales que su suma sea `target`.\n\n" +
+            "## Ejemplo\n" +
+            "- **Entrada:** `nums = [2, 7, 11, 15]`, `target = 9`\n" +
+            "- **Salida esperada:** `[0, 1]`\n" +
+            "- **Explicacion:** `nums[0] + nums[1] = 2 + 7 = 9`.\n\n" +
+            "## Reglas\n" +
+            "1. Existe exactamente una solucion valida.\n" +
+            "2. No puedes usar el mismo elemento dos veces.\n" +
+            "3. Puedes devolver los indices en cualquier orden.",
     },
     {
         id: "valid-parentheses",
@@ -21,7 +30,19 @@ export const PROBLEM_CATALOG: ProblemDefinition[] = [
         difficulty: "Facil",
         topic: "Stack",
         statement:
-            "Dada una cadena con caracteres '(', ')', '{', '}', '[' y ']', determina si es valida. Una cadena es valida si los cierres respetan orden y tipo.\n\nEjemplo:\nEntrada: s = \"()[]{}\"\nSalida: true\nExplicacion: todos los simbolos abiertos se cierran en el orden correcto.",
+            "## Objetivo\n" +
+            "Dada una cadena `s` con caracteres `()[]{}`, determina si es valida.\n\n" +
+            "Una cadena es valida si:\n" +
+            "1. Todo simbolo abierto se cierra.\n" +
+            "2. Los cierres respetan el orden correcto.\n" +
+            "3. El tipo del cierre coincide con el de apertura.\n\n" +
+            "## Ejemplos\n" +
+            "| Entrada | Salida |\n" +
+            "| --- | --- |\n" +
+            "| `s = \"()[]{}\"` | `true` |\n" +
+            "| `s = \"(]\"` | `false` |\n\n" +
+            "## Pista\n" +
+            "Una pila (stack) suele ser la estructura natural para este problema.",
     },
     {
         id: "longest-substring-no-repeat",
@@ -29,7 +50,15 @@ export const PROBLEM_CATALOG: ProblemDefinition[] = [
         difficulty: "Media",
         topic: "Sliding Window",
         statement:
-            "Dada una cadena s, encuentra la longitud de la subcadena mas larga sin caracteres repetidos.\n\nEjemplo:\nEntrada: s = \"abcabcbb\"\nSalida: 3\nExplicacion: la subcadena mas larga sin repetir es \"abc\".",
+            "## Objetivo\n" +
+            "Dada una cadena `s`, encuentra la longitud de la subcadena mas larga sin caracteres repetidos.\n\n" +
+            "## Ejemplo\n" +
+            "- **Entrada:** `s = \"abcabcbb\"`\n" +
+            "- **Salida esperada:** `3`\n" +
+            "- **Explicacion:** la subcadena mas larga sin repetir es `\"abc\"`.\n\n" +
+            "## Restricciones orientativas\n" +
+            "- `0 <= s.length <= 5 * 10^4`\n" +
+            "- `s` puede contener letras, numeros, simbolos y espacios.",
     },
     {
         id: "merge-intervals",
@@ -37,6 +66,13 @@ export const PROBLEM_CATALOG: ProblemDefinition[] = [
         difficulty: "Media",
         topic: "Sorting",
         statement:
-            "Dado un conjunto de intervalos [start, end], combina todos los intervalos solapados y devuelve una lista de intervalos no solapados.\n\nEjemplo:\nEntrada: intervals = [[1,3], [2,6], [8,10], [15,18]]\nSalida: [[1,6], [8,10], [15,18]]\nExplicacion: [1,3] y [2,6] se solapan, por eso se fusionan en [1,6].",
+            "## Objetivo\n" +
+            "Dado un conjunto de intervalos `[start, end]`, combina todos los intervalos solapados y devuelve una lista final de intervalos no solapados.\n\n" +
+            "## Ejemplo\n" +
+            "- **Entrada:** `intervals = [[1,3], [2,6], [8,10], [15,18]]`\n" +
+            "- **Salida esperada:** `[[1,6], [8,10], [15,18]]`\n" +
+            "- **Explicacion:** `[1,3]` y `[2,6]` se solapan, por eso se fusionan en `[1,6]`.\n\n" +
+            "## Nota\n" +
+            "Suele ser util ordenar primero por el inicio de cada intervalo.",
     },
 ];
