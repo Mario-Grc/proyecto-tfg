@@ -51,12 +51,13 @@
     width: auto !important;
     border-right: none;
     border-top: var(--border-width) solid var(--color-border-soft);
-    padding: var(--space-7);
+    padding: var(--space-5);
   }
 
   .chat-header {
     flex-wrap: wrap;
     gap: var(--space-3);
+    padding-bottom: var(--space-4);
   }
 
   .chat-header-main {
@@ -64,7 +65,11 @@
   }
 
   .duck-widget {
-    width: min(100%, 18rem);
+    width: min(100%, 14rem);
+  }
+
+  .duck-avatar {
+    width: clamp(84px, 42vw, 128px);
   }
 
   .editor-runner-toolbar {

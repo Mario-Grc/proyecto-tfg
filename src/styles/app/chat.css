@@ -1,7 +1,7 @@
 /* Chat messages + markdown content + chat form */
 .chat-messages {
-  min-height: var(--min-height-messages);
-  flex-grow: 1;
+  min-height: 0;
+  flex: 1 1 auto;
   overflow-y: auto;
   padding: var(--space-1) var(--space-4) var(--space-1);
   display: flex;
@@ -146,6 +146,7 @@
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: end;
+  flex-shrink: 0;
   gap: var(--space-3);
   border-top: var(--border-width) solid var(--color-border-soft);
   padding-top: var(--space-8);

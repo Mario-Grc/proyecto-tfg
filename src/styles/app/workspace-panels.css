@@ -147,6 +147,7 @@
 .chat-panel {
   display: flex;
   flex-direction: column;
+  min-height: 0;
   gap: var(--space-5);
   padding: var(--space-5);
   overflow: hidden;
