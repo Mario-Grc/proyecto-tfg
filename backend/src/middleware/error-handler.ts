@@ -12,15 +12,35 @@ export class HttpError extends Error {
 }
 
 export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
-  const statusCode = error instanceof HttpError ? error.statusCode : 500;
+  const errorWithStatus = error as { status?: number; statusCode?: number; expose?: boolean };
+  const externalStatus =
+    typeof errorWithStatus.statusCode === "number"
+      ? errorWithStatus.statusCode
+      : typeof errorWithStatus.status === "number"
+      ? errorWithStatus.status
+      : undefined;
+
+  const statusCode =
+    error instanceof HttpError
+      ? error.statusCode
+      : externalStatus && externalStatus >= 400 && externalStatus < 600
+      ? externalStatus
+      : 500;
+
   const details = error instanceof HttpError ? error.details : undefined;
+  const message =
+    statusCode >= 500
+      ? "Internal server error"
+      : error instanceof Error
+      ? error.message
+      : "Request error";
 
   if (statusCode >= 500) {
     console.error("[backend] unhandled error", error);
   }
 
   res.status(statusCode).json({
-    error: error.message || "Internal server error",
+    error: message,
     details,
   });
 };
