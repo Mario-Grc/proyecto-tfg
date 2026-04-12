@@ -27,15 +27,17 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
       ? externalStatus
       : 500;
 
+  const isControlledHttpError = error instanceof HttpError;
   const details = error instanceof HttpError ? error.details : undefined;
-  const message =
-    statusCode >= 500
-      ? "Internal server error"
-      : error instanceof Error
-      ? error.message
-      : "Request error";
+  const message = isControlledHttpError
+    ? error.message
+    : statusCode >= 500
+    ? "Internal server error"
+    : error instanceof Error
+    ? error.message
+    : "Request error";
 
-  if (statusCode >= 500) {
+  if (statusCode >= 500 && !isControlledHttpError) {
     console.error("[backend] unhandled error", error);
   }
 
