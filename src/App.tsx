@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { EditorView } from "@codemirror/view";
-import { ConversationMessage } from "./services/llmService";
-import { PROBLEM_CATALOG, ProblemDefinition } from "./data/problems";
+import type { ProblemRecord } from "../shared/types";
+import { createSession, fetchProblems } from "./services/backendApi";
 import LandingPage from "./pages/LandingPage";
 import ProblemSelectorPage from "./pages/ProblemSelectorPage";
 import WorkspacePage from "./pages/WorkspacePage";
@@ -15,38 +15,16 @@ import "./App.css";
 type ThemeMode = "dark" | "light";
 type AppView = "landing" | "selector" | "workspace";
 
-const BASE_SYSTEM_PROMPT = [
-    "Eres un asistente tutor para aprender programacion.",
-    "Tu objetivo principal es ayudar al usuario a entender, no solo dar la respuesta final.",
-    "Explica el razonamiento paso a paso cuando sea util, resuelve dudas concretas y propone ejemplos pequenos.",
-    "Adapta el nivel de detalle a las preguntas del usuario y verifica que los conceptos queden claros.",
-    "Si no tienes suficiente contexto de codigo para responder con precision, pide al usuario un fragmento concreto del editor.",
-].join(" ");
-
-function buildSystemPrompt(problemTitle?: string, problemStatement?: string): ConversationMessage {
-    const statement = problemStatement?.trim();
-
-    if (!problemTitle && !statement) {
-        return { role: "system", content: BASE_SYSTEM_PROMPT };
-    }
-
-    const parts = [
-        BASE_SYSTEM_PROMPT,
-        "Contexto del problema activo:",
-        `Titulo: ${problemTitle ?? "Sin titulo"}`,
-        `Enunciado:\n${statement || "Sin enunciado."}`,
-        "No inventes requisitos que no esten en el enunciado.",
-    ];
-
-    return { role: "system", content: parts.join("\n\n") };
-}
-
 function App() {
     const [themeMode, setThemeMode] = usePersistentState<ThemeMode>("theme_mode", "dark");
     const [problemText, setProblemText] = usePersistentState<string>("problem_text", "");
     const [selectedProblemId, setSelectedProblemId] = usePersistentState<string | null>("selected_problem_id", null);
+    const [activeSessionId, setActiveSessionId] = usePersistentState<string | null>("active_session_id", null);
     const [currentView, setCurrentView] = useState<AppView>("landing");
-    const initialSystemPromptRef = useRef<ConversationMessage>(buildSystemPrompt());
+    const [problems, setProblems] = useState<ProblemRecord[]>([]);
+    const [problemsLoading, setProblemsLoading] = useState(false);
+    const [problemsError, setProblemsError] = useState<string | null>(null);
+
     const {
         messages,
         status,
@@ -54,13 +32,14 @@ function App() {
         loading,
         inputText,
         setInputText,
-        apiEndpoint,
-        modelName,
         sendPrompt,
         clearConversation,
         resetConversation,
-        saveLLMSettings,
-    } = useTutorChat({ initialSystemPrompt: initialSystemPromptRef.current });
+    } = useTutorChat({
+        sessionId: activeSessionId,
+        problemId: selectedProblemId,
+    });
+
     const {
         duckState,
         duckCompact,
@@ -84,6 +63,46 @@ function App() {
     const editorViewRef = useRef<EditorView | null>(null);
     const chatTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
+    const selectedProblem = selectedProblemId
+        ? problems.find((problem) => problem.id === selectedProblemId)
+        : undefined;
+
+    const loadProblems = useCallback(async () => {
+        setProblemsLoading(true);
+        setProblemsError(null);
+
+        try {
+            const backendProblems = await fetchProblems();
+            setProblems(backendProblems);
+
+            if (!selectedProblemId) {
+                return;
+            }
+
+            const restoredProblem = backendProblems.find((problem) => problem.id === selectedProblemId);
+
+            if (!restoredProblem) {
+                setSelectedProblemId(null);
+                setActiveSessionId(null);
+                setProblemText("");
+                return;
+            }
+
+            if (!problemText.trim()) {
+                setProblemText(restoredProblem.statement);
+            }
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Error desconocido";
+            setProblemsError(message);
+        } finally {
+            setProblemsLoading(false);
+        }
+    }, [problemText, selectedProblemId, setActiveSessionId, setProblemText, setSelectedProblemId]);
+
+    useEffect(() => {
+        void loadProblems();
+    }, [loadProblems]);
+
     const handleEditorReady = useCallback((view: EditorView) => {
         editorViewRef.current = view;
     }, []);
@@ -91,8 +110,6 @@ function App() {
     useEffect(() => {
         document.documentElement.setAttribute("data-theme", themeMode);
     }, [themeMode]);
-
-    const selectedProblem = selectedProblemId ? PROBLEM_CATALOG.find((problem) => problem.id === selectedProblemId) : undefined;
 
     function getSelectedCodeFromEditor() {
         const view = editorViewRef.current;
@@ -152,8 +169,8 @@ function App() {
 
         const code = editorViewRef.current?.state.doc.toString().trim();
 
-        if (!code){
-            setStatus("El editor está vacío.");
+        if (!code) {
+            setStatus("El editor esta vacio.");
             return;
         }
 
@@ -174,7 +191,7 @@ function App() {
         const nextCursorPos = before.length + insertion.length;
 
         setInputText(nextText);
-        setStatus("Código añadido al prompt.");
+        setStatus("Codigo anadido al prompt.");
 
         if (textarea) {
             requestAnimationFrame(() => {
@@ -204,34 +221,55 @@ function App() {
         };
     }, [inputText, loading]);
 
-    function handleClearConversation() {
-        const nextSystemPrompt = buildSystemPrompt(selectedProblem?.title, problemText);
-        clearConversation(nextSystemPrompt);
-        setNormal();
+    async function handleClearConversation() {
+        if (!selectedProblem) {
+            setStatus("Selecciona un problema antes de reiniciar la conversacion.");
+            return;
+        }
+
+        setThinking();
+        setStatus("Reiniciando conversacion...");
+
+        try {
+            const newSession = await createSession(selectedProblem.id);
+            setActiveSessionId(newSession.id);
+            clearConversation();
+            setStatus("Conversacion reiniciada.");
+            setNormal();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Error desconocido";
+            setStatus(`No se pudo reiniciar: ${message}`);
+            setConfused();
+        }
     }
 
     function toggleTheme() {
         setThemeMode((prev) => (prev === "dark" ? "light" : "dark"));
     }
 
-    function handleSaveLLMSettings(endpoint: string, model: string) {
-        saveLLMSettings(endpoint, model);
-    }
+    async function handleSelectProblem(problem: ProblemRecord) {
+        setThinking();
+        setStatus(`Creando sesion para ${problem.title}...`);
 
-    function handleSelectProblem(problem: ProblemDefinition) {
-        const nextSystemPrompt = buildSystemPrompt(problem.title, problem.statement);
-
-        setSelectedProblemId(problem.id);
-        setProblemText(problem.statement);
-        resetConversation(nextSystemPrompt);
-        setProblemVisible(true);
-        setCurrentView("workspace");
-        setStatus(`Problema cargado: ${problem.title}`);
-        setNormal();
+        try {
+            const session = await createSession(problem.id);
+            setSelectedProblemId(problem.id);
+            setActiveSessionId(session.id);
+            setProblemText(problem.statement);
+            resetConversation();
+            setProblemVisible(true);
+            setCurrentView("workspace");
+            setStatus(`Problema cargado: ${problem.title}`);
+            setNormal();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Error desconocido";
+            setStatus(`No se pudo crear la sesion: ${message}`);
+            setConfused();
+        }
     }
 
     const selectedProblemTitle = selectedProblem?.title ?? "Problema seleccionado";
-    const canContinueSession = Boolean(selectedProblemId && problemText.trim().length > 0);
+    const canContinueSession = Boolean(selectedProblemId && activeSessionId);
 
     if (currentView === "landing") {
         return (
@@ -246,9 +284,16 @@ function App() {
     if (currentView === "selector") {
         return (
             <ProblemSelectorPage
-                problems={PROBLEM_CATALOG}
+                problems={problems}
+                loading={problemsLoading}
+                errorMessage={problemsError}
+                onRetry={() => {
+                    void loadProblems();
+                }}
                 onBack={() => setCurrentView("landing")}
-                onSelect={handleSelectProblem}
+                onSelect={(problem) => {
+                    void handleSelectProblem(problem);
+                }}
             />
         );
     }
@@ -271,8 +316,6 @@ function App() {
             problemText={problemText}
             chatTextareaRef={chatTextareaRef}
             themeMode={themeMode}
-            apiEndpoint={apiEndpoint}
-            modelName={modelName}
             onEditorReady={handleEditorReady}
             onInputChange={setInputText}
             onPromptSend={handlePromptSend}
@@ -281,7 +324,6 @@ function App() {
             onRunJavaScript={handleRunJavaScript}
             onToggleTheme={toggleTheme}
             onClearConversation={handleClearConversation}
-            onSaveLLMSettings={handleSaveLLMSettings}
             onToggleChat={() => setChatVisible((prev) => !prev)}
             onToggleProblem={() => setProblemVisible((prev) => !prev)}
             onHideChat={() => setChatVisible(false)}

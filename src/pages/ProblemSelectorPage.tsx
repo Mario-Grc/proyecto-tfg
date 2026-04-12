@@ -1,12 +1,22 @@
-import { ProblemDefinition } from "../data/problems";
+import type { ProblemRecord } from "../../shared/types";
 
 interface ProblemSelectorPageProps {
-    problems: ProblemDefinition[];
+    problems: ProblemRecord[];
+    loading: boolean;
+    errorMessage: string | null;
+    onRetry: () => void;
     onBack: () => void;
-    onSelect: (problem: ProblemDefinition) => void;
+    onSelect: (problem: ProblemRecord) => void;
 }
 
-export default function ProblemSelectorPage({ problems, onBack, onSelect }: ProblemSelectorPageProps) {
+export default function ProblemSelectorPage({
+    problems,
+    loading,
+    errorMessage,
+    onRetry,
+    onBack,
+    onSelect,
+}: ProblemSelectorPageProps) {
     return (
         <div className="app-shell">
             <section className="selector-screen">
@@ -27,7 +37,25 @@ export default function ProblemSelectorPage({ problems, onBack, onSelect }: Prob
                 </header>
 
                 <div className="problem-grid">
-                    {problems.map((problem) => (
+                    {loading && <p>Cargando problemas...</p>}
+
+                    {!loading && errorMessage && (
+                        <article className="problem-card">
+                            <div className="problem-main">
+                                <h3>No se pudo cargar el catalogo</h3>
+                                <p>{errorMessage}</p>
+                            </div>
+                            <button type="button" onClick={onRetry}>
+                                Reintentar
+                            </button>
+                        </article>
+                    )}
+
+                    {!loading && !errorMessage && problems.length === 0 && (
+                        <p>No hay problemas disponibles en el backend.</p>
+                    )}
+
+                    {!loading && !errorMessage && problems.map((problem) => (
                         <article key={problem.id} className="problem-card">
                             <div className="problem-main">
                                 <h3>{problem.title}</h3>
