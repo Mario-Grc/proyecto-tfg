@@ -15,6 +15,10 @@ import "./App.css";
 type ThemeMode = "dark" | "light";
 type AppView = "landing" | "selector" | "workspace";
 
+function getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : "Error desconocido";
+}
+
 function App() {
     const [themeMode, setThemeMode] = usePersistentState<ThemeMode>("theme_mode", "dark");
     const [problemText, setProblemText] = usePersistentState<string>("problem_text", "");
@@ -37,7 +41,6 @@ function App() {
         resetConversation,
     } = useTutorChat({
         sessionId: activeSessionId,
-        problemId: selectedProblemId,
     });
 
     const {
@@ -92,7 +95,7 @@ function App() {
                 setProblemText(restoredProblem.statement);
             }
         } catch (error) {
-            const message = error instanceof Error ? error.message : "Error desconocido";
+            const message = getErrorMessage(error);
             setProblemsError(message);
         } finally {
             setProblemsLoading(false);
@@ -237,7 +240,7 @@ function App() {
             setStatus("Conversacion reiniciada.");
             setNormal();
         } catch (error) {
-            const message = error instanceof Error ? error.message : "Error desconocido";
+            const message = getErrorMessage(error);
             setStatus(`No se pudo reiniciar: ${message}`);
             setConfused();
         }
@@ -262,7 +265,7 @@ function App() {
             setStatus(`Problema cargado: ${problem.title}`);
             setNormal();
         } catch (error) {
-            const message = error instanceof Error ? error.message : "Error desconocido";
+            const message = getErrorMessage(error);
             setStatus(`No se pudo crear la sesion: ${message}`);
             setConfused();
         }

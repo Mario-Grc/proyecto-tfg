@@ -2,7 +2,6 @@ import { z } from "zod";
 
 export const chatRequestSchema = z.object({
   sessionId: z.string().min(1),
-  problemId: z.string().min(1).optional(),
   text: z.string().trim().min(1),
   selectedCode: z.string().optional(),
 });

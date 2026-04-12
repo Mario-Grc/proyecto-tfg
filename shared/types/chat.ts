@@ -7,7 +7,6 @@ export interface LLMConversationMessage {
 
 export interface ChatRequest {
   sessionId: string;
-  problemId?: string;
   text: string;
   selectedCode?: string;
 }

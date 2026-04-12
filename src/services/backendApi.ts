@@ -41,12 +41,20 @@ function extractErrorMessage(status: number, body: unknown): string {
 }
 
 async function requestJson<TResponse>(path: string, init?: RequestInit): Promise<TResponse> {
+    const headers = new Headers(init?.headers ?? {});
+
+    if (!headers.has("Accept")) {
+        headers.set("Accept", "application/json");
+    }
+
+    // Set Content-Type only when the request actually sends a body.
+    if (init?.body !== undefined && !headers.has("Content-Type")) {
+        headers.set("Content-Type", "application/json");
+    }
+
     const response = await fetch(buildApiUrl(path), {
         ...init,
-        headers: {
-            "Content-Type": "application/json",
-            ...(init?.headers ?? {}),
-        },
+        headers,
     });
 
     const body = await parseBody(response);

@@ -13,7 +13,6 @@ interface ConversationMessage {
 
 interface ChatRequestInput {
   sessionId: string;
-  problemId?: string;
   text: string;
   selectedCode?: string;
 }
@@ -151,10 +150,6 @@ export class ChatService {
 
     if (!session) {
       throw new HttpError(404, `Sesion no encontrada: ${input.sessionId}`);
-    }
-
-    if (input.problemId && input.problemId !== session.problemId) {
-      throw new HttpError(400, "El problemId no coincide con la sesion");
     }
 
     const problem = this.problemRepository.findById(session.problemId);

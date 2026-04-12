@@ -10,10 +10,13 @@ interface SendPromptOptions {
 
 interface UseTutorChatOptions {
     sessionId: string | null;
-    problemId: string | null;
 }
 
 export type ChatSendResult = "success" | "error" | "ignored";
+
+function getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : "Error desconocido";
+}
 
 function buildContentForChat(trimmedText: string, selectedCode: string): string {
     if (!selectedCode) {
@@ -57,7 +60,7 @@ function buildLocalMessageId(prefix: string, seq: number): string {
     return `${prefix}-${Date.now()}-${seq}`;
 }
 
-export default function useTutorChat({ sessionId, problemId }: UseTutorChatOptions) {
+export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [status, setStatus] = useState("Selecciona un problema para empezar.");
     const [loading, setLoading] = useState(false);
@@ -73,7 +76,7 @@ export default function useTutorChat({ sessionId, problemId }: UseTutorChatOptio
             setMessages(mapStoredMessagesToChat(storedMessages));
             setStatus(storedMessages.length > 0 ? "Historial cargado." : "Sesion lista para empezar.");
         } catch (error) {
-            const message = error instanceof Error ? error.message : "Error desconocido";
+            const message = getErrorMessage(error);
             setMessages([]);
             setStatus(`No se pudo cargar la sesion: ${message}`);
         } finally {
@@ -100,7 +103,7 @@ export default function useTutorChat({ sessionId, problemId }: UseTutorChatOptio
             return "ignored";
         }
 
-        if (!sessionId || !problemId) {
+        if (!sessionId) {
             setStatus("No hay una sesion activa para enviar mensajes.");
             return "error";
         }
@@ -117,7 +120,6 @@ export default function useTutorChat({ sessionId, problemId }: UseTutorChatOptio
         try {
             const response = await sendChatRequest({
                 sessionId,
-                problemId,
                 text: trimmedText,
                 selectedCode: normalizedCode || undefined,
             });
@@ -133,7 +135,7 @@ export default function useTutorChat({ sessionId, problemId }: UseTutorChatOptio
 
             return "success";
         } catch (error) {
-            const message = error instanceof Error ? error.message : "Error desconocido";
+            const message = getErrorMessage(error);
             const errorId = buildLocalMessageId("error", localMessageSeqRef.current++);
             setMessages((prev) => [...prev, { id: errorId, text: message, type: "llm" }]);
             setStatus(`Fallo: ${message}`);
@@ -142,7 +144,7 @@ export default function useTutorChat({ sessionId, problemId }: UseTutorChatOptio
         } finally {
             setLoading(false);
         }
-    }, [loading, problemId, sessionId]);
+    }, [loading, sessionId]);
 
     const resetConversation = useCallback(() => {
         setMessages([]);
