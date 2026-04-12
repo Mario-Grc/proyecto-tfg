@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MessageRole, SessionMessageRecord } from "../../shared/types";
 import { fetchSessionMessages, sendChatRequest } from "../services/backendApi";
-import { Message } from "../types";
+import type { Message } from "../types";
 
 interface SendPromptOptions {
     text: string;
@@ -37,7 +37,7 @@ function roleToChatType(role: MessageRole): Message["type"] | null {
 
 function mapStoredMessagesToChat(messages: SessionMessageRecord[]): Message[] {
     return messages
-        .map((message) => {
+        .map((message): Message | null => {
             const mappedType = roleToChatType(message.role);
 
             if (!mappedType) {
@@ -48,7 +48,7 @@ function mapStoredMessagesToChat(messages: SessionMessageRecord[]): Message[] {
                 id: message.id,
                 text: message.content,
                 type: mappedType,
-            } satisfies Message;
+            };
         })
         .filter((message): message is Message => message !== null);
 }
@@ -165,6 +165,5 @@ export default function useTutorChat({ sessionId, problemId }: UseTutorChatOptio
         sendPrompt,
         clearConversation,
         resetConversation,
-        loadSessionHistory,
     };
 }
