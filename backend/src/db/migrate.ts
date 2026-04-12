@@ -14,7 +14,12 @@ interface AppliedMigrationRow {
 }
 
 function resolveMigrationsDir(): string {
-  return path.resolve(process.cwd(), "src/db/migrations");
+  const runtimeDir = path.resolve(__dirname, "migrations");
+  if (fs.existsSync(runtimeDir)) {
+    return runtimeDir;
+  }
+
+  return path.resolve(__dirname, "../../src/db/migrations");
 }
 
 function listMigrationFiles(migrationsDir: string): string[] {

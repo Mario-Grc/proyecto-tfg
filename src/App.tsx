@@ -91,16 +91,14 @@ function App() {
                 return;
             }
 
-            if (!problemText.trim()) {
-                setProblemText(restoredProblem.statement);
-            }
+            setProblemText((previous) => (previous.trim() ? previous : restoredProblem.statement));
         } catch (error) {
             const message = getErrorMessage(error);
             setProblemsError(message);
         } finally {
             setProblemsLoading(false);
         }
-    }, [problemText, selectedProblemId, setActiveSessionId, setProblemText, setSelectedProblemId]);
+    }, [selectedProblemId, setActiveSessionId, setProblemText, setSelectedProblemId]);
 
     useEffect(() => {
         void loadProblems();
