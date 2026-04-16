@@ -12,8 +12,25 @@ export const chatUsageSchema = z.object({
   total_tokens: z.number().int().nonnegative(),
 });
 
-export const chatResponseSchema = z.object({
+export const chatStreamDeltaEventSchema = z.object({
+  type: z.literal("delta"),
+  delta: z.string(),
+});
+
+export const chatStreamDoneEventSchema = z.object({
+  type: z.literal("done"),
   sessionId: z.string().min(1),
   assistantText: z.string(),
   usage: chatUsageSchema.optional(),
 });
+
+export const chatStreamErrorEventSchema = z.object({
+  type: z.literal("error"),
+  error: z.string().min(1),
+});
+
+export const chatStreamEventSchema = z.discriminatedUnion("type", [
+  chatStreamDeltaEventSchema,
+  chatStreamDoneEventSchema,
+  chatStreamErrorEventSchema,
+]);

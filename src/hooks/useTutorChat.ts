@@ -112,20 +112,48 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
         const userContentForChat = buildContentForChat(trimmedText, normalizedCode);
 
         const userId = buildLocalMessageId("user", localMessageSeqRef.current++);
-        setMessages((prev) => [...prev, { id: userId, text: userContentForChat, type: "user" }]);
+        const assistantId = buildLocalMessageId("assistant", localMessageSeqRef.current++);
+        setMessages((prev) => [
+            ...prev,
+            { id: userId, text: userContentForChat, type: "user" },
+            { id: assistantId, text: "", type: "llm" },
+        ]);
 
         setLoading(true);
-        setStatus(normalizedCode ? "Consultando al modelo con tu seleccion de codigo..." : "Consultando al modelo...");
+        setStatus(normalizedCode ? "Generando respuesta con tu seleccion de codigo..." : "Generando respuesta...");
+
+        const applyAssistantText = (updater: (currentText: string) => string) => {
+            setMessages((prev) =>
+                prev.map((message) =>
+                    message.id === assistantId
+                        ? {
+                            ...message,
+                            text: updater(message.text),
+                        }
+                        : message,
+                ),
+            );
+        };
 
         try {
-            const response = await sendChatRequest({
-                sessionId,
-                text: trimmedText,
-                selectedCode: normalizedCode || undefined,
-            });
+            const response = await sendChatRequest(
+                {
+                    sessionId,
+                    text: trimmedText,
+                    selectedCode: normalizedCode || undefined,
+                },
+                {
+                    onDelta: (deltaText) => {
+                        if (!deltaText) {
+                            return;
+                        }
 
-            const llmId = buildLocalMessageId("assistant", localMessageSeqRef.current++);
-            setMessages((prev) => [...prev, { id: llmId, text: response.assistantText, type: "llm" }]);
+                        applyAssistantText((currentText) => `${currentText}${deltaText}`);
+                    },
+                },
+            );
+
+            applyAssistantText(() => response.assistantText);
 
             if (response.usage) {
                 setStatus(`Respuesta recibida - ${response.usage.total_tokens} tokens usados`);
@@ -137,7 +165,13 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
         } catch (error) {
             const message = getErrorMessage(error);
             const errorId = buildLocalMessageId("error", localMessageSeqRef.current++);
-            setMessages((prev) => [...prev, { id: errorId, text: message, type: "llm" }]);
+            setMessages((prev) => {
+                const withoutEmptyAssistant = prev.filter(
+                    (chatMessage) => !(chatMessage.id === assistantId && chatMessage.text.trim().length === 0),
+                );
+
+                return [...withoutEmptyAssistant, { id: errorId, text: message, type: "llm" }];
+            });
             setStatus(`Fallo: ${message}`);
 
             return "error";

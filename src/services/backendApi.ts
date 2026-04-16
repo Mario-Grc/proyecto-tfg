@@ -2,6 +2,7 @@ import type {
     ApiErrorResponse,
     ChatRequest,
     ChatResponse,
+    ChatStreamEvent,
     ProblemRecord,
     SessionMessageRecord,
     SessionRecord,
@@ -10,6 +11,10 @@ import type {
 const DEFAULT_API_BASE = "http://localhost:3001/api";
 const configuredApiBase = (import.meta.env.VITE_BACKEND_API_BASE as string | undefined)?.trim();
 const API_BASE = (configuredApiBase && configuredApiBase.length > 0 ? configuredApiBase : DEFAULT_API_BASE).replace(/\/+$/, "");
+
+interface SendChatRequestOptions {
+    onDelta: (deltaText: string) => void;
+}
 
 function buildApiUrl(path: string): string {
     return `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
@@ -38,6 +43,36 @@ function extractErrorMessage(status: number, body: unknown): string {
     }
 
     return `Error HTTP ${status}`;
+}
+
+function parseChatStreamEvent(rawEventData: string): ChatStreamEvent {
+    let parsed: unknown;
+
+    try {
+        parsed = JSON.parse(rawEventData);
+    } catch {
+        throw new Error("El backend devolvio un evento de stream con JSON invalido.");
+    }
+
+    if (!parsed || typeof parsed !== "object" || !("type" in parsed)) {
+        throw new Error("El backend devolvio un evento de stream invalido.");
+    }
+
+    const asRecord = parsed as Record<string, unknown>;
+
+    if (asRecord.type === "delta" && typeof asRecord.delta === "string") {
+        return parsed as ChatStreamEvent;
+    }
+
+    if (asRecord.type === "done" && typeof asRecord.sessionId === "string" && typeof asRecord.assistantText === "string") {
+        return parsed as ChatStreamEvent;
+    }
+
+    if (asRecord.type === "error" && typeof asRecord.error === "string") {
+        return parsed as ChatStreamEvent;
+    }
+
+    throw new Error("El backend devolvio un evento de stream con formato inesperado.");
 }
 
 async function requestJson<TResponse>(path: string, init?: RequestInit): Promise<TResponse> {
@@ -83,9 +118,111 @@ export async function fetchSessionMessages(sessionId: string): Promise<SessionMe
     });
 }
 
-export async function sendChatRequest(payload: ChatRequest): Promise<ChatResponse> {
-    return requestJson<ChatResponse>("/chat", {
-        method: "POST",
-        body: JSON.stringify(payload),
-    });
+export async function sendChatRequest(
+    payload: ChatRequest,
+    options: SendChatRequestOptions,
+): Promise<ChatResponse> {
+    let response: Response;
+
+    try {
+        response = await fetch(buildApiUrl("/chat"), {
+            method: "POST",
+            headers: {
+                Accept: "text/event-stream",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        });
+    } catch {
+        throw new Error("No se pudo abrir el stream de chat.");
+    }
+
+    if (!response.ok) {
+        const body = await parseBody(response);
+        throw new Error(extractErrorMessage(response.status, body));
+    }
+
+    if (!response.body) {
+        throw new Error("El backend no devolvio un stream utilizable.");
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    let buffer = "";
+    let finalResponse: ChatResponse | null = null;
+
+    const applyEvent = (event: ChatStreamEvent) => {
+        if (event.type === "delta") {
+            options.onDelta(event.delta);
+            return;
+        }
+
+        if (event.type === "done") {
+            finalResponse = {
+                sessionId: event.sessionId,
+                assistantText: event.assistantText,
+                usage: event.usage,
+            };
+            return;
+        }
+
+        if (event.type === "error") {
+            throw new Error(event.error);
+        }
+    };
+
+    try {
+        while (true) {
+            const { done, value } = await reader.read();
+
+            if (done) {
+                buffer += decoder.decode();
+                break;
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+
+            const lines = buffer.split("\n");
+            buffer = lines.pop() ?? "";
+
+            for (const rawLine of lines) {
+                const line = rawLine.replace(/\r$/, "").trim();
+
+                if (!line || !line.startsWith("data:")) {
+                    continue;
+                }
+
+                const event = parseChatStreamEvent(line.slice(5).trimStart());
+                applyEvent(event);
+
+                if (finalResponse) {
+                    break;
+                }
+            }
+
+            if (finalResponse) {
+                break;
+            }
+        }
+    } catch (error) {
+        if (error instanceof Error) {
+            throw error;
+        }
+
+        throw new Error("Se perdio la conexion del stream de chat.");
+    } finally {
+        reader.releaseLock();
+    }
+
+    if (!finalResponse && buffer.trim().startsWith("data:")) {
+        const event = parseChatStreamEvent(buffer.trim().slice(5).trimStart());
+        applyEvent(event);
+    }
+
+    if (!finalResponse) {
+        throw new Error("El stream termino sin enviar una respuesta final.");
+    }
+
+    return finalResponse;
 }

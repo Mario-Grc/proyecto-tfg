@@ -22,3 +22,25 @@ export interface ChatResponse {
   assistantText: string;
   usage?: ChatUsage;
 }
+
+export interface ChatStreamDeltaEvent {
+  type: "delta";
+  delta: string;
+}
+
+export interface ChatStreamDoneEvent {
+  type: "done";
+  sessionId: string;
+  assistantText: string;
+  usage?: ChatUsage;
+}
+
+export interface ChatStreamErrorEvent {
+  type: "error";
+  error: string;
+}
+
+export type ChatStreamEvent =
+  | ChatStreamDeltaEvent
+  | ChatStreamDoneEvent
+  | ChatStreamErrorEvent;

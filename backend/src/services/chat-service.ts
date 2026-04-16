@@ -29,8 +29,15 @@ interface ChatResult {
   usage?: ChatUsage;
 }
 
-interface LMStudioResponse {
+interface ChatStreamCallbacks {
+  onDelta: (deltaText: string) => void;
+}
+
+interface LMStudioStreamResponse {
   choices?: Array<{
+    delta?: {
+      content?: string;
+    };
     message?: {
       content?: string;
     };
@@ -75,22 +82,10 @@ function buildUserContentForModel(text: string, selectedCode?: string): string {
 
 function normalizeErrorDetails(error: unknown): Record<string, unknown> {
   if (error instanceof Error) {
-    const details: Record<string, unknown> = {
+    return {
       message: error.message,
       name: error.name,
     };
-
-    const withCode = error as Error & { code?: unknown; cause?: unknown };
-
-    if (typeof withCode.code === "string") {
-      details.code = withCode.code;
-    }
-
-    if (withCode.cause instanceof Error) {
-      details.cause = withCode.cause.message;
-    }
-
-    return details;
   }
 
   return {
@@ -98,7 +93,18 @@ function normalizeErrorDetails(error: unknown): Record<string, unknown> {
   };
 }
 
-async function callLocalLLM(conversation: ConversationMessage[]): Promise<{ rawText: string; usage?: ChatUsage }> {
+function parseStreamDataLine(line: string): string | null {
+  if (!line.startsWith("data:")) {
+    return null;
+  }
+
+  return line.slice(5).trim();
+}
+
+async function callLocalLLM(
+  conversation: ConversationMessage[],
+  callbacks: ChatStreamCallbacks,
+): Promise<{ rawText: string; usage?: ChatUsage }> {
   let response: Response;
 
   try {
@@ -111,6 +117,10 @@ async function callLocalLLM(conversation: ConversationMessage[]): Promise<{ rawT
         model: config.llmModelName,
         messages: conversation,
         temperature: 0.6,
+        stream: true,
+        stream_options: {
+          include_usage: true,
+        },
       }),
     });
   } catch (error) {
@@ -122,16 +132,80 @@ async function callLocalLLM(conversation: ConversationMessage[]): Promise<{ rawT
     throw new HttpError(502, `LLM local devolvio HTTP ${response.status}: ${errorText}`);
   }
 
-  const data = (await response.json()) as LMStudioResponse;
-  const rawText = data.choices?.[0]?.message?.content?.trim();
+  if (!response.body) {
+    throw new HttpError(502, "El LLM no devolvio un stream utilizable");
+  }
 
-  if (!rawText) {
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+
+  let buffer = "";
+  let rawText = "";
+  let usage: ChatUsage | undefined;
+
+  const processLine = (line: string) => {
+    const payload = parseStreamDataLine(line);
+
+    if (!payload || payload === "[DONE]") {
+      return;
+    }
+
+    let chunk: LMStudioStreamResponse;
+
+    try {
+      chunk = JSON.parse(payload) as LMStudioStreamResponse;
+    } catch {
+      return;
+    }
+
+    const deltaText = chunk.choices?.[0]?.delta?.content ?? chunk.choices?.[0]?.message?.content ?? "";
+
+    if (deltaText) {
+      rawText += deltaText;
+      callbacks.onDelta(deltaText);
+    }
+
+    if (chunk.usage) {
+      usage = chunk.usage;
+    }
+  };
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) {
+        buffer += decoder.decode();
+        break;
+      }
+
+      buffer += decoder.decode(value, { stream: true });
+
+      let lineBreakIndex = buffer.indexOf("\n");
+      while (lineBreakIndex !== -1) {
+        const line = buffer.slice(0, lineBreakIndex).replace(/\r$/, "");
+        buffer = buffer.slice(lineBreakIndex + 1);
+        processLine(line);
+        lineBreakIndex = buffer.indexOf("\n");
+      }
+    }
+  } catch (error) {
+    throw new HttpError(502, "Se interrumpio el stream del LLM local", normalizeErrorDetails(error));
+  } finally {
+    reader.releaseLock();
+  }
+
+  if (buffer.trim()) {
+    processLine(buffer.replace(/\r$/, ""));
+  }
+
+  if (!rawText.trim()) {
     throw new HttpError(502, "El LLM no devolvio contenido");
   }
 
   return {
     rawText,
-    usage: data.usage,
+    usage,
   };
 }
 
@@ -144,8 +218,7 @@ export class ChatService {
   private readonly sessionRepository = new SessionRepository();
   private readonly messageRepository = new MessageRepository();
 
-  // V2: este punto sera el candidato natural para migrar a streaming.
-  async reply(input: ChatRequestInput): Promise<ChatResult> {
+  private createConversation(input: ChatRequestInput): { sessionId: string; conversation: ConversationMessage[] } {
     const session = this.sessionRepository.findById(input.sessionId);
 
     if (!session) {
@@ -168,31 +241,42 @@ export class ChatService {
 
     const persistedMessages = this.messageRepository.listBySessionId(session.id);
 
-    const conversation: ConversationMessage[] = [
-      {
-        role: "system",
-        content: buildSystemPrompt(problem.title, problem.statement),
-      },
-      ...persistedMessages.map((message) => ({
-        role: message.role,
-        content: message.content,
-      })),
-    ];
-
-    const llmResponse = await callLocalLLM(conversation);
-    const assistantText = cleanAssistantText(llmResponse.rawText);
-
-    this.messageRepository.create({
-      sessionId: session.id,
-      role: "assistant",
-      content: assistantText,
-      usagePromptTokens: llmResponse.usage?.prompt_tokens ?? null,
-      usageCompletionTokens: llmResponse.usage?.completion_tokens ?? null,
-      usageTotalTokens: llmResponse.usage?.total_tokens ?? null,
-    });
-
     return {
       sessionId: session.id,
+      conversation: [
+        {
+          role: "system",
+          content: buildSystemPrompt(problem.title, problem.statement),
+        },
+        ...persistedMessages.map((message) => ({
+          role: message.role,
+          content: message.content,
+        })),
+      ],
+    };
+  }
+
+  private persistAssistantMessage(sessionId: string, assistantText: string, usage?: ChatUsage): void {
+    this.messageRepository.create({
+      sessionId,
+      role: "assistant",
+      content: assistantText,
+      usagePromptTokens: usage?.prompt_tokens ?? null,
+      usageCompletionTokens: usage?.completion_tokens ?? null,
+      usageTotalTokens: usage?.total_tokens ?? null,
+    });
+  }
+
+  async reply(input: ChatRequestInput, callbacks: ChatStreamCallbacks): Promise<ChatResult> {
+    const { sessionId, conversation } = this.createConversation(input);
+
+    const llmResponse = await callLocalLLM(conversation, callbacks);
+    const assistantText = cleanAssistantText(llmResponse.rawText);
+
+    this.persistAssistantMessage(sessionId, assistantText, llmResponse.usage);
+
+    return {
+      sessionId,
       assistantText,
       usage: llmResponse.usage,
     };
