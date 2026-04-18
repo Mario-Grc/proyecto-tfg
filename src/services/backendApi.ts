@@ -14,6 +14,8 @@ const API_BASE = (configuredApiBase && configuredApiBase.length > 0 ? configured
 
 interface SendChatRequestOptions {
     onDelta: (deltaText: string) => void;
+    onToolStart?: (toolName: string) => void;
+    onToolResult?: (toolName: string, result: string) => void;
 }
 
 function buildApiUrl(path: string): string {
@@ -61,6 +63,14 @@ function parseChatStreamEvent(rawEventData: string): ChatStreamEvent {
     const asRecord = parsed as Record<string, unknown>;
 
     if (asRecord.type === "delta" && typeof asRecord.delta === "string") {
+        return parsed as ChatStreamEvent;
+    }
+
+    if (asRecord.type === "tool_start" && typeof asRecord.toolName === "string") {
+        return parsed as ChatStreamEvent;
+    }
+
+    if (asRecord.type === "tool_result" && typeof asRecord.toolName === "string" && typeof asRecord.result === "string") {
         return parsed as ChatStreamEvent;
     }
 
@@ -155,6 +165,16 @@ export async function sendChatRequest(
     const applyEvent = (event: ChatStreamEvent) => {
         if (event.type === "delta") {
             options.onDelta(event.delta);
+            return;
+        }
+
+        if (event.type === "tool_start") {
+            options.onToolStart?.(event.toolName);
+            return;
+        }
+
+        if (event.type === "tool_result") {
+            options.onToolResult?.(event.toolName, event.result);
             return;
         }
 

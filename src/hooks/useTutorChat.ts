@@ -60,6 +60,20 @@ function buildLocalMessageId(prefix: string, seq: number): string {
     return `${prefix}-${Date.now()}-${seq}`;
 }
 
+function toSingleLinePreview(text: string, maxChars = 140): string {
+    const normalized = text.replace(/\s+/g, " ").trim();
+
+    if (!normalized) {
+        return "sin salida";
+    }
+
+    if (normalized.length <= maxChars) {
+        return normalized;
+    }
+
+    return `${normalized.slice(0, maxChars)}...`;
+}
+
 export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [status, setStatus] = useState("Selecciona un problema para empezar.");
@@ -149,6 +163,12 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
                         }
 
                         applyAssistantText((currentText) => `${currentText}${deltaText}`);
+                    },
+                    onToolStart: (toolName) => {
+                        setStatus(`Ejecutando herramienta: ${toolName}...`);
+                    },
+                    onToolResult: (toolName, result) => {
+                        setStatus(`Resultado ${toolName}: ${toSingleLinePreview(result)}`);
                     },
                 },
             );
