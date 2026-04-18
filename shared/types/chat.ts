@@ -28,6 +28,17 @@ export interface ChatStreamDeltaEvent {
   delta: string;
 }
 
+export interface ChatStreamToolStartEvent {
+  type: "tool_start";
+  toolName: string;
+}
+
+export interface ChatStreamToolResultEvent {
+  type: "tool_result";
+  toolName: string;
+  result: string;
+}
+
 export interface ChatStreamDoneEvent {
   type: "done";
   sessionId: string;
@@ -42,5 +53,7 @@ export interface ChatStreamErrorEvent {
 
 export type ChatStreamEvent =
   | ChatStreamDeltaEvent
+  | ChatStreamToolStartEvent
+  | ChatStreamToolResultEvent
   | ChatStreamDoneEvent
   | ChatStreamErrorEvent;

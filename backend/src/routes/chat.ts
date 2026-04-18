@@ -40,6 +40,27 @@ chatRouter.post("/", async (req, res) => {
             delta: deltaText,
           });
         },
+        onToolStart: (toolName) => {
+          if (!toolName) {
+            return;
+          }
+
+          writeEvent({
+            type: "tool_start",
+            toolName,
+          });
+        },
+        onToolResult: (toolName, resultPreview) => {
+          if (!toolName) {
+            return;
+          }
+
+          writeEvent({
+            type: "tool_result",
+            toolName,
+            result: resultPreview,
+          });
+        },
       },
     );
 

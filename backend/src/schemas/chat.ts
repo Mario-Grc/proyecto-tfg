@@ -17,6 +17,17 @@ export const chatStreamDeltaEventSchema = z.object({
   delta: z.string(),
 });
 
+export const chatStreamToolStartEventSchema = z.object({
+  type: z.literal("tool_start"),
+  toolName: z.string().min(1),
+});
+
+export const chatStreamToolResultEventSchema = z.object({
+  type: z.literal("tool_result"),
+  toolName: z.string().min(1),
+  result: z.string(),
+});
+
 export const chatStreamDoneEventSchema = z.object({
   type: z.literal("done"),
   sessionId: z.string().min(1),
@@ -31,6 +42,8 @@ export const chatStreamErrorEventSchema = z.object({
 
 export const chatStreamEventSchema = z.discriminatedUnion("type", [
   chatStreamDeltaEventSchema,
+  chatStreamToolStartEventSchema,
+  chatStreamToolResultEventSchema,
   chatStreamDoneEventSchema,
   chatStreamErrorEventSchema,
 ]);
