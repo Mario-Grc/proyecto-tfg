@@ -35,6 +35,10 @@ function roleToChatType(role: MessageRole): Message["type"] | null {
         return "llm";
     }
 
+    if (role === "tool") {
+        return "tool";
+    }
+
     return null;
 }
 
@@ -72,6 +76,12 @@ function toSingleLinePreview(text: string, maxChars = 140): string {
     }
 
     return `${normalized.slice(0, maxChars)}...`;
+}
+
+function buildToolResultMessage(toolName: string, result: string): string {
+    const normalizedResult = result.trim() || "Sin salida.";
+
+    return [`[Herramienta] ${toolName}`, "Resultado:", normalizedResult].join("\n");
 }
 
 export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
@@ -149,6 +159,29 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
             );
         };
 
+        const insertToolResultMessage = (toolName: string, result: string) => {
+            const toolMessageId = buildLocalMessageId("tool", localMessageSeqRef.current++);
+            const toolMessage: Message = {
+                id: toolMessageId,
+                text: buildToolResultMessage(toolName, result),
+                type: "tool",
+            };
+
+            setMessages((prev) => {
+                const assistantIndex = prev.findIndex((message) => message.id === assistantId);
+
+                if (assistantIndex === -1) {
+                    return [...prev, toolMessage];
+                }
+
+                return [
+                    ...prev.slice(0, assistantIndex),
+                    toolMessage,
+                    ...prev.slice(assistantIndex),
+                ];
+            });
+        };
+
         try {
             const response = await sendChatRequest(
                 {
@@ -168,6 +201,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
                         setStatus(`Ejecutando herramienta: ${toolName}...`);
                     },
                     onToolResult: (toolName, result) => {
+                        insertToolResultMessage(toolName, result);
                         setStatus(`Resultado ${toolName}: ${toSingleLinePreview(result)}`);
                     },
                 },

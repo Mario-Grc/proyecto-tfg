@@ -10,7 +10,8 @@
 }
 
 .llm-message,
-.user-message {
+.user-message,
+.tool-message {
   padding: var(--space-4) var(--space-6);
   max-width: var(--max-width-message);
   line-height: var(--line-height-message);
@@ -33,6 +34,17 @@
   border-radius: var(--radius-message-llm);
   align-self: flex-start;
   color: var(--color-text-base);
+}
+
+.tool-message {
+  background: color-mix(in srgb, var(--color-bg-surface-muted) 74%, var(--color-bg-console) 26%);
+  border: var(--border-width) dashed var(--color-border-muted);
+  border-radius: var(--radius-message-llm);
+  align-self: flex-start;
+  color: var(--color-text-muted);
+  white-space: pre-wrap;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
 }
 
 .llm-message p {

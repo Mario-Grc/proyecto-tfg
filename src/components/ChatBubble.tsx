@@ -48,7 +48,7 @@ function MarkdownPre(props: ComponentPropsWithoutRef<"pre">) {
 }
 
 export default function ChatBubble({ text, type }: ChatBubbleProps) {
-    const className = type === "user" ? "user-message" : "llm-message";
+    const className = type === "user" ? "user-message" : type === "tool" ? "tool-message" : "llm-message";
 
     return (
         <div className={className}>

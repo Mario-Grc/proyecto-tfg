@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const messageRoleSchema = z.enum(["system", "user", "assistant"]);
+export const messageRoleSchema = z.enum(["system", "user", "assistant", "tool"]);
 
 export const messageRecordSchema = z.object({
   id: z.string().min(1),

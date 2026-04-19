@@ -1,7 +1,7 @@
 import { getDatabase } from "../db/connection";
 import { createId } from "../utils/id";
 
-export type MessageRole = "system" | "user" | "assistant";
+export type MessageRole = "system" | "user" | "assistant" | "tool";
 
 export interface MessageEntity {
   id: string;

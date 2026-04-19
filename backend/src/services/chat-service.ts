@@ -245,6 +245,46 @@ function buildToolMessageContent(toolName: string, ok: boolean, output: string):
   );
 }
 
+function formatToolArgumentsForStorage(rawArguments: string): string {
+  const parsedArguments = parseToolArguments(rawArguments);
+
+  if (parsedArguments === null) {
+    const normalizedRawArguments = rawArguments.trim();
+    return normalizedRawArguments || "{}";
+  }
+
+  if (typeof parsedArguments === "string") {
+    return parsedArguments;
+  }
+
+  try {
+    return JSON.stringify(parsedArguments, null, 2);
+  } catch {
+    return String(parsedArguments);
+  }
+}
+
+function buildToolHistoryContent(
+  toolName: string,
+  rawArguments: string,
+  ok: boolean,
+  output: string,
+): string {
+  const status = ok ? "exito" : "error";
+  const normalizedOutput = output.trim() || "Sin salida.";
+
+  return [
+    `[Herramienta] ${toolName}`,
+    `Estado: ${status}`,
+    "",
+    "Argumentos:",
+    formatToolArgumentsForStorage(rawArguments),
+    "",
+    "Resultado:",
+    normalizedOutput,
+  ].join("\n");
+}
+
 async function callLLMForToolDecision(
   conversation: ConversationMessage[],
 ): Promise<ToolDecisionResult> {
@@ -436,6 +476,18 @@ export class ChatService {
     });
 
     const persistedMessages = this.messageRepository.listBySessionId(session.id);
+    const historyForModel = persistedMessages.flatMap((message): ConversationMessage[] => {
+      if (message.role === "tool") {
+        return [];
+      }
+
+      return [
+        {
+          role: message.role,
+          content: message.content,
+        },
+      ];
+    });
 
     return {
       sessionId: session.id,
@@ -444,10 +496,7 @@ export class ChatService {
           role: "system",
           content: buildSystemPrompt(problem.title, problem.statement),
         },
-        ...persistedMessages.map((message) => ({
-          role: message.role,
-          content: message.content,
-        })),
+        ...historyForModel,
       ],
     };
   }
@@ -463,7 +512,25 @@ export class ChatService {
     });
   }
 
-  private async resolveToolCalling(conversation: ConversationMessage[], callbacks: ChatStreamCallbacks): Promise<void> {
+  private persistToolMessage(
+    sessionId: string,
+    toolName: string,
+    rawArguments: string,
+    ok: boolean,
+    output: string,
+  ): void {
+    this.messageRepository.create({
+      sessionId,
+      role: "tool",
+      content: buildToolHistoryContent(toolName, rawArguments, ok, output),
+    });
+  }
+
+  private async resolveToolCalling(
+    sessionId: string,
+    conversation: ConversationMessage[],
+    callbacks: ChatStreamCallbacks,
+  ): Promise<void> {
     if (!config.enableToolCalling) {
       return;
     }
@@ -499,6 +566,14 @@ export class ChatService {
           };
         }
 
+        this.persistToolMessage(
+          sessionId,
+          toolExecutionResult.toolName,
+          toolCall.function.arguments,
+          toolExecutionResult.ok,
+          toolExecutionResult.output,
+        );
+
         callbacks.onToolResult?.(toolExecutionResult.toolName, previewToolResult(toolExecutionResult.output));
 
         conversation.push({
@@ -522,7 +597,7 @@ export class ChatService {
   async reply(input: ChatRequestInput, callbacks: ChatStreamCallbacks): Promise<ChatResult> {
     const { sessionId, conversation } = this.createConversation(input);
 
-    await this.resolveToolCalling(conversation, callbacks);
+    await this.resolveToolCalling(sessionId, conversation, callbacks);
 
     const llmResponse = await callLLMStreaming(conversation, callbacks);
     const assistantText = cleanAssistantText(llmResponse.rawText);
