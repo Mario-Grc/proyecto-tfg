@@ -1,5 +1,6 @@
 import { config } from "../config";
 import { runJavaScriptCode } from "./code-runner";
+import { TavilyMcpClient } from "./tavily-mcp-client";
 import {
   TOOL_NAME_EXECUTE_CODE,
   TOOL_NAME_SEARCH_WEB,
@@ -83,6 +84,8 @@ function buildExecuteCodeOutput(result: Awaited<ReturnType<typeof runJavaScriptC
 }
 
 export class ToolExecutor {
+  private readonly tavilyMcpClient = new TavilyMcpClient();
+
   async execute(toolName: string, rawArgs: unknown): Promise<ToolExecutionOutcome> {
     if (toolName === TOOL_NAME_EXECUTE_CODE) {
       return this.executeCode(rawArgs);
@@ -160,10 +163,12 @@ export class ToolExecutor {
       };
     }
 
+    const searchResult = await this.tavilyMcpClient.search(parsedArgs.query);
+
     return {
       toolName: TOOL_NAME_SEARCH_WEB,
-      ok: false,
-      output: "La integracion MCP de busqueda se habilitara en una fase posterior.",
+      ok: searchResult.ok,
+      output: searchResult.output,
     };
   }
 }

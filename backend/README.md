@@ -13,6 +13,13 @@ Backend API for QuackCode built with Express, TypeScript, Zod, and better-sqlite
 
 Copy `.env.example` to `.env` and adjust values if needed.
 
+For MCP web search with Tavily:
+- `ENABLE_MCP_WEB_SEARCH=true`
+- `TAVILY_API_KEY=<tu_api_key>`
+- `TAVILY_MCP_ENDPOINT=https://mcp.tavily.com/mcp` (default)
+- `TAVILY_MCP_TOOL_NAME=tavily-search` (default)
+- `MCP_WEB_SEARCH_TIMEOUT_MS=15000` (default)
+
 ## Current status
 
 Phase A bootstrap includes:
