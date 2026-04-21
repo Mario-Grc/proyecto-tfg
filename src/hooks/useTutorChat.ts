@@ -53,7 +53,7 @@ function mapStoredMessagesToChat(messages: SessionMessageRecord[]): Message[] {
 
             return {
                 id: message.id,
-                text: message.content,
+                text: normalizeMessageTextForChat(mappedType, message.content),
                 type: mappedType,
             };
         })
@@ -78,10 +78,63 @@ function toSingleLinePreview(text: string, maxChars = 140): string {
     return `${normalized.slice(0, maxChars)}...`;
 }
 
-function buildToolResultMessage(toolName: string, result: string): string {
-    const normalizedResult = result.trim() || "Sin salida.";
+function extractToolName(rawToolMessage: string): string {
+    const firstLine = rawToolMessage.split("\n", 1)[0]?.trim() ?? "";
 
-    return [`[Herramienta] ${toolName}`, "Resultado:", normalizedResult].join("\n");
+    if (!firstLine.startsWith("[Herramienta]")) {
+        return "Herramienta";
+    }
+
+    const normalized = firstLine.replace(/^\[Herramienta\]\s*/, "").trim();
+    return normalized || "Herramienta";
+}
+
+function extractToolStatus(rawToolMessage: string): string | null {
+    const statusMatch = rawToolMessage.match(/(?:^|\n)Estado:\s*(.+)(?:\n|$)/i);
+
+    if (!statusMatch) {
+        return null;
+    }
+
+    const status = statusMatch[1]?.trim() ?? "";
+    return status || null;
+}
+
+function extractToolResult(rawToolMessage: string): string {
+    const resultSectionMatch = rawToolMessage.match(/(?:^|\n)Resultado:\s*\n([\s\S]*)$/i);
+
+    if (!resultSectionMatch) {
+        return rawToolMessage;
+    }
+
+    return resultSectionMatch[1] ?? "";
+}
+
+function formatToolMessageForChat(rawToolMessage: string): string {
+    const toolName = extractToolName(rawToolMessage);
+    const status = extractToolStatus(rawToolMessage);
+    const resultPreview = toSingleLinePreview(extractToolResult(rawToolMessage), 220);
+
+    return [
+        `[Herramienta] ${toolName}`,
+        status ? `Estado: ${status}` : null,
+        "Resultado:",
+        resultPreview,
+    ]
+        .filter((line): line is string => Boolean(line))
+        .join("\n");
+}
+
+function normalizeMessageTextForChat(type: Message["type"], text: string): string {
+    if (type === "tool") {
+        return formatToolMessageForChat(text);
+    }
+
+    return text;
+}
+
+function buildToolResultMessage(toolName: string, result: string): string {
+    return formatToolMessageForChat([`[Herramienta] ${toolName}`, "Resultado:", result].join("\n"));
 }
 
 export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
