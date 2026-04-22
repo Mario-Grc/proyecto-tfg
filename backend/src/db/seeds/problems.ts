@@ -8,6 +8,7 @@ interface ProblemSeed {
   difficulty: SeedDifficulty;
   topic: string;
   statement: string;
+  source: "seed";
 }
 
 const PROBLEM_SEED: ProblemSeed[] = [
@@ -16,6 +17,7 @@ const PROBLEM_SEED: ProblemSeed[] = [
     title: "Two Sum",
     difficulty: "Facil",
     topic: "Arrays",
+    source: "seed",
     statement:
       "## Objetivo\n" +
       "Dado un array de enteros `nums` y un entero `target`, devuelve los indices de dos numeros tales que su suma sea `target`.\n\n" +
@@ -33,6 +35,7 @@ const PROBLEM_SEED: ProblemSeed[] = [
     title: "Valid Parentheses",
     difficulty: "Facil",
     topic: "Stack",
+    source: "seed",
     statement:
       "## Objetivo\n" +
       "Dada una cadena `s` con caracteres `()[]{}`, determina si es valida.\n\n" +
@@ -53,6 +56,7 @@ const PROBLEM_SEED: ProblemSeed[] = [
     title: "Longest Substring Without Repeating Characters",
     difficulty: "Media",
     topic: "Sliding Window",
+    source: "seed",
     statement:
       "## Objetivo\n" +
       "Dada una cadena `s`, encuentra la longitud de la subcadena mas larga sin caracteres repetidos.\n\n" +
@@ -69,6 +73,7 @@ const PROBLEM_SEED: ProblemSeed[] = [
     title: "Merge Intervals",
     difficulty: "Media",
     topic: "Sorting",
+    source: "seed",
     statement:
       "## Objetivo\n" +
       "Dado un conjunto de intervalos `[start, end]`, combina todos los intervalos solapados y devuelve una lista final de intervalos no solapados.\n\n" +
@@ -83,13 +88,14 @@ const PROBLEM_SEED: ProblemSeed[] = [
 
 export function seedProblems(db: Database.Database): number {
   const upsertStatement = db.prepare(`
-    INSERT INTO problems (id, title, difficulty, topic, statement, created_at, updated_at)
-    VALUES (@id, @title, @difficulty, @topic, @statement, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    INSERT INTO problems (id, title, difficulty, topic, statement, source, created_at, updated_at)
+    VALUES (@id, @title, @difficulty, @topic, @statement, @source, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     ON CONFLICT(id) DO UPDATE SET
       title = excluded.title,
       difficulty = excluded.difficulty,
       topic = excluded.topic,
       statement = excluded.statement,
+      source = excluded.source,
       updated_at = CURRENT_TIMESTAMP
   `);
 

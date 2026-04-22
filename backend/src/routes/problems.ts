@@ -33,10 +33,8 @@ problemsRouter.get("/:problemId", (req, res) => {
 
 problemsRouter.post("/", (req, res) => {
   const body = parseRequest(createProblemBodySchema, req.body, "Body de problema invalido");
-  const existed = Boolean(problemRepository.findById(body.id));
-
-  const saved = problemRepository.upsert(body);
+  const saved = problemRepository.createUser(body);
   const responseBody = problemRecordSchema.parse(saved);
 
-  res.status(existed ? 200 : 201).json(responseBody);
+  res.status(201).json(responseBody);
 });
