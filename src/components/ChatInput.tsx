@@ -38,6 +38,10 @@ export default function ChatInput({ value, onChange, onSend, onInsertCode, disab
     // para poder hacer el salto de línea
     function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
         if (e.key === "Enter" && !e.shiftKey) {
+            if (disabled) {
+                return;
+            }
+
             e.preventDefault();
             submit();
         }
@@ -52,7 +56,6 @@ export default function ChatInput({ value, onChange, onSend, onInsertCode, disab
                 onKeyDown={handleKeyDown}
                 placeholder="Escribe tu mensaje..."
                 rows={1}
-                disabled={disabled}
                 required
             />
 

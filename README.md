@@ -4,7 +4,7 @@
 Aplicación web para practicar problemas de programación con tres elementos principales:
 - editor de código
 - chat con LLM local (LM Studio)
-- ejecucion JavaScript en navegador
+- ejecución JavaScript en navegador
 
 Esta aplicación implementa un entorno de apoyo al aprendizaje de programación basado en práctica guiada. El usuario selecciona un problema, desarrolla su solución en el editor, consulta dudas al asistente LLM local y valida su razonamiento mediante ejecución JavaScript básica.
 

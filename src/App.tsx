@@ -260,6 +260,14 @@ function App() {
     }
 
     async function handleSelectProblem(problem: ProblemRecord) {
+        if (selectedProblemId === problem.id && activeSessionId) {
+            setProblemVisible(true);
+            setCurrentView("workspace");
+            setStatus(`Sesion reanudada: ${problem.title}`);
+            setNormal();
+            return;
+        }
+
         setThinking();
         setStatus(`Creando sesion para ${problem.title}...`);
 
