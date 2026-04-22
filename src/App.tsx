@@ -1,8 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { EditorView } from "@codemirror/view";
-import type { ProblemRecord } from "../shared/types";
-import { createSession, fetchProblems } from "./services/backendApi";
+import type { CreateProblemInput, ProblemRecord } from "../shared/types";
+import { createProblem, createSession, fetchProblems } from "./services/backendApi";
 import LandingPage from "./pages/LandingPage";
+import CreateProblemPage from "./pages/CreateProblemPage";
 import ProblemSelectorPage from "./pages/ProblemSelectorPage";
 import WorkspacePage from "./pages/WorkspacePage";
 import useDuckState from "./hooks/useDuckState";
@@ -13,7 +14,7 @@ import useWorkspacePanels from "./hooks/useWorkspacePanels";
 import "./App.css";
 
 type ThemeMode = "dark" | "light";
-type AppView = "landing" | "selector" | "workspace";
+type AppView = "landing" | "selector" | "create-problem" | "workspace";
 
 function getErrorMessage(error: unknown): string {
     return error instanceof Error ? error.message : "Error desconocido";
@@ -248,24 +249,51 @@ function App() {
         setThemeMode((prev) => (prev === "dark" ? "light" : "dark"));
     }
 
+    async function activateProblem(problem: ProblemRecord) {
+        const session = await createSession(problem.id);
+        setSelectedProblemId(problem.id);
+        setActiveSessionId(session.id);
+        setProblemText(problem.statement);
+        resetConversation();
+        setProblemVisible(true);
+        setCurrentView("workspace");
+    }
+
     async function handleSelectProblem(problem: ProblemRecord) {
         setThinking();
         setStatus(`Creando sesion para ${problem.title}...`);
 
         try {
-            const session = await createSession(problem.id);
-            setSelectedProblemId(problem.id);
-            setActiveSessionId(session.id);
-            setProblemText(problem.statement);
-            resetConversation();
-            setProblemVisible(true);
-            setCurrentView("workspace");
+            await activateProblem(problem);
             setStatus(`Problema cargado: ${problem.title}`);
             setNormal();
         } catch (error) {
             const message = getErrorMessage(error);
             setStatus(`No se pudo crear la sesion: ${message}`);
             setConfused();
+        }
+    }
+
+    async function handleCreateProblem(input: CreateProblemInput) {
+        setThinking();
+        setStatus("Creando problema personalizado...");
+
+        try {
+            const createdProblem = await createProblem(input);
+            setProblems((previous) => [
+                createdProblem,
+                ...previous.filter((problem) => problem.id !== createdProblem.id),
+            ]);
+
+            setStatus(`Problema creado: ${createdProblem.title}. Creando sesion...`);
+            await activateProblem(createdProblem);
+            setStatus(`Problema cargado: ${createdProblem.title}`);
+            setNormal();
+        } catch (error) {
+            const message = getErrorMessage(error);
+            setStatus(`No se pudo crear el problema: ${message}`);
+            setConfused();
+            throw new Error(message);
         }
     }
 
@@ -292,9 +320,19 @@ function App() {
                     void loadProblems();
                 }}
                 onBack={() => setCurrentView("landing")}
+                onUploadProblem={() => setCurrentView("create-problem")}
                 onSelect={(problem) => {
                     void handleSelectProblem(problem);
                 }}
+            />
+        );
+    }
+
+    if (currentView === "create-problem") {
+        return (
+            <CreateProblemPage
+                onBack={() => setCurrentView("selector")}
+                onCreate={handleCreateProblem}
             />
         );
     }

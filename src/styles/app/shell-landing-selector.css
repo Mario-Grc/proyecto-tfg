@@ -8,7 +8,8 @@
 }
 
 .landing-screen,
-.selector-screen {
+.selector-screen,
+.create-problem-screen {
   min-height: 100%;
   height: 100%;
   padding: clamp(18px, 2.6vw, 32px);
@@ -19,7 +20,8 @@
 }
 
 .landing-screen,
-.selector-screen {
+.selector-screen,
+.create-problem-screen {
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -250,6 +252,108 @@
   gap: var(--space-6);
 }
 
+.create-problem-screen {
+  display: flex;
+  flex-direction: column;
+}
+
+.create-problem-surface {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: var(--space-5);
+}
+
+.create-problem-form {
+  display: grid;
+  gap: var(--space-5);
+  padding: clamp(16px, 2.4vw, 24px);
+  border-radius: 16px;
+  border: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 86%, transparent);
+  background: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--color-bg-surface) 92%, transparent),
+    color-mix(in srgb, var(--color-bg-panel) 96%, transparent)
+  );
+}
+
+.create-problem-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.create-problem-field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.create-problem-field span {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: color-mix(in srgb, var(--color-text-base) 90%, white 10%);
+}
+
+.create-problem-field-full {
+  grid-column: 1 / -1;
+}
+
+.create-problem-input,
+.create-problem-select,
+.create-problem-textarea {
+  width: 100%;
+  min-height: var(--min-height-control);
+  padding: var(--space-4) var(--space-5);
+  border: var(--border-width) solid var(--color-border-muted);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  background: var(--color-bg-surface-muted);
+  color: var(--color-text-base);
+}
+
+.create-problem-input::placeholder,
+.create-problem-textarea::placeholder {
+  color: var(--color-text-placeholder);
+}
+
+.create-problem-input:focus,
+.create-problem-select:focus,
+.create-problem-textarea:focus {
+  outline: none;
+  border-color: var(--color-tertiary);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.create-problem-select {
+  cursor: pointer;
+}
+
+.create-problem-textarea {
+  min-height: 240px;
+  resize: vertical;
+  line-height: var(--line-height-base);
+}
+
+.create-problem-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: var(--border-width) solid var(--color-border-danger);
+  background: var(--color-bg-danger-soft);
+  color: var(--color-text-danger);
+  font-size: var(--font-size-sm);
+}
+
+.create-problem-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.create-problem-actions button {
+  min-width: 190px;
+}
+
 .selector-header {
   display: flex;
   flex-wrap: wrap;
@@ -325,6 +429,15 @@
   font-weight: 700;
 }
 
+.problem-source-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: var(--border-width) solid color-mix(in srgb, var(--color-tertiary) 44%, transparent);
+  background: color-mix(in srgb, var(--color-tertiary) 14%, transparent);
+  color: color-mix(in srgb, var(--color-tertiary) 66%, white 34%);
+  font-weight: 700;
+}
+
 @media (max-width: 1080px) {
   .landing-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -341,7 +454,8 @@
 
 @media (max-width: 760px) {
   .landing-screen,
-  .selector-screen {
+  .selector-screen,
+  .create-problem-screen {
     padding: 14px;
   }
 
@@ -363,6 +477,18 @@
   }
 
   .problem-card button {
+    width: 100%;
+  }
+
+  .create-problem-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .create-problem-actions {
+    justify-content: stretch;
+  }
+
+  .create-problem-actions button {
     width: 100%;
   }
 }

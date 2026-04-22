@@ -6,6 +6,7 @@ interface ProblemSelectorPageProps {
     errorMessage: string | null;
     onRetry: () => void;
     onBack: () => void;
+    onUploadProblem: () => void;
     onSelect: (problem: ProblemRecord) => void;
 }
 
@@ -15,6 +16,7 @@ export default function ProblemSelectorPage({
     errorMessage,
     onRetry,
     onBack,
+    onUploadProblem,
     onSelect,
 }: ProblemSelectorPageProps) {
     return (
@@ -30,8 +32,8 @@ export default function ProblemSelectorPage({
                         <button type="button" className="ghost-btn" onClick={onBack}>
                             Volver
                         </button>
-                        <button type="button" className="ghost-btn" disabled title="Lo activaremos en un PR posterior">
-                            Subir problema (Proximamente)
+                        <button type="button" className="ghost-btn" onClick={onUploadProblem}>
+                            Subir problema
                         </button>
                     </div>
                 </header>
@@ -61,6 +63,7 @@ export default function ProblemSelectorPage({
                                 <h3>{problem.title}</h3>
                                 <div className="problem-meta">
                                     <span className="problem-difficulty">{problem.difficulty}</span>
+                                    {problem.source === "user" && <span className="problem-source-badge">Tu problema</span>}
                                     <span>{problem.topic}</span>
                                 </div>
                             </div>

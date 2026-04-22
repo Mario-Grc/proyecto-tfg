@@ -3,6 +3,7 @@ import type {
     ChatRequest,
     ChatResponse,
     ChatStreamEvent,
+    CreateProblemInput,
     ProblemRecord,
     SessionMessageRecord,
     SessionRecord,
@@ -113,6 +114,13 @@ async function requestJson<TResponse>(path: string, init?: RequestInit): Promise
 
 export async function fetchProblems(): Promise<ProblemRecord[]> {
     return requestJson<ProblemRecord[]>("/problems", { method: "GET" });
+}
+
+export async function createProblem(payload: CreateProblemInput): Promise<ProblemRecord> {
+    return requestJson<ProblemRecord>("/problems", {
+        method: "POST",
+        body: JSON.stringify(payload),
+    });
 }
 
 export async function createSession(problemId: string): Promise<SessionRecord> {
