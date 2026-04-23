@@ -11,6 +11,12 @@ export const sessionIdParamsSchema = z.object({
   sessionId: z.string().min(1),
 });
 
+export const latestSessionByProblemParamsSchema = z.object({
+  problemId: z.string().min(1),
+});
+
 export const createSessionBodySchema = z.object({
   problemId: z.string().min(1),
 });
+
+export const latestSessionResponseSchema = sessionRecordSchema.nullable();

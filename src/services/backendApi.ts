@@ -130,6 +130,12 @@ export async function createSession(problemId: string): Promise<SessionRecord> {
     });
 }
 
+export async function fetchLatestSessionForProblem(problemId: string): Promise<SessionRecord | null> {
+    return requestJson<SessionRecord | null>(`/sessions/latest/problem/${encodeURIComponent(problemId)}`, {
+        method: "GET",
+    });
+}
+
 export async function fetchSessionMessages(sessionId: string): Promise<SessionMessageRecord[]> {
     return requestJson<SessionMessageRecord[]>(`/sessions/${encodeURIComponent(sessionId)}/messages`, {
         method: "GET",

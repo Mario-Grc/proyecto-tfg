@@ -38,6 +38,14 @@ export class SessionRepository {
     WHERE id = ?
   `);
 
+  private readonly selectLatestByProblemStmt = this.db.prepare(`
+    SELECT id, problem_id, created_at, updated_at
+    FROM sessions
+    WHERE problem_id = ?
+    ORDER BY updated_at DESC, created_at DESC, id DESC
+    LIMIT 1
+  `);
+
   private readonly touchStmt = this.db.prepare(`
     UPDATE sessions
     SET updated_at = CURRENT_TIMESTAMP
@@ -58,6 +66,11 @@ export class SessionRepository {
 
   findById(sessionId: string): SessionEntity | null {
     const row = this.selectByIdStmt.get(sessionId) as SessionRow | undefined;
+    return row ? mapSessionRow(row) : null;
+  }
+
+  findLatestByProblemId(problemId: string): SessionEntity | null {
+    const row = this.selectLatestByProblemStmt.get(problemId) as SessionRow | undefined;
     return row ? mapSessionRow(row) : null;
   }
 

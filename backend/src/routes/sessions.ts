@@ -11,6 +11,8 @@ import {
 } from "../schemas/messages";
 import {
   createSessionBodySchema,
+  latestSessionByProblemParamsSchema,
+  latestSessionResponseSchema,
   sessionIdParamsSchema,
   sessionRecordSchema,
 } from "../schemas/sessions";
@@ -32,6 +34,18 @@ sessionsRouter.post("/", (req, res) => {
   const session = sessionRepository.create(body.problemId);
   const responseBody = sessionRecordSchema.parse(session);
   res.status(201).json(responseBody);
+});
+
+sessionsRouter.get("/latest/problem/:problemId", (req, res) => {
+  const { problemId } = parseRequest(
+    latestSessionByProblemParamsSchema,
+    req.params,
+    "Parametro problemId invalido",
+  );
+
+  const latestSession = sessionRepository.findLatestByProblemId(problemId);
+  const responseBody = latestSessionResponseSchema.parse(latestSession);
+  res.json(responseBody);
 });
 
 sessionsRouter.get("/:sessionId", (req, res) => {

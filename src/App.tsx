@@ -1,7 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { EditorView } from "@codemirror/view";
 import type { CreateProblemInput, ProblemRecord } from "../shared/types";
-import { createProblem, createSession, fetchProblems } from "./services/backendApi";
+import {
+    createProblem,
+    createSession,
+    fetchLatestSessionForProblem,
+    fetchProblems,
+} from "./services/backendApi";
 import LandingPage from "./pages/LandingPage";
 import CreateProblemPage from "./pages/CreateProblemPage";
 import ProblemSelectorPage from "./pages/ProblemSelectorPage";
@@ -249,8 +254,17 @@ function App() {
         setThemeMode((prev) => (prev === "dark" ? "light" : "dark"));
     }
 
-    async function activateProblem(problem: ProblemRecord) {
-        const session = await createSession(problem.id);
+    async function activateProblem(problem: ProblemRecord, options?: { allowResumeLatest?: boolean }) {
+        let session = null;
+
+        if (options?.allowResumeLatest) {
+            session = await fetchLatestSessionForProblem(problem.id);
+        }
+
+        if (!session) {
+            session = await createSession(problem.id);
+        }
+
         setSelectedProblemId(problem.id);
         setActiveSessionId(session.id);
         setProblemText(problem.statement);
@@ -269,15 +283,15 @@ function App() {
         }
 
         setThinking();
-        setStatus(`Creando sesion para ${problem.title}...`);
+        setStatus(`Abriendo sesion para ${problem.title}...`);
 
         try {
-            await activateProblem(problem);
+            await activateProblem(problem, { allowResumeLatest: true });
             setStatus(`Problema cargado: ${problem.title}`);
             setNormal();
         } catch (error) {
             const message = getErrorMessage(error);
-            setStatus(`No se pudo crear la sesion: ${message}`);
+            setStatus(`No se pudo abrir la sesion: ${message}`);
             setConfused();
         }
     }
@@ -294,7 +308,7 @@ function App() {
             ]);
 
             setStatus(`Problema creado: ${createdProblem.title}. Creando sesion...`);
-            await activateProblem(createdProblem);
+            await activateProblem(createdProblem, { allowResumeLatest: false });
             setStatus(`Problema cargado: ${createdProblem.title}`);
             setNormal();
         } catch (error) {
