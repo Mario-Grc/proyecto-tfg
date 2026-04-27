@@ -39,7 +39,7 @@ function MarkdownPre(props: ComponentPropsWithoutRef<"pre">) {
 
     return (
         <div className="code-block-shell">
-            <button type="button" className={buttonClassName} onClick={handleCopy} aria-label="Copiar bloque de codigo">
+            <button type="button" className={buttonClassName} onClick={handleCopy} aria-label="Copiar bloque de código">
                 {buttonLabel}
             </button>
             <pre {...props} ref={preRef} />

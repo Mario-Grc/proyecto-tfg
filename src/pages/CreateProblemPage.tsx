@@ -35,7 +35,7 @@ export default function CreateProblemPage({ onBack, onCreate }: CreateProblemPag
         };
 
         if (!payload.title || !payload.topic || !payload.statement) {
-            setErrorMessage("Completa titulo, tema y enunciado antes de crear el problema.");
+            setErrorMessage("Completa título, tema y enunciado antes de crear el problema.");
             return;
         }
 

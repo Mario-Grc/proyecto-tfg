@@ -13,10 +13,7 @@
   min-height: 100%;
   height: 100%;
   padding: clamp(18px, 2.6vw, 32px);
-  background:
-    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--color-tertiary) 24%, transparent), transparent 42%),
-    radial-gradient(circle at 88% 10%, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent 34%),
-    linear-gradient(132deg, color-mix(in srgb, var(--color-bg-panel) 92%, black 8%), var(--color-bg-surface));
+  background: var(--color-bg-surface);
 }
 
 .landing-screen,
@@ -39,12 +36,7 @@
   padding: clamp(18px, 2.6vw, 28px);
   border: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 86%, transparent);
   border-radius: 20px;
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--color-bg-surface) 90%, transparent),
-    color-mix(in srgb, var(--color-bg-panel) 94%, transparent)
-  );
-  box-shadow: 0 16px 30px color-mix(in srgb, var(--color-shadow-soft) 46%, transparent);
+  background: var(--color-bg-panel);
 }
 
 .landing-kicker {
@@ -95,7 +87,6 @@
 .landing-cta {
   border-radius: 12px;
   border-color: color-mix(in srgb, var(--color-primary) 70%, black 30%);
-  box-shadow: 0 8px 18px color-mix(in srgb, var(--color-primary) 26%, transparent);
 }
 
 .landing-pillars {
@@ -137,11 +128,7 @@
   padding: clamp(14px, 1.9vw, 20px);
   border-radius: 16px;
   border: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 82%, transparent);
-  background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--color-bg-surface) 90%, transparent),
-    color-mix(in srgb, var(--color-bg-panel) 94%, transparent)
-  );
+  background: var(--color-bg-panel);
 }
 
 .landing-card h2 {
@@ -208,11 +195,7 @@
 }
 
 .landing-card-highlight {
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--color-tertiary) 8%, var(--color-bg-surface)),
-    color-mix(in srgb, var(--color-bg-panel) 90%, transparent)
-  );
+  background: var(--color-bg-panel);
 }
 
 .landing-badges {
@@ -270,11 +253,7 @@
   padding: clamp(16px, 2.4vw, 24px);
   border-radius: 16px;
   border: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 86%, transparent);
-  background: linear-gradient(
-    150deg,
-    color-mix(in srgb, var(--color-bg-surface) 92%, transparent),
-    color-mix(in srgb, var(--color-bg-panel) 96%, transparent)
-  );
+  background: var(--color-bg-panel);
 }
 
 .create-problem-grid {
@@ -322,7 +301,6 @@
 .create-problem-textarea:focus {
   outline: none;
   border-color: var(--color-tertiary);
-  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .create-problem-select {

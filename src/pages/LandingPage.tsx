@@ -8,12 +8,12 @@ const VALUE_PILLARS = [
     {
         title: "Tutor con contexto",
         description:
-            "Pregunta sobre tu codigo, recibe guias paso a paso y aterriza conceptos sin salir del editor.",
+            "Pregunta sobre tu código, recibe guias paso a paso y aterriza conceptos sin salir del editor.",
     },
     {
         title: "Ejecucion inmediata",
         description:
-            "Prueba tus ideas en JavaScript al instante para validar logica, casos borde y complejidad.",
+            "Prueba tus ideas en JavaScript al instante para validar lógica, casos borde y complejidad.",
     },
     {
         title: "Stack local",
@@ -58,9 +58,9 @@ export default function LandingPage({ onStart, canContinue, onContinue }: Landin
                         <p className="landing-kicker">Asistente de programacion con LLM local</p>
                         <h1>Practica problemas con una ayuda clara, directa y dentro de tu propio entorno.</h1>
                         <p className="landing-lead">
-                            QuackCode integra editor, consola y tutor conversacional en una sola vista para
+                            QuackCode integra editor, consola y tutor conversaciónal en una sola vista para
                             practicar con metodo. El objetivo es que entiendas el por que de cada decision mientras
-                            iteras codigo.
+                            iteras código.
                         </p>
 
                         <div className="landing-actions">
@@ -69,7 +69,7 @@ export default function LandingPage({ onStart, canContinue, onContinue }: Landin
                             </button>
                             {canContinue && (
                                 <button type="button" className="ghost-btn landing-continue" onClick={onContinue}>
-                                    Continuar sesion
+                                    Continuar sesión
                                 </button>
                             )}
                         </div>
@@ -103,9 +103,9 @@ export default function LandingPage({ onStart, canContinue, onContinue }: Landin
                         <article className="landing-card landing-card-highlight">
                             <h2>Asistencia contextual continua</h2>
                             <p className="landing-card-copy">
-                                El asistente siempre trabaja sobre el problema activo y el codigo que tengas en
+                                El asistente siempre trabaja sobre el problema activo y el código que tengas en
                                 pantalla. No hay modos distintos: es una sola experiencia de aprendizaje durante toda
-                                la sesion.
+                                la sesión.
                             </p>
                             <ul className="landing-badges" aria-label="Capacidades disponibles">
                                 {LOCAL_STACK_NOTES.map((item) => (
@@ -124,7 +124,7 @@ sendPrompt({
                             <ul className="landing-list" aria-label="Resultados esperados">
                                 <li>
                                     <h3>Menos bloqueo</h3>
-                                    <p>Recibes ayuda puntual sobre dudas de logica, sintaxis y estrategia.</p>
+                                    <p>Recibes ayuda puntual sobre dudas de lógica, sintaxis y estrategia.</p>
                                 </li>
                                 <li>
                                     <h3>Mejor comprension</h3>

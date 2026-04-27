@@ -5,7 +5,6 @@
   grid-template-rows: auto 1fr;
   border: var(--border-width) solid var(--color-border-soft);
   background: var(--color-bg-panel);
-  box-shadow: 0 14px 30px var(--color-shadow-soft);
 }
 
 .topbar {
@@ -84,7 +83,6 @@
   background: var(--color-bg-panel);
   border: var(--border-width) solid var(--color-border-soft);
   border-radius: var(--radius-lg);
-  box-shadow: 0 16px 44px var(--color-shadow-soft);
 }
 
 .options-modal-header,
@@ -181,7 +179,6 @@
 .options-input:focus-visible {
   outline: none;
   border-color: var(--color-tertiary);
-  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .options-feedback {

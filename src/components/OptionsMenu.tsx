@@ -57,7 +57,7 @@ export default function OptionsMenu({
                         <header className="options-modal-header">
                             <div>
                                 <h2 id="options-modal-title" className="options-modal-title">Ajustes</h2>
-                                <p className="options-modal-subtitle">Personaliza la interfaz y el estado de la sesion.</p>
+                                <p className="options-modal-subtitle">Personaliza la interfaz y el estado de la sesión.</p>
                             </div>
                             <button
                                 type="button"
@@ -82,13 +82,13 @@ export default function OptionsMenu({
                             </section>
 
                             <section className="options-section">
-                                <h3 className="options-section-title">Conversacion</h3>
+                                <h3 className="options-section-title">Conversación</h3>
                                 <button
                                     type="button"
                                     className="options-item danger"
                                     onClick={onClearConversation}
                                 >
-                                    Borrar conversacion
+                                    Borrar conversación
                                 </button>
                             </section>
                         </div>

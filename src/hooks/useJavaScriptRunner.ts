@@ -5,7 +5,7 @@ export type JavaScriptRunStatus = "success" | "error" | "ignored";
 
 export default function useJavaScriptRunner() {
     const [runningCode, setRunningCode] = useState(false);
-    const [runOutput, setRunOutput] = useState("Aun no has ejecutado codigo.");
+    const [runOutput, setRunOutput] = useState("Aun no has ejecutado código.");
 
     const runCode = useCallback(async (code: string): Promise<JavaScriptRunStatus> => {
         if (runningCode) {
@@ -13,7 +13,7 @@ export default function useJavaScriptRunner() {
         }
 
         if (!code.trim()) {
-            setRunOutput("No hay codigo en el editor.");
+            setRunOutput("No hay código en el editor.");
             return "ignored";
         }
 

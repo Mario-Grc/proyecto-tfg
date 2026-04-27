@@ -23,7 +23,7 @@ function buildContentForChat(trimmedText: string, selectedCode: string): string 
         return trimmedText;
     }
 
-    return `${trimmedText}\n\n(Se adjunto automaticamente tu seleccion de codigo al modelo.)`;
+    return `${trimmedText}\n\n(Se adjunto automaticamente tu seleccion de código al modelo.)`;
 }
 
 function roleToChatType(role: MessageRole): Message["type"] | null {
@@ -146,16 +146,16 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
 
     const loadSessionHistory = useCallback(async (targetSessionId: string) => {
         setLoading(true);
-        setStatus("Cargando historial de la sesion...");
+        setStatus("Cargando historial de la sesión...");
 
         try {
             const storedMessages = await fetchSessionMessages(targetSessionId);
             setMessages(mapStoredMessagesToChat(storedMessages));
-            setStatus(storedMessages.length > 0 ? "Historial cargado." : "Sesion lista para empezar.");
+            setStatus(storedMessages.length > 0 ? "Historial cargado." : "Sesión lista para empezar.");
         } catch (error) {
             const message = getErrorMessage(error);
             setMessages([]);
-            setStatus(`No se pudo cargar la sesion: ${message}`);
+            setStatus(`No se pudo cargar la sesión: ${message}`);
         } finally {
             setLoading(false);
         }
@@ -181,7 +181,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
         }
 
         if (!sessionId) {
-            setStatus("No hay una sesion activa para enviar mensajes.");
+            setStatus("No hay una sesión activa para enviar mensajes.");
             return "error";
         }
 
@@ -197,7 +197,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
         ]);
 
         setLoading(true);
-        setStatus(normalizedCode ? "Generando respuesta con tu seleccion de codigo..." : "Generando respuesta...");
+        setStatus(normalizedCode ? "Generando respuesta con tu seleccion de código..." : "Generando respuesta...");
 
         const applyAssistantText = (updater: (currentText: string) => string) => {
             setMessages((prev) =>
@@ -295,7 +295,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
 
     const clearConversation = useCallback(() => {
         resetConversation();
-        setStatus("Conversacion borrada.");
+        setStatus("Conversación borrada.");
     }, [resetConversation]);
 
     return {

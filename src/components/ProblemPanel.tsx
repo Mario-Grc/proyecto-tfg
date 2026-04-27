@@ -65,7 +65,7 @@ export default function ProblemPanel({ title, value, onChange, onHide }: Problem
                     className="problem-textarea"
                     value={draftValue}
                     onChange={(e) => setDraftValue(e.target.value)}
-                    placeholder="Escribe o pega aqui el enunciado en Markdown (titulos, listas, ejemplos, tablas, codigo)..."
+                    placeholder="Escribe o pega aquí el enunciado en Markdown (títulos, listas, ejemplos, tablas, código)..."
                     spellCheck={false}
                 />
             ) : (

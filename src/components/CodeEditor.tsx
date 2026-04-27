@@ -6,7 +6,7 @@ import { javascript } from "@codemirror/lang-javascript";
 import { keymap } from "@codemirror/view";
 import { insertTab } from "@codemirror/commands";
 
-const PLACEHOLDER = `// Escribe tu codigo JavaScript aqui...
+const PLACEHOLDER = `// Escribe tu código JavaScript aquí...
 function saludar(nombre) {
     console.log("¡Hola, " + nombre + "!");
 }

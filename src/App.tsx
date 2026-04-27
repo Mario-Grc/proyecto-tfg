@@ -198,7 +198,7 @@ function App() {
         const nextCursorPos = before.length + insertion.length;
 
         setInputText(nextText);
-        setStatus("Codigo anadido al prompt.");
+        setStatus("Código añadido al prompt.");
 
         if (textarea) {
             requestAnimationFrame(() => {
@@ -230,18 +230,18 @@ function App() {
 
     async function handleClearConversation() {
         if (!selectedProblem) {
-            setStatus("Selecciona un problema antes de reiniciar la conversacion.");
+            setStatus("Selecciona un problema antes de reiniciar la conversación.");
             return;
         }
 
         setThinking();
-        setStatus("Reiniciando conversacion...");
+        setStatus("Reiniciando conversación...");
 
         try {
             const newSession = await createSession(selectedProblem.id);
             setActiveSessionId(newSession.id);
             clearConversation();
-            setStatus("Conversacion reiniciada.");
+            setStatus("Conversación reiniciada.");
             setNormal();
         } catch (error) {
             const message = getErrorMessage(error);
@@ -277,13 +277,13 @@ function App() {
         if (selectedProblemId === problem.id && activeSessionId) {
             setProblemVisible(true);
             setCurrentView("workspace");
-            setStatus(`Sesion reanudada: ${problem.title}`);
+            setStatus(`Sesión reanudada: ${problem.title}`);
             setNormal();
             return;
         }
 
         setThinking();
-        setStatus(`Abriendo sesion para ${problem.title}...`);
+        setStatus(`Abriendo sesión para ${problem.title}...`);
 
         try {
             await activateProblem(problem, { allowResumeLatest: true });
@@ -291,7 +291,7 @@ function App() {
             setNormal();
         } catch (error) {
             const message = getErrorMessage(error);
-            setStatus(`No se pudo abrir la sesion: ${message}`);
+            setStatus(`No se pudo abrir la sesión: ${message}`);
             setConfused();
         }
     }
@@ -307,7 +307,7 @@ function App() {
                 ...previous.filter((problem) => problem.id !== createdProblem.id),
             ]);
 
-            setStatus(`Problema creado: ${createdProblem.title}. Creando sesion...`);
+            setStatus(`Problema creado: ${createdProblem.title}. Creando sesión...`);
             await activateProblem(createdProblem, { allowResumeLatest: false });
             setStatus(`Problema cargado: ${createdProblem.title}`);
             setNormal();
