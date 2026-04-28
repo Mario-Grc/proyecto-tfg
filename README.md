@@ -20,6 +20,27 @@ Además, el entorno cuenta con un compañero interactivo (un **pato de goma virt
 
 ## Stack
 
+<p align="center">
+    <a href="https://react.dev/" target="_blank" rel="noreferrer">
+        <img src="https://skillicons.dev/icons?i=react" alt="React" title="React" width="72" />
+    </a>
+    <a href="https://vite.dev/" target="_blank" rel="noreferrer">
+        <img src="https://skillicons.dev/icons?i=vite" alt="Vite" title="Vite" width="72" />
+    </a>
+    <a href="https://www.typescriptlang.org/" target="_blank" rel="noreferrer">
+        <img src="https://skillicons.dev/icons?i=ts" alt="TypeScript" title="TypeScript" width="72" />
+    </a>
+    <a href="https://nodejs.org/" target="_blank" rel="noreferrer">
+        <img src="https://skillicons.dev/icons?i=nodejs" alt="Node.js" title="Node.js" width="72" />
+    </a>
+    <a href="https://expressjs.com/" target="_blank" rel="noreferrer">
+        <img src="https://skillicons.dev/icons?i=express" alt="Express" title="Express" width="72" />
+    </a>
+    <a href="https://sqlite.org/" target="_blank" rel="noreferrer">
+        <img src="https://skillicons.dev/icons?i=sqlite" alt="SQLite" title="SQLite" width="72" />
+    </a>
+</p>
+
 - Frontend: React 19 + TypeScript + Vite
 - Backend: Express + TypeScript + Zod
 - Base de datos: SQLite (better-sqlite3)
@@ -65,7 +86,7 @@ Para ejecutar el proyecto en tu máquina, sigue estos pasos:
     cp backend/.env.example backend/.env
     ```
 
-    Edita `backend/.env` si necesitas cambiar el puerto o la URL de LM Studio.
+    Edita `backend/.env` si quieres cambiar el puerto, la URL de LM Studio o activar la búsqueda en internet con Tavily. Con la configuración por defecto la aplicación funciona sin búsqueda web. Para más detalle sobre estas variables, consulta el [README](./backend/README.md) del backend.
 
 6. Ejecutar el backend (terminal 1):
     ```bash
@@ -79,7 +100,7 @@ Para ejecutar el proyecto en tu máquina, sigue estos pasos:
     ```
 
 La aplicación estará disponible en `http://localhost:5173`.
-El backend estará disponible en `http://localhost:3001`.
+El backend estará disponible en `http://localhost:3001`, la aplicación se conectará automáticamente a este backend cuando lo necesite.
 
 ## Autor
 Mario García Abellán

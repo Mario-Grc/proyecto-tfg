@@ -156,7 +156,7 @@ export default function WorkspacePage({
 
                         <section className="editor-output" aria-label="Salida de ejecucion JavaScript">
                             <div className="editor-output-head">
-                                <p className="editor-output-title">Consola</p>
+                                <p className="editor-output-title">Salida</p>
                             </div>
                             <pre className="editor-output-content">{runOutput}</pre>
                         </section>

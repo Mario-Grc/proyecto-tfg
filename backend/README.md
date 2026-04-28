@@ -12,14 +12,27 @@ API backend para QuackCode, construida con Express, TypeScript, Zod y better-sql
 
 ## Entorno
 
-Copia `.env.example` a `.env` y ajusta los valores si es necesario.
+Copia `.env.example` a `.env` y ajusta los valores si es necesario. Con los valores por defecto el backend arranca y la aplicación funciona sin búsqueda web. Si quieres cambiar la configuración, el endpoint de LM Studio o activar la búsqueda con Tavily, revisa las variables de abajo.
 
-Para búsqueda web MCP con Tavily:
-- `ENABLE_MCP_WEB_SEARCH=true`
-- `TAVILY_API_KEY=<tu_api_key>`
-- `TAVILY_MCP_ENDPOINT=https://mcp.tavily.com/mcp` (por defecto)
-- `TAVILY_MCP_TOOL_NAME=tavily-search` (por defecto)
-- `MCP_WEB_SEARCH_TIMEOUT_MS=15000` (por defecto)
+Variables necesarias para el arranque:
+- `PORT`: Puerto del backend.
+- `FRONTEND_ORIGIN`: URL del frontend para CORS (ej: `http://localhost:5173`).
+- `LLM_API_ENDPOINT`: URL del endpoint de LM Studio (ej: `http://localhost:1234/v1/chat/completions`).
+- `LLM_MODEL_NAME`: Nombre del modelo que se usa en el backend. Si solo se tiene un modelo cargado en LM Studio, se puede dejar local-model.
+
+Variables por defecto (no hace falta editarlas para que funcione el proyecto, solo para personalizarlo):
+- `ENABLE_TOOL_CALLING`: activa o desactiva el uso de herramientas.
+- `TOOL_CALL_MAX_ROUNDS`: número máximo de llamadas a herramientas por mensaje.
+- `CODE_RUNNER_TIMEOUT_MS`: tiempo máximo de ejecución del runner de JavaScript.
+- `CODE_RUNNER_MAX_CODE_CHARS`: límite de tamaño del código a ejecutar.
+- `DATA_DIR`: carpeta donde se guarda la base de datos.
+- `DB_FILE_NAME`: nombre del fichero SQLite.
+
+- `ENABLE_MCP_WEB_SEARCH`: activar la búsqueda web con Tavily.
+- `TAVILY_API_KEY`: clave de Tavily, solo si activas la búsqueda web.
+- `TAVILY_MCP_ENDPOINT`: endpoint del servidor MCP de Tavily (por defecto https://mcp.tavily.com/mcp)
+- `TAVILY_MCP_TOOL_NAME`: nombre de la herramienta MCP.
+- `MCP_WEB_SEARCH_TIMEOUT_MS`: tiempo máximo para la búsqueda web.
 
 ## Estado actual
 
