@@ -12,190 +12,142 @@
 .create-problem-screen {
   min-height: 100%;
   height: 100%;
-  padding: clamp(18px, 2.6vw, 32px);
-  background: var(--color-bg-surface);
-}
-
-.landing-screen,
-.selector-screen,
-.create-problem-screen {
+  padding: clamp(18px, 4vw, 64px);
+  background: var(--color-bg-app);
   overflow: auto;
   -webkit-overflow-scrolling: touch;
+  display: flex;
+  justify-content: center;
 }
 
-.landing-surface {
-  width: min(1120px, 100%);
-  margin: 0 auto;
-  display: grid;
-  gap: var(--space-6);
+.landing-container {
+  width: min(800px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  padding-top: 5vh;
 }
 
 .landing-hero {
-  display: grid;
-  gap: var(--space-4);
-  padding: clamp(18px, 2.6vw, 28px);
-  border: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 86%, transparent);
-  border-radius: 20px;
-  background: var(--color-bg-panel);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.25rem;
 }
 
-.landing-kicker {
-  margin: 0;
-  width: fit-content;
-  padding: 5px 10px;
-  border-radius: 999px;
-  border: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 82%, transparent);
-  background: color-mix(in srgb, var(--color-bg-surface-muted) 76%, transparent);
-  font-size: 0.7rem;
+.landing-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  font-family: var(--font-family-mono);
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  color: var(--color-neutral);
+  background: var(--color-primary);
+  border-radius: 4px;
+}
+
+.landing-title {
+  margin: 0;
+  font-family: "Space Grotesk", var(--font-family-heading);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
   font-weight: 700;
-  color: var(--color-text-muted);
-  font-family: "Space Grotesk", "Trebuchet MS", sans-serif;
-}
-
-.landing-hero h1 {
-  margin: 0;
-  max-width: 22ch;
-  font-family: "Space Grotesk", "Trebuchet MS", sans-serif;
-  font-size: clamp(2rem, 4.2vw, 3.4rem);
-  line-height: 1.06;
+  line-height: 1.1;
   letter-spacing: -0.02em;
-  color: color-mix(in srgb, var(--color-text-heading) 68%, white 32%);
+  color: var(--color-text-heading);
 }
 
-.landing-lead {
+.landing-subtitle {
   margin: 0;
-  max-width: 62ch;
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  line-height: 1.6;
   color: var(--color-text-base);
-  line-height: 1.62;
-  font-size: clamp(0.97rem, 1.05vw, 1.07rem);
+  max-width: 55ch;
+}
+
+.landing-subtitle em {
+  font-style: italic;
+  color: var(--color-tertiary);
 }
 
 .landing-actions {
   display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
   flex-wrap: wrap;
-  gap: var(--space-4);
 }
 
-.landing-cta,
-.landing-continue {
-  min-height: 46px;
-  min-width: 210px;
+.landing-btn-primary,
+.landing-btn-secondary {
+  font-family: var(--font-family-base);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.875rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
 }
 
-.landing-cta {
-  border-radius: 12px;
-  border-color: color-mix(in srgb, var(--color-primary) 70%, black 30%);
+.landing-btn-primary {
+  background: var(--color-text-heading);
+  color: var(--color-bg-app);
 }
 
-.landing-pillars {
+.landing-btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.landing-btn-secondary {
+  background: transparent;
+  color: var(--color-text-base);
+  border: 1px solid var(--color-border-muted);
+}
+
+.landing-btn-secondary:hover {
+  background: var(--color-bg-surface);
+  border-color: var(--color-text-base);
+}
+
+.landing-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--color-border-soft);
+}
+
+.landing-steps {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
 }
 
-.landing-pillar {
-  padding: 12px;
-  border-radius: 12px;
-  border: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 78%, transparent);
-  background: color-mix(in srgb, var(--color-bg-surface-muted) 48%, transparent);
+.landing-step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.landing-pillar h2 {
-  margin: 0;
-  font-size: 0.98rem;
-  font-family: "Space Grotesk", "Trebuchet MS", sans-serif;
-  color: color-mix(in srgb, var(--color-text-heading) 60%, white 40%);
-}
-
-.landing-pillar p {
-  margin: 7px 0 0;
-  font-size: 0.86rem;
-  line-height: 1.56;
+.step-number {
+  font-family: var(--font-family-mono);
+  font-size: 0.875rem;
   color: var(--color-text-muted);
 }
 
-.landing-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-5);
-}
-
-.landing-card {
-  display: grid;
-  gap: var(--space-4);
-  padding: clamp(14px, 1.9vw, 20px);
-  border-radius: 16px;
-  border: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 82%, transparent);
-  background: var(--color-bg-panel);
-}
-
-.landing-card h2 {
+.landing-step h2 {
   margin: 0;
-  font-size: 1.1rem;
-  letter-spacing: -0.01em;
-  font-family: "Space Grotesk", "Trebuchet MS", sans-serif;
-  color: color-mix(in srgb, var(--color-text-heading) 64%, white 36%);
+  font-family: "Space Grotesk", var(--font-family-heading);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-base);
 }
 
-.landing-card-copy {
+.landing-step p {
   margin: 0;
-  line-height: 1.56;
-  color: var(--color-text-muted);
-  font-size: 0.88rem;
-}
-
-.landing-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 10px;
-}
-
-.landing-list li {
-  padding: 10px;
-  border-radius: 10px;
-  border: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 80%, transparent);
-  background: color-mix(in srgb, var(--color-bg-surface-muted) 52%, transparent);
-}
-
-.landing-list h3 {
-  margin: 0;
-  font-size: 0.92rem;
-  color: color-mix(in srgb, var(--color-text-base) 82%, white 18%);
-}
-
-.landing-list p {
-  margin: 6px 0 0;
-  font-size: 0.83rem;
+  font-size: 0.9375rem;
   line-height: 1.5;
   color: var(--color-text-muted);
-}
-
-.landing-list-ordered li {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: start;
-  gap: 10px;
-}
-
-.landing-step-index {
-  min-width: 36px;
-  padding: 5px 7px;
-  text-align: center;
-  border-radius: 8px;
-  font-size: 0.74rem;
-  letter-spacing: 0.07em;
-  font-family: var(--font-family-mono);
-  color: color-mix(in srgb, var(--color-primary) 90%, black 10%);
-  border: var(--border-width) solid color-mix(in srgb, var(--color-primary) 42%, transparent);
-  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
-}
-
-.landing-card-highlight {
-  background: var(--color-bg-panel);
 }
 
 .landing-badges {
@@ -332,6 +284,15 @@
   min-width: 190px;
 }
 
+.selector-surface {
+  width: min(800px, 100%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding-top: 5vh;
+}
+
 .selector-header {
   display: flex;
   flex-wrap: wrap;
@@ -380,7 +341,7 @@
 
 .problem-card h3 {
   margin: 0;
-  color: var(--color-text-heading);
+  color: var(--color-text-base);
 }
 
 .problem-card button {
@@ -402,9 +363,25 @@
   padding: 2px 8px;
   border-radius: 999px;
   border: var(--border-width) solid var(--color-border-soft);
-  color: var(--color-text-heading);
-  background: var(--color-bg-surface-muted);
   font-weight: 700;
+}
+
+.difficulty-facil {
+  color: #34d399; /* emerald-400 */
+  background: rgba(52, 211, 153, 0.1);
+  border-color: rgba(52, 211, 153, 0.2);
+}
+
+.difficulty-media {
+  color: #fbbf24; /* amber-400 */
+  background: rgba(251, 191, 36, 0.1);
+  border-color: rgba(251, 191, 36, 0.2);
+}
+
+.difficulty-dificil {
+  color: #f87171; /* red-400 */
+  background: rgba(248, 113, 113, 0.1);
+  border-color: rgba(248, 113, 113, 0.2);
 }
 
 .problem-source-badge {

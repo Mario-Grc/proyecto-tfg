@@ -49,30 +49,35 @@ export default function ChatInput({ value, onChange, onSend, onInsertCode, disab
 
     return (
         <form className="chat-form" onSubmit={handleSubmit} autoComplete="off">
-            <textarea
-                ref={textareaRef}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Escribe tu mensaje..."
-                rows={1}
-                required
-            />
+            <div className="chat-input-wrapper">
+                <textarea
+                    ref={textareaRef}
+                    className="chat-textarea"
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Escribe tu mensaje..."
+                    rows={1}
+                    required
+                />
 
-            <div className="chat-form-actions">
-                <button
-                    type="button"
-                    className="insert-code-btn"
-                    onClick={onInsertCode}
-                    disabled={disabled}
-                    title="Alt+Shift+L"
-                >
-                    &lt;/&gt;
-                </button>
+                <div className="chat-form-actions">
+                    <div className="chat-form-actions-left">
+                        <button
+                            type="button"
+                            className="insert-code-btn"
+                            onClick={onInsertCode}
+                            disabled={disabled}
+                            title="Insertar codigo seleccionado en el chat (Alt+Shift+L)"
+                        >
+                            + Selección
+                        </button>
+                    </div>
 
-                <button type="submit" disabled={disabled}>
-                    Enviar
-                </button>
+                    <button type="submit" className="chat-btn-send" disabled={disabled || !value.trim()}>
+                        Enviar
+                    </button>
+                </div>
             </div>
         </form>
     );

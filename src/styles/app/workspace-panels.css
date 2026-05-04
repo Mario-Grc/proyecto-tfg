@@ -45,12 +45,15 @@
 
 /* CodeMirror container */
 .code-editor {
-  flex-grow: 1;
-  overflow: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   font-size: 0.9rem;
 }
 
 .code-editor .cm-editor {
+  flex: 1;
   height: 100%;
 }
 
@@ -170,6 +173,9 @@
   color: var(--color-text-base);
   min-height: 34px;
   padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-md);
+  cursor: pointer;
 }
 
 .chat-header-main {
@@ -201,6 +207,10 @@
   border-radius: var(--radius-md);
   background: var(--color-bg-surface-muted);
   color: var(--color-text-base);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .duck-collapse-btn {
@@ -289,6 +299,7 @@
 
 .problem-panel {
   height: 100%;
+  min-height: 0;
   display: grid;
   grid-template-rows: auto 1fr;
   gap: var(--space-3);
@@ -335,9 +346,12 @@
 .problem-textarea {
   width: 100%;
   height: 100%;
+  min-height: 0;
+  align-self: stretch;
+  max-height: none;
   resize: none;
-  background: var(--color-bg-panel);
-  border: var(--border-width) solid var(--color-border-soft);
+  background: color-mix(in srgb, var(--color-bg-panel) 80%, var(--color-bg-surface) 20%);
+  border: var(--border-width) dashed var(--color-border-soft);
   border-radius: var(--radius-md);
   color: var(--color-text-base);
   padding: var(--space-4);
@@ -348,6 +362,7 @@
 .problem-textarea:focus {
   outline: none;
   border-color: var(--color-tertiary);
+  background: var(--color-bg-panel);
 }
 
 .problem-markdown {
