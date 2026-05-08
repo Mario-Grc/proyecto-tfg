@@ -5,6 +5,7 @@ import type { Message } from "../types";
 
 interface SendPromptOptions {
     text: string;
+    editorCode?: string;
     selectedCode?: string;
 }
 
@@ -173,7 +174,8 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
         void loadSessionHistory(sessionId);
     }, [loadSessionHistory, sessionId]);
 
-    const sendPrompt = useCallback(async ({ text, selectedCode = "" }: SendPromptOptions): Promise<ChatSendResult> => {
+    const sendPrompt = useCallback(
+        async ({ text, editorCode = "", selectedCode = "" }: SendPromptOptions): Promise<ChatSendResult> => {
         const trimmedText = text.trim();
 
         if (!trimmedText || loading) {
@@ -185,6 +187,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
             return "error";
         }
 
+        const normalizedEditorCode = editorCode.trim();
         const normalizedCode = selectedCode.trim();
         const userContentForChat = buildContentForChat(trimmedText, normalizedCode);
 
@@ -240,6 +243,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
                 {
                     sessionId,
                     text: trimmedText,
+                    editorCode: normalizedEditorCode || undefined,
                     selectedCode: normalizedCode || undefined,
                 },
                 {

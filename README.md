@@ -78,7 +78,6 @@ Para ejecutar el proyecto en tu máquina, sigue estos pasos:
     *   Ve a la pestaña de "Local Server" (Servidor Local).
     *   Selecciona el modelo descargado en la parte superior de la pestaña.
     *   Inicia el servidor (Start Server). Por defecto suele correr en `http://localhost:1234`.
-    *   En server settings activa la opción `enable CORS`.
 
 5. Configurar el backend:
     Crea `backend/.env` a partir de `backend/.env.example`.

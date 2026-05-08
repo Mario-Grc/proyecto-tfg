@@ -156,6 +156,7 @@ function App() {
 
         const sendStatus = await sendPrompt({
             text,
+            editorCode: getEditorCode(),
             selectedCode: getSelectedCodeFromEditor(),
         });
 

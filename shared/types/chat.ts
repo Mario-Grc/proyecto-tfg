@@ -8,6 +8,7 @@ export interface LLMConversationMessage {
 export interface ChatRequest {
   sessionId: string;
   text: string;
+  editorCode?: string;
   selectedCode?: string;
 }
 

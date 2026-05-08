@@ -3,6 +3,7 @@ import { z } from "zod";
 export const chatRequestSchema = z.object({
   sessionId: z.string().min(1),
   text: z.string().trim().min(1),
+  editorCode: z.string().optional(),
   selectedCode: z.string().optional(),
 });
 

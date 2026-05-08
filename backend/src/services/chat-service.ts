@@ -35,6 +35,7 @@ type ConversationMessage =
 interface ChatRequestInput {
   sessionId: string;
   text: string;
+  editorCode?: string;
   selectedCode?: string;
 }
 
@@ -137,21 +138,33 @@ function buildSystemPrompt(problemTitle: string, problemStatement: string): stri
   ].join("\n\n");
 }
 
-function buildUserContentForModel(text: string, selectedCode?: string): string {
-  const normalizedCode = selectedCode?.trim() ?? "";
+function buildUserContentForModel(text: string, editorCode?: string, selectedCode?: string): string {
+  const normalizedEditorCode = editorCode?.trim() ?? "";
+  const normalizedSelectedCode = selectedCode?.trim() ?? "";
 
-  if (!normalizedCode) {
-    return text;
+  const sections = [text];
+
+  if (normalizedEditorCode) {
+    sections.push(
+      "",
+      "Este es el codigo completo del editor actual del usuario:",
+      "```javascript",
+      normalizedEditorCode,
+      "```"
+    );
   }
 
-  return [
-    text,
-    "",
-    "Contexto de codigo seleccionado automaticamente:",
-    "```javascript",
-    normalizedCode,
-    "```",
-  ].join("\n");
+  if (normalizedSelectedCode) {
+    sections.push(
+      "",
+      "El usuario ha seleccionado el siguiente fragmento, presta especial atencion a esta parte:",
+      "```javascript",
+      normalizedSelectedCode,
+      "```"
+    );
+  }
+
+  return sections.join("\n");
 }
 
 function normalizeErrorDetails(error: unknown): Record<string, unknown> {
@@ -467,7 +480,7 @@ export class ChatService {
       throw new HttpError(500, `Sesion ${session.id} referencia un problema inexistente`);
     }
 
-    const userContent = buildUserContentForModel(input.text, input.selectedCode);
+    const userContent = buildUserContentForModel(input.text, input.editorCode, input.selectedCode);
 
     this.messageRepository.create({
       sessionId: session.id,
