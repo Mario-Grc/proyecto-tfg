@@ -45,7 +45,7 @@
   font-weight: 600;
   color: var(--color-neutral);
   background: var(--color-primary);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .landing-title {
@@ -84,7 +84,7 @@
   font-size: 1rem;
   font-weight: 600;
   padding: 0.875rem 1.5rem;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.2s ease;
   border: none;
@@ -171,7 +171,7 @@
 .landing-snippet {
   margin: 0;
   padding: 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   border: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 74%, transparent);
   background: color-mix(in srgb, var(--color-bg-code-block) 86%, black 14%);
   color: var(--color-text-code);
@@ -203,7 +203,7 @@
   display: grid;
   gap: var(--space-5);
   padding: clamp(16px, 2.4vw, 24px);
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   border: var(--border-width) solid color-mix(in srgb, var(--color-border-soft) 86%, transparent);
   background: var(--color-bg-panel);
 }

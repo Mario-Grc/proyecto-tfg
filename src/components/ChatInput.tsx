@@ -6,12 +6,11 @@ interface ChatInputProps {
     value: string;
     onChange: (value: string) => void;
     onSend: (text: string) => void;
-    onInsertCode: () => void;
     disabled: boolean;
     textareaRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
-export default function ChatInput({ value, onChange, onSend, onInsertCode, disabled, textareaRef }: ChatInputProps) {
+export default function ChatInput({ value, onChange, onSend, disabled, textareaRef }: ChatInputProps) {
 
     // resize del textarea cuando cambia el contenido
     useEffect(() => {
@@ -63,15 +62,7 @@ export default function ChatInput({ value, onChange, onSend, onInsertCode, disab
 
                 <div className="chat-form-actions">
                     <div className="chat-form-actions-left">
-                        <button
-                            type="button"
-                            className="insert-code-btn"
-                            onClick={onInsertCode}
-                            disabled={disabled}
-                            title="Insertar codigo seleccionado en el chat (Alt+Shift+L)"
-                        >
-                            + Selección
-                        </button>
+                        {/* Se eliminó el botón de Insertar código porque ya se envía el código completo automáticamente */}
                     </div>
 
                     <button type="submit" className="chat-btn-send" disabled={disabled || !value.trim()}>

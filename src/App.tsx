@@ -170,45 +170,6 @@ function App() {
         }
     }
 
-    function insertCodeIntoPrompt() {
-        if (loading) {
-            return;
-        }
-
-        const code = editorViewRef.current?.state.doc.toString().trim();
-
-        if (!code) {
-            setStatus("El editor esta vacio.");
-            return;
-        }
-
-        const textarea = chatTextareaRef.current;
-        const current = inputText;
-
-        const selectionStart = textarea?.selectionStart ?? current.length;
-        const selectionEnd = textarea?.selectionEnd ?? current.length;
-
-        const before = current.slice(0, selectionStart);
-        const after = current.slice(selectionEnd);
-
-        const needsLeadingBreak = before.length > 0 && !before.endsWith("\n");
-        const needsTrailingBreak = after.length > 0 && !after.startsWith("\n");
-        const insertion = `${needsLeadingBreak ? "\n" : ""}${code}${needsTrailingBreak ? "\n" : ""}`;
-
-        const nextText = `${before}${insertion}${after}`;
-        const nextCursorPos = before.length + insertion.length;
-
-        setInputText(nextText);
-        setStatus("Código añadido al prompt.");
-
-        if (textarea) {
-            requestAnimationFrame(() => {
-                textarea.focus();
-                textarea.setSelectionRange(nextCursorPos, nextCursorPos);
-            });
-        }
-    }
-
     function handlePromptSend(text: string) {
         void handleSend(text);
         setInputText("");
@@ -216,10 +177,7 @@ function App() {
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.altKey && e.shiftKey && e.key.toLowerCase() === "l") {
-                e.preventDefault();
-                insertCodeIntoPrompt();
-            }
+            // Este event listener se mantiene pero ya no requiere atrapar la inserción de código.
         };
 
         window.addEventListener("keydown", onKeyDown);
@@ -382,7 +340,6 @@ function App() {
             onInputChange={setInputText}
             onPromptSend={handlePromptSend}
             onToggleDuckCompact={toggleCompact}
-            onInsertCode={insertCodeIntoPrompt}
             onRunJavaScript={handleRunJavaScript}
             onToggleTheme={toggleTheme}
             onClearConversation={handleClearConversation}

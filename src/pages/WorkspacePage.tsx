@@ -30,7 +30,6 @@ interface WorkspacePageProps {
     onInputChange: (value: string) => void;
     onPromptSend: (text: string) => void;
     onToggleDuckCompact: () => void;
-    onInsertCode: () => void;
     onRunJavaScript: () => void;
     onToggleTheme: () => void;
     onClearConversation: () => void;
@@ -66,7 +65,6 @@ export default function WorkspacePage({
     onInputChange,
     onPromptSend,
     onToggleDuckCompact,
-    onInsertCode,
     onRunJavaScript,
     onToggleTheme,
     onClearConversation,
@@ -125,7 +123,6 @@ export default function WorkspacePage({
                                     onSend={onPromptSend}
                                     disabled={loading}
                                     textareaRef={chatTextareaRef}
-                                    onInsertCode={onInsertCode}
                                 />
 
                                 <p className="status">{status}</p>
