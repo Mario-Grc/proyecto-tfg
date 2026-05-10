@@ -130,6 +130,13 @@ export async function createSession(problemId: string): Promise<SessionRecord> {
     });
 }
 
+export async function updateSessionCode(sessionId: string, editorCode: string | null): Promise<SessionRecord> {
+    return requestJson<SessionRecord>(`/sessions/${sessionId}/code`, {
+        method: "PATCH",
+        body: JSON.stringify({ editorCode }),
+    });
+}
+
 export async function fetchLatestSessionForProblem(problemId: string): Promise<SessionRecord | null> {
     return requestJson<SessionRecord | null>(`/sessions/latest/problem/${encodeURIComponent(problemId)}`, {
         method: "GET",

@@ -20,11 +20,18 @@ function getErrorMessage(error: unknown): string {
 }
 
 function buildContentForChat(trimmedText: string, selectedCode: string): string {
-    if (!selectedCode) {
-        return trimmedText;
+    return trimmedText;
+}
+
+function normalizeUserMessageForChat(text: string): string {
+    const codeContextMarker = "\n\nEste es el codigo completo del editor actual del usuario:";
+    const markerIndex = text.indexOf(codeContextMarker);
+
+    if (markerIndex === -1) {
+        return text;
     }
 
-    return `${trimmedText}\n\n(Se adjunto automaticamente tu seleccion de código al modelo.)`;
+    return text.slice(0, markerIndex).trimEnd();
 }
 
 function roleToChatType(role: MessageRole): Message["type"] | null {
@@ -54,7 +61,7 @@ function mapStoredMessagesToChat(messages: SessionMessageRecord[]): Message[] {
 
             return {
                 id: message.id,
-                text: normalizeMessageTextForChat(mappedType, message.content),
+                text: mappedType === "user" ? normalizeUserMessageForChat(message.content) : normalizeMessageTextForChat(mappedType, message.content),
                 type: mappedType,
             };
         })

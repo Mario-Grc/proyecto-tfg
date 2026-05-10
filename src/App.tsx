@@ -5,6 +5,7 @@ import {
     createProblem,
     createSession,
     fetchLatestSessionForProblem,
+    updateSessionCode,
     fetchProblems,
 } from "./services/backendApi";
 import LandingPage from "./pages/LandingPage";
@@ -71,6 +72,9 @@ function App() {
 
     const editorViewRef = useRef<EditorView | null>(null);
     const chatTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+    const [initialEditorCode, setInitialEditorCode] = useState<string | null>(null);
+    const [isSavingCode, setIsSavingCode] = useState(false);
+    const saveCodeTimeoutRef = useRef<number | null>(null);
 
     const selectedProblem = selectedProblemId
         ? problems.find((problem) => problem.id === selectedProblemId)
@@ -113,6 +117,35 @@ function App() {
     const handleEditorReady = useCallback((view: EditorView) => {
         editorViewRef.current = view;
     }, []);
+
+    const handleEditorChange = useCallback((code: string) => {
+        if (!activeSessionId) return;
+
+        if (saveCodeTimeoutRef.current !== null) {
+            clearTimeout(saveCodeTimeoutRef.current);
+        }
+
+        setIsSavingCode(true);
+
+        saveCodeTimeoutRef.current = window.setTimeout(() => {
+            updateSessionCode(activeSessionId, code)
+                .then(() => setIsSavingCode(false))
+                .catch((error) => {
+                    console.error("Failed to save code:", error);
+                    setIsSavingCode(false);
+                });
+        }, 2000);
+    }, [activeSessionId]);
+
+    useEffect(() => {
+        return () => {
+            if (saveCodeTimeoutRef.current !== null) {
+                clearTimeout(saveCodeTimeoutRef.current);
+                saveCodeTimeoutRef.current = null;
+                setIsSavingCode(false);
+            }
+        };
+    }, [activeSessionId]);
 
     useEffect(() => {
         document.documentElement.setAttribute("data-theme", themeMode);
@@ -175,18 +208,6 @@ function App() {
         setInputText("");
     }
 
-    useEffect(() => {
-        const onKeyDown = (e: KeyboardEvent) => {
-            // Este event listener se mantiene pero ya no requiere atrapar la inserción de código.
-        };
-
-        window.addEventListener("keydown", onKeyDown);
-
-        return () => {
-            window.removeEventListener("keydown", onKeyDown);
-        };
-    }, [inputText, loading]);
-
     async function handleClearConversation() {
         if (!selectedProblem) {
             setStatus("Selecciona un problema antes de reiniciar la conversación.");
@@ -227,6 +248,7 @@ function App() {
         setSelectedProblemId(problem.id);
         setActiveSessionId(session.id);
         setProblemText(problem.statement);
+        setInitialEditorCode(session.editorCode ?? null);
         resetConversation();
         setProblemVisible(true);
         setCurrentView("workspace");
@@ -234,10 +256,22 @@ function App() {
 
     async function handleSelectProblem(problem: ProblemRecord) {
         if (selectedProblemId === problem.id && activeSessionId) {
-            setProblemVisible(true);
-            setCurrentView("workspace");
-            setStatus(`Sesión reanudada: ${problem.title}`);
-            setNormal();
+            setThinking();
+            setStatus(`Reanudando sesión para ${problem.title}...`);
+            try {
+                const session = await fetchLatestSessionForProblem(problem.id);
+                if (session) {
+                    setInitialEditorCode(session.editorCode ?? null);
+                }
+                setProblemVisible(true);
+                setCurrentView("workspace");
+                setStatus(`Sesión reanudada: ${problem.title}`);
+                setNormal();
+            } catch (error) {
+                const message = getErrorMessage(error);
+                setStatus(`Error al reanudar: ${message}`);
+                setConfused();
+            }
             return;
         }
 
@@ -278,6 +312,28 @@ function App() {
         }
     }
 
+    async function handleContinueSession() {
+        if (!selectedProblemId || !activeSessionId) return;
+
+        setThinking();
+        setStatus("Reanudando sesión guardada...");
+        
+        try {
+            const session = await fetchLatestSessionForProblem(selectedProblemId);
+            if (session) {
+                setInitialEditorCode(session.editorCode ?? null);
+            }
+            setProblemVisible(true);
+            setCurrentView("workspace");
+            setStatus(`Sesión reanudada: ${selectedProblem?.title ?? ""}`);
+            setNormal();
+        } catch (error) {
+            const message = getErrorMessage(error);
+            setStatus(`Error al reanudar: ${message}`);
+            setConfused();
+        }
+    }
+
     const selectedProblemTitle = selectedProblem?.title ?? "Problema seleccionado";
     const canContinueSession = Boolean(selectedProblemId && activeSessionId);
 
@@ -286,7 +342,7 @@ function App() {
             <LandingPage
                 onStart={() => setCurrentView("selector")}
                 canContinue={canContinueSession}
-                onContinue={() => setCurrentView("workspace")}
+                onContinue={handleContinueSession}
             />
         );
     }
@@ -324,6 +380,7 @@ function App() {
             messages={messages}
             status={status}
             loading={loading}
+            isSavingCode={isSavingCode}
             duckState={duckState}
             duckCompact={duckCompact}
             runningCode={runningCode}
@@ -336,7 +393,9 @@ function App() {
             problemText={problemText}
             chatTextareaRef={chatTextareaRef}
             themeMode={themeMode}
+            initialEditorCode={initialEditorCode}
             onEditorReady={handleEditorReady}
+            onEditorChange={handleEditorChange}
             onInputChange={setInputText}
             onPromptSend={handlePromptSend}
             onToggleDuckCompact={toggleCompact}

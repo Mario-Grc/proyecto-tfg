@@ -1,0 +1,1 @@
+ALTER TABLE sessions ADD COLUMN editor_code TEXT;

@@ -15,6 +15,7 @@ import {
   latestSessionResponseSchema,
   sessionIdParamsSchema,
   sessionRecordSchema,
+  updateSessionCodeBodySchema,
 } from "../schemas/sessions";
 
 export const sessionsRouter = Router();
@@ -58,6 +59,24 @@ sessionsRouter.get("/:sessionId", (req, res) => {
 
   const responseBody = sessionRecordSchema.parse(session);
   res.json(responseBody);
+});
+
+sessionsRouter.patch("/:sessionId/code", (req, res) => {
+  const { sessionId } = parseRequest(sessionIdParamsSchema, req.params, "Parametro sessionId invalido");
+  const body = parseRequest(updateSessionCodeBodySchema, req.body, "Body code invalido");
+
+  const session = sessionRepository.findById(sessionId);
+  if (!session) {
+    throw new HttpError(404, `Sesion no encontrada: ${sessionId}`);
+  }
+
+  sessionRepository.updateCode(sessionId, body.editorCode);
+
+  const updatedSession = sessionRepository.findById(sessionId);
+  if (!updatedSession) {
+    throw new HttpError(500, `Error interno al recuperar la sesión actualizada: ${sessionId}`);
+  }
+  res.json(sessionRecordSchema.parse(updatedSession));
 });
 
 sessionsRouter.post("/:sessionId/messages", (req, res) => {

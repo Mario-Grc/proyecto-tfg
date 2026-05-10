@@ -43,6 +43,12 @@
   filter: brightness(1.1);
 }
 
+.save-status {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  padding: 0 var(--space-2);
+}
+
 /* CodeMirror container */
 .code-editor {
   flex: 1;
@@ -194,9 +200,6 @@
   justify-content: center;
   width: min(100%, 22rem);
   padding: var(--space-3) var(--space-2) var(--space-2);
-  border: var(--border-width) solid var(--color-border-soft);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-surface);
 }
 
 .duck-compact-btn {
@@ -218,6 +221,12 @@
   top: var(--space-2);
   right: var(--space-2);
   z-index: 2;
+  opacity: 0.3;
+  transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+.duck-widget:hover .duck-collapse-btn {
+  opacity: 1;
 }
 
 .duck-avatar {

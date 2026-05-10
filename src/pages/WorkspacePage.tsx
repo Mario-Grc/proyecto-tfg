@@ -14,6 +14,7 @@ interface WorkspacePageProps {
     messages: Message[];
     status: string;
     loading: boolean;
+    isSavingCode?: boolean;
     duckState: DuckState;
     duckCompact: boolean;
     runningCode: boolean;
@@ -26,7 +27,9 @@ interface WorkspacePageProps {
     problemText: string;
     chatTextareaRef: React.RefObject<HTMLTextAreaElement | null>;
     themeMode: ThemeMode;
+    initialEditorCode?: string | null;
     onEditorReady: (view: EditorView) => void;
+    onEditorChange: (code: string) => void;
     onInputChange: (value: string) => void;
     onPromptSend: (text: string) => void;
     onToggleDuckCompact: () => void;
@@ -49,6 +52,7 @@ export default function WorkspacePage({
     messages,
     status,
     loading,
+    isSavingCode,
     duckState,
     duckCompact,
     runningCode,
@@ -61,7 +65,9 @@ export default function WorkspacePage({
     problemText,
     chatTextareaRef,
     themeMode,
+    initialEditorCode,
     onEditorReady,
+    onEditorChange,
     onInputChange,
     onPromptSend,
     onToggleDuckCompact,
@@ -147,9 +153,16 @@ export default function WorkspacePage({
                             <button type="button" className="run-js-btn" onClick={onRunJavaScript} disabled={runningCode}>
                                 {runningCode ? "Ejecutando JS..." : "Ejecutar JS"}
                             </button>
+                            <span className="save-status">
+                                {isSavingCode ? "Guardando..." : "Guardado"}
+                            </span>
                         </div>
 
-                        <CodeEditor onEditorReady={onEditorReady} />
+                        <CodeEditor 
+                            initialCode={initialEditorCode} 
+                            onEditorReady={onEditorReady} 
+                            onChange={onEditorChange} 
+                        />
 
                         <section className="editor-output" aria-label="Salida de ejecucion JavaScript">
                             <div className="editor-output-head">

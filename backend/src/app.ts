@@ -4,10 +4,10 @@ import { config } from "./config";
 import { initializeDatabase } from "./db/init";
 import { errorHandler } from "./middleware/error-handler";
 import { notFoundHandler } from "./middleware/not-found";
-import { buildApiRouter } from "./routes";
 
 export function createApp() {
   initializeDatabase();
+  const { buildApiRouter } = require("./routes") as typeof import("./routes");
 
   const app = express();
 
