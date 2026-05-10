@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { EditorView } from "@codemirror/view";
 import ChatWindow from "../components/ChatWindow";
 import ChatInput from "../components/ChatInput";
 import CodeEditor from "../components/CodeEditor";
 import DuckAssistant from "../components/DuckAssistant";
+import NotesPanel from "../components/NotesPanel";
 import OptionsMenu from "../components/OptionsMenu";
 import ProblemPanel from "../components/ProblemPanel";
 import { DuckState, Message } from "../types";
@@ -11,6 +13,7 @@ type ThemeMode = "dark" | "light";
 
 interface WorkspacePageProps {
     selectedProblemTitle: string;
+    selectedProblemId: string | null;
     messages: Message[];
     status: string;
     loading: boolean;
@@ -40,7 +43,6 @@ interface WorkspacePageProps {
     onToggleProblem: () => void;
     onHideChat: () => void;
     onHideProblem: () => void;
-    onProblemTextChange: (value: string) => void;
     onChatResizeMouseDown: (e: React.MouseEvent) => void;
     onProblemResizeMouseDown: (e: React.MouseEvent) => void;
     onGoSelector: () => void;
@@ -49,6 +51,7 @@ interface WorkspacePageProps {
 
 export default function WorkspacePage({
     selectedProblemTitle,
+    selectedProblemId,
     messages,
     status,
     loading,
@@ -78,12 +81,13 @@ export default function WorkspacePage({
     onToggleProblem,
     onHideChat,
     onHideProblem,
-    onProblemTextChange,
     onChatResizeMouseDown,
     onProblemResizeMouseDown,
     onGoSelector,
     onGoHome,
 }: WorkspacePageProps) {
+    const [notesVisible, setNotesVisible] = useState(false);
+
     return (
         <div className="app-shell">
             <div className="workspace-frame">
@@ -158,10 +162,10 @@ export default function WorkspacePage({
                             </span>
                         </div>
 
-                        <CodeEditor 
-                            initialCode={initialEditorCode} 
-                            onEditorReady={onEditorReady} 
-                            onChange={onEditorChange} 
+                        <CodeEditor
+                            initialCode={initialEditorCode}
+                            onEditorReady={onEditorReady}
+                            onChange={onEditorChange}
                         />
 
                         <section className="editor-output" aria-label="Salida de ejecucion JavaScript">
@@ -181,12 +185,33 @@ export default function WorkspacePage({
                             />
 
                             <aside className="problem-side" style={{ width: problemWidth, flexShrink: 0 }}>
-                                <ProblemPanel
-                                    title={selectedProblemTitle}
-                                    value={problemText}
-                                    onChange={onProblemTextChange}
-                                    onHide={onHideProblem}
-                                />
+                                <div className="problem-split">
+                                    <div className="problem-split-top">
+                                        <ProblemPanel
+                                            title={selectedProblemTitle}
+                                            value={problemText}
+                                            onHide={onHideProblem}
+                                        />
+                                    </div>
+
+                                    {notesVisible && selectedProblemId ? (
+                                        <div className="problem-split-bottom">
+                                            <NotesPanel
+                                                key={selectedProblemId}
+                                                problemId={selectedProblemId}
+                                                onHide={() => setNotesVisible(false)}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            className="notes-show-btn"
+                                            onClick={() => setNotesVisible(true)}
+                                        >
+                                            + Mostrar notas
+                                        </button>
+                                    )}
+                                </div>
                             </aside>
                         </>
                     ) : (

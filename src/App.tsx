@@ -406,7 +406,7 @@ function App() {
             onToggleProblem={() => setProblemVisible((prev) => !prev)}
             onHideChat={() => setChatVisible(false)}
             onHideProblem={() => setProblemVisible(false)}
-            onProblemTextChange={setProblemText}
+            selectedProblemId={selectedProblemId}
             onChatResizeMouseDown={handleChatResizeMouseDown}
             onProblemResizeMouseDown={handleProblemResizeMouseDown}
             onGoSelector={() => setCurrentView("selector")}

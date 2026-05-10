@@ -301,9 +301,27 @@
    ============================ */
 .problem-side {
   min-height: 0;
-  padding: var(--space-5);
   border-left: var(--border-width) solid var(--color-border-soft);
   background: var(--color-bg-panel);
+}
+
+.problem-split {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.problem-split-top {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.problem-split-bottom {
+  flex: 0 0 40%;
+  min-height: 120px;
+  overflow: auto;
+  border-top: var(--border-width) solid var(--color-border-soft);
 }
 
 .problem-panel {
@@ -312,10 +330,70 @@
   display: grid;
   grid-template-rows: auto 1fr;
   gap: var(--space-3);
-  border: var(--border-width) solid var(--color-border-soft);
-  border-radius: var(--radius-md);
   background: var(--color-bg-surface);
   padding: var(--space-4);
+}
+
+.notes-panel {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: color-mix(in srgb, var(--color-bg-panel) 60%, var(--color-bg-surface) 40%);
+}
+
+.notes-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.notes-panel-title {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.notes-textarea {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  resize: none;
+  background: transparent;
+  border: var(--border-width) solid var(--color-border-soft);
+  border-radius: var(--radius-md);
+  color: var(--color-text-base);
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+}
+
+.notes-textarea:focus {
+  outline: none;
+  border-color: var(--color-tertiary);
+}
+
+.notes-show-btn {
+  flex-shrink: 0;
+  width: 100%;
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  border: none;
+  border-top: var(--border-width) solid var(--color-border-soft);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  text-align: center;
+}
+
+.notes-show-btn:hover {
+  color: var(--color-text-base);
+  background: var(--color-bg-surface-muted);
 }
 
 .problem-panel-title {
@@ -379,7 +457,6 @@
   height: 100%;
   overflow: auto;
   background: color-mix(in srgb, var(--color-bg-panel) 80%, var(--color-bg-surface) 20%);
-  border: var(--border-width) dashed var(--color-border-soft);
   border-radius: var(--radius-md);
   padding: var(--space-4);
   color: var(--color-text-base);
