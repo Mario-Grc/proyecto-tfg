@@ -1,5 +1,7 @@
 import type { MessageRole } from "./message";
 
+export type CodeLanguage = "javascript" | "python";
+
 export interface LLMConversationMessage {
   role: MessageRole;
   content: string;
@@ -10,6 +12,7 @@ export interface ChatRequest {
   text: string;
   editorCode?: string;
   selectedCode?: string;
+  language?: CodeLanguage;
 }
 
 export interface ChatUsage {

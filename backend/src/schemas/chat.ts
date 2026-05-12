@@ -5,6 +5,7 @@ export const chatRequestSchema = z.object({
   text: z.string().trim().min(1),
   editorCode: z.string().optional(),
   selectedCode: z.string().optional(),
+  language: z.enum(["javascript", "python"]).optional(),
 });
 
 export const chatUsageSchema = z.object({

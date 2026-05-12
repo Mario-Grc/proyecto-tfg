@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { EditorView } from "@codemirror/view";
-import type { CreateProblemInput, ProblemRecord } from "../shared/types";
+import type { CodeLanguage, CreateProblemInput, ProblemRecord } from "../shared/types";
 import {
     createProblem,
     createSession,
@@ -13,7 +13,7 @@ import CreateProblemPage from "./pages/CreateProblemPage";
 import ProblemSelectorPage from "./pages/ProblemSelectorPage";
 import WorkspacePage from "./pages/WorkspacePage";
 import useDuckState from "./hooks/useDuckState";
-import useJavaScriptRunner from "./hooks/useJavaScriptRunner";
+import useCodeRunner from "./hooks/useCodeRunner";
 import usePersistentState from "./hooks/usePersistentState";
 import useTutorChat from "./hooks/useTutorChat";
 import useWorkspacePanels from "./hooks/useWorkspacePanels";
@@ -58,7 +58,8 @@ function App() {
         setThinking,
         setConfused,
     } = useDuckState();
-    const { runningCode, runOutput, runCode } = useJavaScriptRunner();
+    const [language, setLanguage] = usePersistentState<CodeLanguage>("editor_language", "javascript");
+    const { runningCode, runOutput, runCode } = useCodeRunner(language);
     const {
         chatVisible,
         setChatVisible,
@@ -171,7 +172,7 @@ function App() {
         return editorViewRef.current?.state.doc.toString() ?? "";
     }
 
-    async function handleRunJavaScript() {
+    async function handleRunCode() {
         const runStatus = await runCode(getEditorCode());
 
         if (runStatus === "error") {
@@ -191,6 +192,7 @@ function App() {
             text,
             editorCode: getEditorCode(),
             selectedCode: getSelectedCodeFromEditor(),
+            language,
         });
 
         if (sendStatus === "error") {
@@ -398,8 +400,10 @@ function App() {
             onEditorChange={handleEditorChange}
             onInputChange={setInputText}
             onPromptSend={handlePromptSend}
+            language={language}
+            onLanguageChange={setLanguage}
             onToggleDuckCompact={toggleCompact}
-            onRunJavaScript={handleRunJavaScript}
+            onRunCode={handleRunCode}
             onToggleTheme={toggleTheme}
             onClearConversation={handleClearConversation}
             onToggleChat={() => setChatVisible((prev) => !prev)}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { EditorView } from "@codemirror/view";
+import type { CodeLanguage } from "../../shared/types";
 import ChatWindow from "../components/ChatWindow";
 import ChatInput from "../components/ChatInput";
 import CodeEditor from "../components/CodeEditor";
@@ -30,13 +31,15 @@ interface WorkspacePageProps {
     problemText: string;
     chatTextareaRef: React.RefObject<HTMLTextAreaElement | null>;
     themeMode: ThemeMode;
+    language: CodeLanguage;
     initialEditorCode?: string | null;
     onEditorReady: (view: EditorView) => void;
     onEditorChange: (code: string) => void;
     onInputChange: (value: string) => void;
     onPromptSend: (text: string) => void;
     onToggleDuckCompact: () => void;
-    onRunJavaScript: () => void;
+    onRunCode: () => void;
+    onLanguageChange: (lang: CodeLanguage) => void;
     onToggleTheme: () => void;
     onClearConversation: () => void;
     onToggleChat: () => void;
@@ -68,13 +71,15 @@ export default function WorkspacePage({
     problemText,
     chatTextareaRef,
     themeMode,
+    language,
     initialEditorCode,
     onEditorReady,
     onEditorChange,
     onInputChange,
     onPromptSend,
     onToggleDuckCompact,
-    onRunJavaScript,
+    onRunCode,
+    onLanguageChange,
     onToggleTheme,
     onClearConversation,
     onToggleChat,
@@ -87,6 +92,10 @@ export default function WorkspacePage({
     onGoHome,
 }: WorkspacePageProps) {
     const [notesVisible, setNotesVisible] = useState(false);
+
+    const runLabel = runningCode
+        ? `Ejecutando ${language === "python" ? "Python" : "JS"}...`
+        : `Ejecutar ${language === "python" ? "Python" : "JS"}`;
 
     return (
         <div className="app-shell">
@@ -154,21 +163,42 @@ export default function WorkspacePage({
 
                     <section className="editor-panel">
                         <div className="editor-runner-toolbar">
-                            <button type="button" className="run-js-btn" onClick={onRunJavaScript} disabled={runningCode}>
-                                {runningCode ? "Ejecutando JS..." : "Ejecutar JS"}
+                            <div className="language-toggle" role="group" aria-label="Lenguaje del editor">
+                                <button
+                                    type="button"
+                                    className={`language-toggle-btn${language === "javascript" ? " language-toggle-btn--active" : ""}`}
+                                    onClick={() => onLanguageChange("javascript")}
+                                    disabled={runningCode}
+                                >
+                                    JS
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`language-toggle-btn${language === "python" ? " language-toggle-btn--active" : ""}`}
+                                    onClick={() => onLanguageChange("python")}
+                                    disabled={runningCode}
+                                >
+                                    Python
+                                </button>
+                            </div>
+
+                            <button type="button" className="run-js-btn" onClick={onRunCode} disabled={runningCode}>
+                                {runLabel}
                             </button>
+
                             <span className="save-status">
                                 {isSavingCode ? "Guardando..." : "Guardado"}
                             </span>
                         </div>
 
                         <CodeEditor
+                            language={language}
                             initialCode={initialEditorCode}
                             onEditorReady={onEditorReady}
                             onChange={onEditorChange}
                         />
 
-                        <section className="editor-output" aria-label="Salida de ejecucion JavaScript">
+                        <section className="editor-output" aria-label="Salida de ejecucion de codigo">
                             <div className="editor-output-head">
                                 <p className="editor-output-title">Salida</p>
                             </div>

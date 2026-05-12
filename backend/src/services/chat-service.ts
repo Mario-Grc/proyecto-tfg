@@ -37,6 +37,7 @@ interface ChatRequestInput {
   text: string;
   editorCode?: string;
   selectedCode?: string;
+  language?: "javascript" | "python";
 }
 
 interface ChatUsage {
@@ -110,6 +111,7 @@ function buildToolInstructions(): string {
   const instructions = [
     "Herramientas disponibles:",
     "- ejecutar_codigo: usala cuando el usuario pida ejecutar, probar, depurar o validar codigo JavaScript.",
+    "- ejecutar_python: usala cuando el usuario pida ejecutar, probar, depurar o validar codigo Python.",
   ];
 
   if (config.enableMcpWebSearch) {
@@ -138,7 +140,12 @@ function buildSystemPrompt(problemTitle: string, problemStatement: string): stri
   ].join("\n\n");
 }
 
-function buildUserContentForModel(text: string, editorCode?: string, selectedCode?: string): string {
+function buildUserContentForModel(
+  text: string,
+  editorCode?: string,
+  selectedCode?: string,
+  language: "javascript" | "python" = "javascript",
+): string {
   const normalizedEditorCode = editorCode?.trim() ?? "";
   const normalizedSelectedCode = selectedCode?.trim() ?? "";
 
@@ -148,7 +155,7 @@ function buildUserContentForModel(text: string, editorCode?: string, selectedCod
     sections.push(
       "",
       "Este es el codigo completo del editor actual del usuario:",
-      "```javascript",
+      `\`\`\`${language}`,
       normalizedEditorCode,
       "```"
     );
@@ -158,7 +165,7 @@ function buildUserContentForModel(text: string, editorCode?: string, selectedCod
     sections.push(
       "",
       "El usuario ha seleccionado el siguiente fragmento, presta especial atencion a esta parte:",
-      "```javascript",
+      `\`\`\`${language}`,
       normalizedSelectedCode,
       "```"
     );
@@ -480,7 +487,7 @@ export class ChatService {
       throw new HttpError(500, `Sesion ${session.id} referencia un problema inexistente`);
     }
 
-    const userContent = buildUserContentForModel(input.text, input.editorCode, input.selectedCode);
+    const userContent = buildUserContentForModel(input.text, input.editorCode, input.selectedCode, input.language);
 
     this.messageRepository.create({
       sessionId: session.id,

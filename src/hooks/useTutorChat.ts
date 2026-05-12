@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { MessageRole, SessionMessageRecord } from "../../shared/types";
+import type { CodeLanguage, MessageRole, SessionMessageRecord } from "../../shared/types";
 import { fetchSessionMessages, sendChatRequest } from "../services/backendApi";
 import type { Message } from "../types";
 
@@ -7,6 +7,7 @@ interface SendPromptOptions {
     text: string;
     editorCode?: string;
     selectedCode?: string;
+    language?: CodeLanguage;
 }
 
 interface UseTutorChatOptions {
@@ -19,7 +20,7 @@ function getErrorMessage(error: unknown): string {
     return error instanceof Error ? error.message : "Error desconocido";
 }
 
-function buildContentForChat(trimmedText: string, selectedCode: string): string {
+function buildContentForChat(trimmedText: string, _selectedCode: string): string {
     return trimmedText;
 }
 
@@ -182,7 +183,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
     }, [loadSessionHistory, sessionId]);
 
     const sendPrompt = useCallback(
-        async ({ text, editorCode = "", selectedCode = "" }: SendPromptOptions): Promise<ChatSendResult> => {
+        async ({ text, editorCode = "", selectedCode = "", language }: SendPromptOptions): Promise<ChatSendResult> => {
         const trimmedText = text.trim();
 
         if (!trimmedText || loading) {
@@ -252,6 +253,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
                     text: trimmedText,
                     editorCode: normalizedEditorCode || undefined,
                     selectedCode: normalizedCode || undefined,
+                    language,
                 },
                 {
                     onDelta: (deltaText) => {

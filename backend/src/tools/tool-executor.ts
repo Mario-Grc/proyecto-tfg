@@ -1,8 +1,9 @@
 import { config } from "../config";
-import { runJavaScriptCode } from "./code-runner";
+import { runJavaScriptCode, runPythonCode, type SubprocessRunResult } from "./code-runner";
 import { TavilyMcpClient } from "./tavily-mcp-client";
 import {
   TOOL_NAME_EXECUTE_CODE,
+  TOOL_NAME_EXECUTE_PYTHON,
   TOOL_NAME_SEARCH_WEB,
 } from "./tool-registry";
 
@@ -34,9 +35,7 @@ function parseExecuteCodeArgs(rawArgs: unknown): ExecuteCodeArgs | null {
     return null;
   }
 
-  return {
-    code: args.code,
-  };
+  return { code: args.code };
 }
 
 function parseSearchWebArgs(rawArgs: unknown): SearchWebArgs | null {
@@ -45,12 +44,10 @@ function parseSearchWebArgs(rawArgs: unknown): SearchWebArgs | null {
     return null;
   }
 
-  return {
-    query: args.query,
-  };
+  return { query: args.query };
 }
 
-function buildExecuteCodeOutput(result: Awaited<ReturnType<typeof runJavaScriptCode>>): string {
+function buildSubprocessOutput(result: SubprocessRunResult, timeoutMs: number): string {
   const blocks: string[] = [];
 
   if (result.stdout.trim()) {
@@ -66,7 +63,7 @@ function buildExecuteCodeOutput(result: Awaited<ReturnType<typeof runJavaScriptC
   }
 
   if (result.timedOut) {
-    blocks.push(`timeout: se supero el limite de ${config.codeRunnerTimeoutMs}ms`);
+    blocks.push(`timeout: se supero el limite de ${timeoutMs}ms`);
   }
 
   if (result.outputTruncated) {
@@ -89,6 +86,10 @@ export class ToolExecutor {
   async execute(toolName: string, rawArgs: unknown): Promise<ToolExecutionOutcome> {
     if (toolName === TOOL_NAME_EXECUTE_CODE) {
       return this.executeCode(rawArgs);
+    }
+
+    if (toolName === TOOL_NAME_EXECUTE_PYTHON) {
+      return this.executePython(rawArgs);
     }
 
     if (toolName === TOOL_NAME_SEARCH_WEB) {
@@ -140,7 +141,49 @@ export class ToolExecutor {
     return {
       toolName: TOOL_NAME_EXECUTE_CODE,
       ok: isSuccess,
-      output: buildExecuteCodeOutput(runResult),
+      output: buildSubprocessOutput(runResult, config.codeRunnerTimeoutMs),
+    };
+  }
+
+  private async executePython(rawArgs: unknown): Promise<ToolExecutionOutcome> {
+    const parsedArgs = parseExecuteCodeArgs(rawArgs);
+
+    if (!parsedArgs) {
+      return {
+        toolName: TOOL_NAME_EXECUTE_PYTHON,
+        ok: false,
+        output: "Argumentos invalidos para ejecutar_python.",
+      };
+    }
+
+    const normalizedCode = parsedArgs.code.trim();
+
+    if (!normalizedCode) {
+      return {
+        toolName: TOOL_NAME_EXECUTE_PYTHON,
+        ok: false,
+        output: "No se recibio codigo para ejecutar.",
+      };
+    }
+
+    if (normalizedCode.length > config.codeRunnerMaxCodeChars) {
+      return {
+        toolName: TOOL_NAME_EXECUTE_PYTHON,
+        ok: false,
+        output: `El codigo supera el limite permitido (${config.codeRunnerMaxCodeChars} caracteres).`,
+      };
+    }
+
+    const runResult = await runPythonCode(normalizedCode, {
+      timeoutMs: config.codeRunnerTimeoutMs,
+    });
+
+    const isSuccess = !runResult.timedOut && !runResult.spawnError && runResult.exitCode === 0;
+
+    return {
+      toolName: TOOL_NAME_EXECUTE_PYTHON,
+      ok: isSuccess,
+      output: buildSubprocessOutput(runResult, config.codeRunnerTimeoutMs),
     };
   }
 

@@ -61,6 +61,7 @@ export const config = {
   tavilyMcpEndpoint: process.env.TAVILY_MCP_ENDPOINT ?? "https://mcp.tavily.com/mcp",
   tavilyMcpToolName: process.env.TAVILY_MCP_TOOL_NAME ?? "tavily-search",
   tavilyApiKey: parseOptionalString(process.env.TAVILY_API_KEY),
+  pythonBin: process.env.PYTHON_BIN ?? "python",
   dataDir: path.resolve(process.cwd(), process.env.DATA_DIR ?? "data"),
   dbFileName: process.env.DB_FILE_NAME ?? "quackcode.db",
 };
