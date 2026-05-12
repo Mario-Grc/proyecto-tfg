@@ -34,7 +34,7 @@ export default function ProblemSelectorPage({
                                 Volver
                             </button>
                             <button type="button" className="ghost-btn" onClick={onUploadProblem}>
-                                Subir problema
+                                Problema personalizado
                             </button>
                         </div>
                     </header>

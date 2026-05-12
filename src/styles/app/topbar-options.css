@@ -164,6 +164,13 @@
   border-color: var(--color-border-danger);
 }
 
+.options-item.danger.confirming {
+  background: var(--color-danger, #c0392b);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 600;
+}
+
 .options-field-label {
   font-size: var(--font-size-xs);
 }

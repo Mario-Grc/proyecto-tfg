@@ -17,7 +17,7 @@ export default function LandingPage({ onStart, canContinue, onContinue }: Landin
                     
                     <div className="landing-actions">
                         <button type="button" className="landing-btn-primary" onClick={onStart}>
-                            Comenzar un reto
+                            Comenzar
                         </button>
                         {canContinue && (
                             <button type="button" className="landing-btn-secondary" onClick={onContinue}>

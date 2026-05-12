@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import useConfirmAction from "../hooks/useConfirmAction";
 
 interface OptionsMenuProps {
     themeMode: "dark" | "light";
@@ -12,6 +13,7 @@ export default function OptionsMenu({
     onClearConversation,
 }: OptionsMenuProps) {
     const [open, setOpen] = useState(false);
+    const { pending: clearPending, trigger: triggerClear } = useConfirmAction(onClearConversation);
 
     useEffect(() => {
         if (!open) {
@@ -85,10 +87,10 @@ export default function OptionsMenu({
                                 <h3 className="options-section-title">Conversación</h3>
                                 <button
                                     type="button"
-                                    className="options-item danger"
-                                    onClick={onClearConversation}
+                                    className={`options-item danger${clearPending ? " confirming" : ""}`}
+                                    onClick={triggerClear}
                                 >
-                                    Borrar conversación
+                                    {clearPending ? "¿Seguro? Pulsa de nuevo para confirmar" : "Borrar conversación"}
                                 </button>
                             </section>
                         </div>

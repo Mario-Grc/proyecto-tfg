@@ -97,5 +97,5 @@ export function runJavaScriptCode(code: string, options: RunCodeOptions): Promis
 }
 
 export function runPythonCode(code: string, options: RunCodeOptions): Promise<SubprocessRunResult> {
-  return runSubprocess(config.pythonBin, ["-c", code], options);
+  return runSubprocess(config.pythonBin, ["-X", "utf8", "-c", code], options);
 }

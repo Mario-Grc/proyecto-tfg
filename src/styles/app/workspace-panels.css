@@ -57,6 +57,13 @@
   font-weight: 600;
 }
 
+.language-toggle-btn--confirming,
+.language-toggle-btn--confirming:hover:not(:disabled) {
+  background: var(--color-danger, #c0392b);
+  color: #fff;
+  font-weight: 600;
+}
+
 .language-toggle-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
