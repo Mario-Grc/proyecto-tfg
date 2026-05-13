@@ -1,4 +1,5 @@
 import type { ProblemRecord } from "../../shared/types";
+import useConfirmAction from "../hooks/useConfirmAction";
 
 interface ProblemSelectorPageProps {
     problems: ProblemRecord[];
@@ -8,6 +9,26 @@ interface ProblemSelectorPageProps {
     onBack: () => void;
     onUploadProblem: () => void;
     onSelect: (problem: ProblemRecord) => void;
+    onEdit: (problem: ProblemRecord) => void;
+    onDelete: (problem: ProblemRecord) => void;
+}
+
+interface ProblemCardDeleteBtnProps {
+    onDelete: () => void;
+}
+
+function ProblemCardDeleteBtn({ onDelete }: ProblemCardDeleteBtnProps) {
+    const { pending, trigger } = useConfirmAction(onDelete);
+
+    return (
+        <button
+            type="button"
+            className={`problem-card-delete-btn${pending ? " confirming" : ""}`}
+            onClick={trigger}
+        >
+            {pending ? "¿Eliminar?" : "Eliminar"}
+        </button>
+    );
 }
 
 export default function ProblemSelectorPage({
@@ -18,6 +39,8 @@ export default function ProblemSelectorPage({
     onBack,
     onUploadProblem,
     onSelect,
+    onEdit,
+    onDelete,
 }: ProblemSelectorPageProps) {
     return (
         <div className="app-shell">
@@ -70,9 +93,23 @@ export default function ProblemSelectorPage({
                                         <span>{problem.topic}</span>
                                     </div>
                                 </div>
-                                <button type="button" onClick={() => onSelect(problem)}>
-                                    Seleccionar
-                                </button>
+                                <div className="problem-card-actions">
+                                    {problem.source === "user" && (
+                                        <>
+                                            <button
+                                                type="button"
+                                                className="problem-card-edit-btn"
+                                                onClick={() => onEdit(problem)}
+                                            >
+                                                Editar
+                                            </button>
+                                            <ProblemCardDeleteBtn onDelete={() => onDelete(problem)} />
+                                        </>
+                                    )}
+                                    <button type="button" onClick={() => onSelect(problem)}>
+                                        Seleccionar
+                                    </button>
+                                </div>
                             </article>
                         ))}
                     </div>

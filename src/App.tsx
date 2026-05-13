@@ -3,6 +3,8 @@ import { EditorView } from "@codemirror/view";
 import type { CodeLanguage, CreateProblemInput, ProblemRecord } from "../shared/types";
 import {
     createProblem,
+    updateProblem,
+    deleteProblem,
     createSession,
     fetchLatestSessionForProblem,
     updateSessionCode,
@@ -20,7 +22,7 @@ import useWorkspacePanels from "./hooks/useWorkspacePanels";
 import "./App.css";
 
 type ThemeMode = "dark" | "light";
-type AppView = "landing" | "selector" | "create-problem" | "workspace";
+type AppView = "landing" | "selector" | "create-problem" | "edit-problem" | "workspace";
 
 function getErrorMessage(error: unknown): string {
     return error instanceof Error ? error.message : "Error desconocido";
@@ -33,6 +35,7 @@ function App() {
     const [activeSessionId, setActiveSessionId] = usePersistentState<string | null>("active_session_id", null);
     const [currentView, setCurrentView] = useState<AppView>("landing");
     const [problems, setProblems] = useState<ProblemRecord[]>([]);
+    const [editingProblem, setEditingProblem] = useState<ProblemRecord | null>(null);
     const [problemsLoading, setProblemsLoading] = useState(false);
     const [problemsError, setProblemsError] = useState<string | null>(null);
 
@@ -291,26 +294,72 @@ function App() {
         }
     }
 
-    async function handleCreateProblem(input: CreateProblemInput) {
-        setThinking();
-        setStatus("Creando problema personalizado...");
+    async function handleSubmitProblem(input: CreateProblemInput) {
+        if (editingProblem) {
+            setStatus("Guardando cambios...");
 
+            try {
+                const updated = await updateProblem(editingProblem.id, input);
+                setProblems((previous) =>
+                    previous.map((p) => (p.id === updated.id ? updated : p)),
+                );
+
+                if (selectedProblemId === updated.id) {
+                    setProblemText(updated.statement);
+                }
+
+                setEditingProblem(null);
+                setCurrentView("selector");
+                setStatus(`Problema actualizado: ${updated.title}`);
+            } catch (error) {
+                const message = getErrorMessage(error);
+                setStatus(`No se pudo guardar: ${message}`);
+                throw new Error(message);
+            }
+        } else {
+            setStatus("Creando problema personalizado...");
+
+            try {
+                const createdProblem = await createProblem(input);
+                setProblems((previous) => [
+                    createdProblem,
+                    ...previous.filter((problem) => problem.id !== createdProblem.id),
+                ]);
+
+                setStatus(`Problema creado: ${createdProblem.title}. Creando sesión...`);
+                await activateProblem(createdProblem, { allowResumeLatest: false });
+                setStatus(`Problema cargado: ${createdProblem.title}`);
+            } catch (error) {
+                const message = getErrorMessage(error);
+                setStatus(`No se pudo crear el problema: ${message}`);
+                throw new Error(message);
+            }
+        }
+    }
+
+    function handleEditProblem(problem: ProblemRecord) {
+        setEditingProblem(problem);
+        setCurrentView("edit-problem");
+    }
+
+    async function handleDeleteProblem(problem: ProblemRecord) {
         try {
-            const createdProblem = await createProblem(input);
-            setProblems((previous) => [
-                createdProblem,
-                ...previous.filter((problem) => problem.id !== createdProblem.id),
-            ]);
+            await deleteProblem(problem.id);
+            setProblems((previous) => previous.filter((p) => p.id !== problem.id));
+            localStorage.removeItem(`notes_${problem.id}`);
 
-            setStatus(`Problema creado: ${createdProblem.title}. Creando sesión...`);
-            await activateProblem(createdProblem, { allowResumeLatest: false });
-            setStatus(`Problema cargado: ${createdProblem.title}`);
-            setNormal();
+            if (selectedProblemId === problem.id) {
+                setSelectedProblemId(null);
+                setActiveSessionId(null);
+                setProblemText("");
+                setInitialEditorCode(null);
+                resetConversation();
+            }
+
+            setStatus("Problema eliminado.");
         } catch (error) {
             const message = getErrorMessage(error);
-            setStatus(`No se pudo crear el problema: ${message}`);
-            setConfused();
-            throw new Error(message);
+            setStatus(`No se pudo eliminar: ${message}`);
         }
     }
 
@@ -363,6 +412,10 @@ function App() {
                 onSelect={(problem) => {
                     void handleSelectProblem(problem);
                 }}
+                onEdit={handleEditProblem}
+                onDelete={(problem) => {
+                    void handleDeleteProblem(problem);
+                }}
             />
         );
     }
@@ -371,7 +424,20 @@ function App() {
         return (
             <CreateProblemPage
                 onBack={() => setCurrentView("selector")}
-                onCreate={handleCreateProblem}
+                onSubmit={handleSubmitProblem}
+            />
+        );
+    }
+
+    if (currentView === "edit-problem" && editingProblem) {
+        return (
+            <CreateProblemPage
+                onBack={() => {
+                    setEditingProblem(null);
+                    setCurrentView("selector");
+                }}
+                onSubmit={handleSubmitProblem}
+                editingProblem={editingProblem}
             />
         );
     }

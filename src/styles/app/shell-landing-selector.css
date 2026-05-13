@@ -344,9 +344,35 @@
   color: var(--color-text-base);
 }
 
-.problem-card button {
-  margin-top: 0;
+.problem-card-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.problem-card-actions > button:last-child {
   min-width: 132px;
+}
+
+.problem-card-edit-btn {
+  background: var(--color-bg-surface-muted);
+  border-color: var(--color-border-soft);
+  color: var(--color-text-base);
+}
+
+.problem-card-delete-btn {
+  background: transparent;
+  color: var(--color-text-danger);
+  border-color: var(--color-border-danger);
+}
+
+.problem-card-delete-btn.confirming,
+.problem-card-delete-btn.confirming:hover {
+  background: var(--color-danger, #c0392b);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 600;
 }
 
 .problem-meta {
@@ -431,8 +457,13 @@
     grid-template-columns: 1fr;
   }
 
-  .problem-card button {
-    width: 100%;
+  .problem-card-actions {
+    flex-wrap: wrap;
+  }
+
+  .problem-card-actions > button {
+    flex: 1;
+    min-width: 0;
   }
 
   .create-problem-grid {

@@ -8,6 +8,8 @@ export interface CreateProblemInput {
   statement: string;
 }
 
+export type UpdateProblemInput = CreateProblemInput;
+
 export interface ProblemRecord {
   id: string;
   title: string;

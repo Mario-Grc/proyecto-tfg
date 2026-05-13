@@ -7,6 +7,7 @@ import type {
     ProblemRecord,
     SessionMessageRecord,
     SessionRecord,
+    UpdateProblemInput,
 } from "../../shared/types";
 
 const DEFAULT_API_BASE = "http://localhost:3001/api";
@@ -121,6 +122,25 @@ export async function createProblem(payload: CreateProblemInput): Promise<Proble
         method: "POST",
         body: JSON.stringify(payload),
     });
+}
+
+export async function updateProblem(problemId: string, payload: UpdateProblemInput): Promise<ProblemRecord> {
+    return requestJson<ProblemRecord>(`/problems/${encodeURIComponent(problemId)}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+    });
+}
+
+export async function deleteProblem(problemId: string): Promise<void> {
+    const response = await fetch(buildApiUrl(`/problems/${encodeURIComponent(problemId)}`), {
+        method: "DELETE",
+        headers: { Accept: "application/json" },
+    });
+
+    if (!response.ok) {
+        const body = await parseBody(response);
+        throw new Error(extractErrorMessage(response.status, body));
+    }
 }
 
 export async function createSession(problemId: string): Promise<SessionRecord> {

@@ -100,6 +100,27 @@ export class ProblemRepository {
     return saved;
   }
 
+  updateById(
+    problemId: string,
+    input: Pick<ProblemEntity, "title" | "difficulty" | "topic" | "statement">,
+  ): ProblemEntity | null {
+    this.db.prepare(`
+      UPDATE problems
+      SET title = @title, difficulty = @difficulty, topic = @topic,
+          statement = @statement, updated_at = CURRENT_TIMESTAMP
+      WHERE id = @id
+    `).run({ id: problemId, ...input });
+
+    return this.findById(problemId);
+  }
+
+  deleteById(problemId: string): void {
+    this.db.transaction(() => {
+      this.db.prepare("DELETE FROM sessions WHERE problem_id = ?").run(problemId);
+      this.db.prepare("DELETE FROM problems WHERE id = ?").run(problemId);
+    })();
+  }
+
   createUser(input: Pick<ProblemEntity, "title" | "difficulty" | "topic" | "statement">): ProblemEntity {
     const id = createId();
     this.buildInsertUserStmt().run({

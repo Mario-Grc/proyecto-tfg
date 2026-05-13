@@ -25,4 +25,6 @@ export const createProblemBodySchema = z.object({
   statement: z.string().min(1),
 });
 
+export const updateProblemBodySchema = createProblemBodySchema;
+
 export const problemListResponseSchema = z.array(problemRecordSchema);

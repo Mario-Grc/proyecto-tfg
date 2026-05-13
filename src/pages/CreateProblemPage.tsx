@@ -1,9 +1,10 @@
 import { useState } from "react";
-import type { CreateProblemInput, ProblemDifficulty } from "../../shared/types";
+import type { CreateProblemInput, ProblemDifficulty, ProblemRecord } from "../../shared/types";
 
 interface CreateProblemPageProps {
     onBack: () => void;
-    onCreate: (input: CreateProblemInput) => Promise<void>;
+    onSubmit: (input: CreateProblemInput) => Promise<void>;
+    editingProblem?: ProblemRecord;
 }
 
 const DIFFICULTY_OPTIONS: ProblemDifficulty[] = ["Facil", "Media", "Dificil"];
@@ -12,15 +13,17 @@ function getErrorMessage(error: unknown): string {
     return error instanceof Error ? error.message : "Error desconocido";
 }
 
-export default function CreateProblemPage({ onBack, onCreate }: CreateProblemPageProps) {
-    const [title, setTitle] = useState("");
-    const [difficulty, setDifficulty] = useState<ProblemDifficulty>("Media");
-    const [topic, setTopic] = useState("");
-    const [statement, setStatement] = useState("");
+export default function CreateProblemPage({ onBack, onSubmit, editingProblem }: CreateProblemPageProps) {
+    const isEditing = editingProblem !== undefined;
+
+    const [title, setTitle] = useState(editingProblem?.title ?? "");
+    const [difficulty, setDifficulty] = useState<ProblemDifficulty>(editingProblem?.difficulty ?? "Media");
+    const [topic, setTopic] = useState(editingProblem?.topic ?? "");
+    const [statement, setStatement] = useState(editingProblem?.statement ?? "");
     const [submitting, setSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: { preventDefault(): void }) {
         event.preventDefault();
 
         if (submitting) {
@@ -35,7 +38,7 @@ export default function CreateProblemPage({ onBack, onCreate }: CreateProblemPag
         };
 
         if (!payload.title || !payload.topic || !payload.statement) {
-            setErrorMessage("Completa título, tema y enunciado antes de crear el problema.");
+            setErrorMessage("Completa título, tema y enunciado antes de continuar.");
             return;
         }
 
@@ -43,7 +46,7 @@ export default function CreateProblemPage({ onBack, onCreate }: CreateProblemPag
         setSubmitting(true);
 
         try {
-            await onCreate(payload);
+            await onSubmit(payload);
         } catch (error) {
             setErrorMessage(getErrorMessage(error));
         } finally {
@@ -57,8 +60,8 @@ export default function CreateProblemPage({ onBack, onCreate }: CreateProblemPag
                 <div className="create-problem-surface">
                     <header className="selector-header">
                         <div>
-                            <p className="landing-kicker">Subir problema</p>
-                            <h2>Crea tu propio reto</h2>
+                            <p className="landing-kicker">{isEditing ? "Editar problema" : "Subir problema"}</p>
+                            <h2>{isEditing ? "Modifica tu reto" : "Crea tu propio reto"}</h2>
                         </div>
 
                         <div className="selector-actions">
@@ -129,7 +132,10 @@ export default function CreateProblemPage({ onBack, onCreate }: CreateProblemPag
 
                         <div className="create-problem-actions">
                             <button type="submit" disabled={submitting}>
-                                {submitting ? "Creando problema..." : "Crear problema"}
+                                {submitting
+                                    ? isEditing ? "Guardando cambios..." : "Creando problema..."
+                                    : isEditing ? "Guardar cambios" : "Crear problema"
+                                }
                             </button>
                         </div>
                     </form>
