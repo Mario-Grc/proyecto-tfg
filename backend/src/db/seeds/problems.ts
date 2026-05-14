@@ -9,6 +9,8 @@ interface ProblemSeed {
   topic: string;
   statement: string;
   source: "seed";
+  function_name: string;
+  test_cases: string;
 }
 
 const PROBLEM_SEED: ProblemSeed[] = [
@@ -18,6 +20,12 @@ const PROBLEM_SEED: ProblemSeed[] = [
     difficulty: "Facil",
     topic: "Arrays",
     source: "seed",
+    function_name: "twoSum",
+    test_cases: JSON.stringify([
+      { input: [[2, 7, 11, 15], 9], expected: [0, 1] },
+      { input: [[3, 2, 4], 6], expected: [1, 2] },
+      { input: [[3, 3], 6], expected: [0, 1] },
+    ]),
     statement:
       "## Objetivo\n" +
       "Dado un array de enteros `nums` y un entero `target`, devuelve los indices de dos numeros tales que su suma sea `target`.\n\n" +
@@ -36,6 +44,14 @@ const PROBLEM_SEED: ProblemSeed[] = [
     difficulty: "Facil",
     topic: "Stack",
     source: "seed",
+    function_name: "isValid",
+    test_cases: JSON.stringify([
+      { input: ["()"], expected: true },
+      { input: ["()[]{}"], expected: true },
+      { input: ["(]"], expected: false },
+      { input: ["([)]"], expected: false },
+      { input: ["{[]}"], expected: true },
+    ]),
     statement:
       "## Objetivo\n" +
       "Dada una cadena `s` con caracteres `()[]{}`, determina si es valida.\n\n" +
@@ -57,6 +73,13 @@ const PROBLEM_SEED: ProblemSeed[] = [
     difficulty: "Media",
     topic: "Sliding Window",
     source: "seed",
+    function_name: "lengthOfLongestSubstring",
+    test_cases: JSON.stringify([
+      { input: ["abcabcbb"], expected: 3 },
+      { input: ["bbbbb"], expected: 1 },
+      { input: ["pwwkew"], expected: 3 },
+      { input: [""], expected: 0 },
+    ]),
     statement:
       "## Objetivo\n" +
       "Dada una cadena `s`, encuentra la longitud de la subcadena mas larga sin caracteres repetidos.\n\n" +
@@ -74,6 +97,12 @@ const PROBLEM_SEED: ProblemSeed[] = [
     difficulty: "Media",
     topic: "Sorting",
     source: "seed",
+    function_name: "mergeIntervals",
+    test_cases: JSON.stringify([
+      { input: [[[1, 3], [2, 6], [8, 10], [15, 18]]], expected: [[1, 6], [8, 10], [15, 18]] },
+      { input: [[[1, 4], [4, 5]]], expected: [[1, 5]] },
+      { input: [[[1, 4], [2, 3]]], expected: [[1, 4]] },
+    ]),
     statement:
       "## Objetivo\n" +
       "Dado un conjunto de intervalos `[start, end]`, combina todos los intervalos solapados y devuelve una lista final de intervalos no solapados.\n\n" +
@@ -88,14 +117,20 @@ const PROBLEM_SEED: ProblemSeed[] = [
 
 export function seedProblems(db: Database.Database): number {
   const upsertStatement = db.prepare(`
-    INSERT INTO problems (id, title, difficulty, topic, statement, source, created_at, updated_at)
-    VALUES (@id, @title, @difficulty, @topic, @statement, @source, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    INSERT INTO problems (id, title, difficulty, topic, statement, source,
+                          function_name, test_cases,
+                          created_at, updated_at)
+    VALUES (@id, @title, @difficulty, @topic, @statement, @source,
+            @function_name, @test_cases,
+            CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     ON CONFLICT(id) DO UPDATE SET
       title = excluded.title,
       difficulty = excluded.difficulty,
       topic = excluded.topic,
       statement = excluded.statement,
       source = excluded.source,
+      function_name = excluded.function_name,
+      test_cases = excluded.test_cases,
       updated_at = CURRENT_TIMESTAMP
   `);
 

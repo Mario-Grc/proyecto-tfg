@@ -3,6 +3,7 @@ import type {
     ChatRequest,
     ChatResponse,
     ChatStreamEvent,
+    CheckResult,
     CreateProblemInput,
     ProblemRecord,
     SessionMessageRecord,
@@ -128,6 +129,17 @@ export async function updateProblem(problemId: string, payload: UpdateProblemInp
     return requestJson<ProblemRecord>(`/problems/${encodeURIComponent(problemId)}`, {
         method: "PATCH",
         body: JSON.stringify(payload),
+    });
+}
+
+export async function checkSolution(
+    problemId: string,
+    code: string,
+    language: "javascript" | "python",
+): Promise<CheckResult> {
+    return requestJson<CheckResult>(`/problems/${encodeURIComponent(problemId)}/check`, {
+        method: "POST",
+        body: JSON.stringify({ code, language }),
     });
 }
 

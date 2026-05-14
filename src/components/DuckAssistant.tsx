@@ -2,6 +2,8 @@ import { DuckState } from "../types";
 import duckConfused from "../assets/pato/pato-extrañado.png";
 import duckNormal from "../assets/pato/pato-normal.png";
 import duckThinking from "../assets/pato/pato-pensando.png";
+// victory image falls back to normal until pato-victoria.png is provided
+const duckVictory = duckNormal;
 
 interface DuckAssistantProps {
     state: DuckState;
@@ -24,6 +26,11 @@ const DUCK_VISUAL_BY_STATE: Record<DuckState, { image: string; label: string; al
         image: duckConfused,
         label: "Extraniado",
         alt: "Pato extranado",
+    },
+    victory: {
+        image: duckVictory,
+        label: "Victoria",
+        alt: "Pato celebrando victoria",
     },
 };
 

@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { EditorView } from "@codemirror/view";
-import type { CodeLanguage } from "../../shared/types";
+import type { CheckResult, CodeLanguage } from "../../shared/types";
 import ChatWindow from "../components/ChatWindow";
 import ChatInput from "../components/ChatInput";
+import CheckResultPanel from "../components/CheckResultPanel";
 import CodeEditor from "../components/CodeEditor";
 import DuckAssistant from "../components/DuckAssistant";
 import NotesPanel from "../components/NotesPanel";
@@ -23,6 +24,9 @@ interface WorkspacePageProps {
     duckCompact: boolean;
     runningCode: boolean;
     runOutput: string;
+    checking: boolean;
+    checkResult: CheckResult | null;
+    canCheck: boolean;
     inputText: string;
     chatVisible: boolean;
     problemVisible: boolean;
@@ -39,6 +43,7 @@ interface WorkspacePageProps {
     onPromptSend: (text: string) => void;
     onToggleDuckCompact: () => void;
     onRunCode: () => void;
+    onCheckSolution: () => void;
     onLanguageChange: (lang: CodeLanguage) => void;
     onToggleTheme: () => void;
     onClearConversation: () => void;
@@ -63,6 +68,9 @@ export default function WorkspacePage({
     duckCompact,
     runningCode,
     runOutput,
+    checking,
+    checkResult,
+    canCheck,
     inputText,
     chatVisible,
     problemVisible,
@@ -79,6 +87,7 @@ export default function WorkspacePage({
     onPromptSend,
     onToggleDuckCompact,
     onRunCode,
+    onCheckSolution,
     onLanguageChange,
     onToggleTheme,
     onClearConversation,
@@ -93,6 +102,7 @@ export default function WorkspacePage({
 }: WorkspacePageProps) {
     const [notesVisible, setNotesVisible] = useState(false);
     const [pendingLanguage, setPendingLanguage] = useState<CodeLanguage | null>(null);
+    const [outputTab, setOutputTab] = useState<"run" | "check">("run");
     const pendingTimeoutRef = useRef<number | null>(null);
 
     const clearPendingLanguage = useCallback(() => {
@@ -119,9 +129,10 @@ export default function WorkspacePage({
         pendingTimeoutRef.current = window.setTimeout(clearPendingLanguage, 3000);
     }
 
-    const runLabel = runningCode
-        ? `Ejecutando ${language === "python" ? "Python" : "JS"}...`
-        : `Ejecutar ${language === "python" ? "Python" : "JS"}`;
+    function handleCheckClick() {
+        setOutputTab("check");
+        onCheckSolution();
+    }
 
     return (
         <div className="app-shell">
@@ -194,7 +205,7 @@ export default function WorkspacePage({
                                     type="button"
                                     className={`language-toggle-btn${language === "javascript" ? " language-toggle-btn--active" : ""}${pendingLanguage === "javascript" ? " language-toggle-btn--confirming" : ""}`}
                                     onClick={() => handleLanguageClick("javascript")}
-                                    disabled={runningCode}
+                                    disabled={runningCode || checking}
                                 >
                                     {pendingLanguage === "javascript" ? "¿Cambiar?" : "JS"}
                                 </button>
@@ -202,15 +213,32 @@ export default function WorkspacePage({
                                     type="button"
                                     className={`language-toggle-btn${language === "python" ? " language-toggle-btn--active" : ""}${pendingLanguage === "python" ? " language-toggle-btn--confirming" : ""}`}
                                     onClick={() => handleLanguageClick("python")}
-                                    disabled={runningCode}
+                                    disabled={runningCode || checking}
                                 >
                                     {pendingLanguage === "python" ? "¿Cambiar?" : "Python"}
                                 </button>
                             </div>
 
-                            <button type="button" className="run-js-btn" onClick={onRunCode} disabled={runningCode}>
-                                {runLabel}
-                            </button>
+                            <div className="run-test-group" role="group" aria-label="Ejecutar y comprobar">
+                                <button
+                                    type="button"
+                                    className="run-test-btn run-test-btn--run"
+                                    onClick={onRunCode}
+                                    disabled={runningCode || checking}
+                                    title="Ejecutar código"
+                                >
+                                    {runningCode ? "Ejecutando..." : "Ejecutar"}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="run-test-btn run-test-btn--test"
+                                    onClick={handleCheckClick}
+                                    disabled={!canCheck || checking || runningCode}
+                                    title={canCheck ? "Comprobar solución contra los tests" : "Este problema no tiene tests configurados"}
+                                >
+                                    {checking ? "Comprobando..." : "Test"}
+                                </button>
+                            </div>
 
                             <span className="save-status">
                                 {isSavingCode ? "Guardando..." : "Guardado"}
@@ -225,10 +253,30 @@ export default function WorkspacePage({
                         />
 
                         <section className="editor-output" aria-label="Salida de ejecucion de codigo">
-                            <div className="editor-output-head">
-                                <p className="editor-output-title">Salida</p>
+                            <div className="editor-output-tabs">
+                                <button
+                                    type="button"
+                                    className={`editor-output-tab${outputTab === "run" ? " editor-output-tab--active" : ""}`}
+                                    onClick={() => setOutputTab("run")}
+                                >
+                                    Salida
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`editor-output-tab${outputTab === "check" ? " editor-output-tab--active" : ""}`}
+                                    onClick={() => setOutputTab("check")}
+                                >
+                                    Comprobación
+                                </button>
                             </div>
-                            <pre className="editor-output-content">{runOutput}</pre>
+
+                            {outputTab === "run" ? (
+                                <pre className="editor-output-content">{runOutput}</pre>
+                            ) : (
+                                <div className="editor-output-content editor-output-content--check">
+                                    <CheckResultPanel checking={checking} result={checkResult} />
+                                </div>
+                            )}
                         </section>
                     </section>
 

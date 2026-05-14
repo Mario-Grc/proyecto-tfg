@@ -38,6 +38,16 @@ export default function useDuckState() {
         }, durationMs);
     }, [clearResetTimeout]);
 
+    const setVictory = useCallback((durationMs = 3500) => {
+        clearResetTimeout();
+        setDuckState("victory");
+
+        resetTimeoutRef.current = window.setTimeout(() => {
+            setDuckState("normal");
+            resetTimeoutRef.current = null;
+        }, durationMs);
+    }, [clearResetTimeout]);
+
     const toggleCompact = useCallback(() => {
         setDuckCompact((prev) => !prev);
     }, [setDuckCompact]);
@@ -55,5 +65,6 @@ export default function useDuckState() {
         setNormal,
         setThinking,
         setConfused,
+        setVictory,
     };
 }

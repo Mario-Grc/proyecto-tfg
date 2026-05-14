@@ -6,6 +6,8 @@ export interface CreateProblemInput {
   difficulty: ProblemDifficulty;
   topic: string;
   statement: string;
+  functionName: string | null;
+  testCases: string | null;
 }
 
 export type UpdateProblemInput = CreateProblemInput;
@@ -17,6 +19,28 @@ export interface ProblemRecord {
   topic: string;
   statement: string;
   source: ProblemSource;
+  functionName: string | null;
+  testCases: string | null;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface TestCase {
+  input: unknown[];
+  expected: unknown;
+}
+
+export interface TestResult {
+  index: number;
+  ok: boolean;
+  input: unknown[];
+  expected: unknown;
+  actual?: unknown;
+  error?: string;
+}
+
+export interface CheckResult {
+  tests: TestResult[];
+  harnessError?: string;
+  allPassed: boolean;
 }

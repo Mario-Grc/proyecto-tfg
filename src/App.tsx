@@ -1,7 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { EditorView } from "@codemirror/view";
-import type { CodeLanguage, CreateProblemInput, ProblemRecord } from "../shared/types";
+import type { CheckResult, CodeLanguage, CreateProblemInput, ProblemRecord } from "../shared/types";
 import {
+    checkSolution,
     createProblem,
     updateProblem,
     deleteProblem,
@@ -53,6 +54,9 @@ function App() {
         sessionId: activeSessionId,
     });
 
+    const [checkResult, setCheckResult] = useState<CheckResult | null>(null);
+    const [checking, setChecking] = useState(false);
+
     const {
         duckState,
         duckCompact,
@@ -60,6 +64,7 @@ function App() {
         setNormal,
         setThinking,
         setConfused,
+        setVictory,
     } = useDuckState();
     const [language, setLanguage] = usePersistentState<CodeLanguage>("editor_language", "javascript");
     const { runningCode, runOutput, runCode } = useCodeRunner(language);
@@ -173,6 +178,30 @@ function App() {
 
     function getEditorCode() {
         return editorViewRef.current?.state.doc.toString() ?? "";
+    }
+
+    async function handleCheckSolution() {
+        if (!selectedProblem?.functionName || !selectedProblem?.testCases) return;
+
+        setChecking(true);
+        setCheckResult(null);
+
+        try {
+            const result = await checkSolution(selectedProblem.id, getEditorCode(), language);
+            setCheckResult(result);
+
+            if (result.allPassed) {
+                setVictory();
+            } else {
+                setConfused();
+            }
+        } catch (error) {
+            const message = getErrorMessage(error);
+            setCheckResult({ tests: [], harnessError: message, allPassed: false });
+            setConfused();
+        } finally {
+            setChecking(false);
+        }
     }
 
     async function handleRunCode() {
@@ -442,6 +471,8 @@ function App() {
         );
     }
 
+    const canCheck = Boolean(selectedProblem?.functionName && selectedProblem?.testCases);
+
     return (
         <WorkspacePage
             selectedProblemTitle={selectedProblemTitle}
@@ -453,6 +484,9 @@ function App() {
             duckCompact={duckCompact}
             runningCode={runningCode}
             runOutput={runOutput}
+            checking={checking}
+            checkResult={checkResult}
+            canCheck={canCheck}
             inputText={inputText}
             chatVisible={chatVisible}
             problemVisible={problemVisible}
@@ -470,6 +504,7 @@ function App() {
             onLanguageChange={setLanguage}
             onToggleDuckCompact={toggleCompact}
             onRunCode={handleRunCode}
+            onCheckSolution={() => { void handleCheckSolution(); }}
             onToggleTheme={toggleTheme}
             onClearConversation={handleClearConversation}
             onToggleChat={() => setChatVisible((prev) => !prev)}

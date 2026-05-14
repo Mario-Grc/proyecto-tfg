@@ -2,7 +2,9 @@ import { Router } from "express";
 import { HttpError } from "../middleware/error-handler";
 import { parseRequest } from "../middleware/validation";
 import { ProblemRepository } from "../repositories/problem-repository";
+import { checkSolution } from "../services/check-service";
 import {
+  checkSolutionBodySchema,
   createProblemBodySchema,
   problemIdParamsSchema,
   problemListResponseSchema,
@@ -73,4 +75,16 @@ problemsRouter.delete("/:problemId", (req, res) => {
 
   problemRepository.deleteById(problemId);
   res.status(204).end();
+});
+
+problemsRouter.post("/:problemId/check", async (req, res, next) => {
+  try {
+    const { problemId } = parseRequest(problemIdParamsSchema, req.params, "Parametro problemId invalido");
+    const { code, language } = parseRequest(checkSolutionBodySchema, req.body, "Body de comprobacion invalido");
+
+    const result = await checkSolution(problemId, code, language);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
 });
