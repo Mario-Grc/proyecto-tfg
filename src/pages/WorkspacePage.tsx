@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { EditorView } from "@codemirror/view";
 import type { CheckResult, CodeLanguage } from "../../shared/types";
 import ChatWindow from "../components/ChatWindow";
@@ -101,32 +101,11 @@ export default function WorkspacePage({
     onGoHome,
 }: WorkspacePageProps) {
     const [notesVisible, setNotesVisible] = useState(false);
-    const [pendingLanguage, setPendingLanguage] = useState<CodeLanguage | null>(null);
     const [outputTab, setOutputTab] = useState<"run" | "check">("run");
-    const pendingTimeoutRef = useRef<number | null>(null);
-
-    const clearPendingLanguage = useCallback(() => {
-        if (pendingTimeoutRef.current !== null) {
-            clearTimeout(pendingTimeoutRef.current);
-            pendingTimeoutRef.current = null;
-        }
-        setPendingLanguage(null);
-    }, []);
-
-    useEffect(() => clearPendingLanguage, [clearPendingLanguage]);
 
     function handleLanguageClick(lang: CodeLanguage) {
         if (lang === language) return;
-
-        if (lang === pendingLanguage) {
-            clearPendingLanguage();
-            onLanguageChange(lang);
-            return;
-        }
-
-        clearPendingLanguage();
-        setPendingLanguage(lang);
-        pendingTimeoutRef.current = window.setTimeout(clearPendingLanguage, 3000);
+        onLanguageChange(lang);
     }
 
     function handleCheckClick() {
@@ -203,19 +182,19 @@ export default function WorkspacePage({
                             <div className="language-toggle" role="group" aria-label="Lenguaje del editor">
                                 <button
                                     type="button"
-                                    className={`language-toggle-btn${language === "javascript" ? " language-toggle-btn--active" : ""}${pendingLanguage === "javascript" ? " language-toggle-btn--confirming" : ""}`}
+                                    className={`language-toggle-btn${language === "javascript" ? " language-toggle-btn--active" : ""}`}
                                     onClick={() => handleLanguageClick("javascript")}
                                     disabled={runningCode || checking}
                                 >
-                                    {pendingLanguage === "javascript" ? "¿Cambiar?" : "JS"}
+                                    JS
                                 </button>
                                 <button
                                     type="button"
-                                    className={`language-toggle-btn${language === "python" ? " language-toggle-btn--active" : ""}${pendingLanguage === "python" ? " language-toggle-btn--confirming" : ""}`}
+                                    className={`language-toggle-btn${language === "python" ? " language-toggle-btn--active" : ""}`}
                                     onClick={() => handleLanguageClick("python")}
                                     disabled={runningCode || checking}
                                 >
-                                    {pendingLanguage === "python" ? "¿Cambiar?" : "Python"}
+                                    Python
                                 </button>
                             </div>
 

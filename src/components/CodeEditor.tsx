@@ -40,6 +40,8 @@ export default function CodeEditor({ language = "javascript", onEditorReady, ini
         if (!containerRef.current) return;
 
         const prevDoc = viewRef.current?.state.doc.toString();
+        const prevLanguage = languageRef.current;
+        const prevPlaceholder = prevLanguage === "python" ? PLACEHOLDER_PY : PLACEHOLDER_JS;
 
         viewRef.current?.destroy();
         viewRef.current = null;
@@ -47,10 +49,16 @@ export default function CodeEditor({ language = "javascript", onEditorReady, ini
         const langExtension = language === "python" ? python() : javascript();
         const placeholder = language === "python" ? PLACEHOLDER_PY : PLACEHOLDER_JS;
 
-        // Si el lenguaje cambió (no primera carga), resetear el doc al placeholder
-        const doc = languageRef.current !== language
-            ? placeholder
-            : (initialCode ?? prevDoc ?? placeholder);
+        let doc: string;
+        if (prevDoc === undefined) {
+            doc = initialCode ?? placeholder;
+        } else if (prevLanguage !== language) {
+            // Si estaba "limpio" (solo el placeholder anterior), mostrar el nuevo placeholder.
+            // En cualquier otro caso (incluido vacío) conservar lo que el usuario tenía.
+            doc = prevDoc === prevPlaceholder ? placeholder : prevDoc;
+        } else {
+            doc = initialCode ?? prevDoc ?? placeholder;
+        }
 
         languageRef.current = language;
 
@@ -80,20 +88,17 @@ export default function CodeEditor({ language = "javascript", onEditorReady, ini
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [language, onEditorReady]);
 
-    // Aplicar initialCode externo sin tocar el lenguaje
+    // Aplicar initialCode externo (carga de sesión) sin tocar el cambio de lenguaje
     useEffect(() => {
-        if (!viewRef.current) return;
+        if (!viewRef.current || initialCode == null) return;
 
         const currentDoc = viewRef.current.state.doc.toString();
-        const placeholder = language === "python" ? PLACEHOLDER_PY : PLACEHOLDER_JS;
-        const newCode = initialCode ?? placeholder;
-
-        if (currentDoc !== newCode) {
+        if (currentDoc !== initialCode) {
             viewRef.current.dispatch({
-                changes: { from: 0, to: currentDoc.length, insert: newCode },
+                changes: { from: 0, to: currentDoc.length, insert: initialCode },
             });
         }
-    }, [initialCode, language]);
+    }, [initialCode]);
 
     return <div className="code-editor" ref={containerRef}></div>;
 }

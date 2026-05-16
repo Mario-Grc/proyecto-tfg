@@ -61,11 +61,10 @@
   font-weight: 600;
 }
 
-.language-toggle-btn--confirming,
-.language-toggle-btn--confirming:hover:not(:disabled) {
-  background: var(--color-danger, #c0392b);
-  color: #fff;
-  font-weight: 600;
+.language-toggle-btn--active:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+  filter: brightness(1.08);
 }
 
 .language-toggle-btn:disabled {
