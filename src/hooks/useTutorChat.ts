@@ -148,7 +148,7 @@ function buildToolResultMessage(toolName: string, result: string): string {
 
 export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [status, setStatus] = useState("Selecciona un problema para empezar.");
+    const [status, setStatus] = useState("Listo");
     const [loading, setLoading] = useState(false);
     const [inputText, setInputText] = useState("");
     const localMessageSeqRef = useRef<number>(1);
@@ -160,7 +160,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
         try {
             const storedMessages = await fetchSessionMessages(targetSessionId);
             setMessages(mapStoredMessagesToChat(storedMessages));
-            setStatus(storedMessages.length > 0 ? "Historial cargado." : "Sesión lista para empezar.");
+            setStatus("Listo");
         } catch (error) {
             const message = getErrorMessage(error);
             setMessages([]);
@@ -175,7 +175,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
 
         if (!sessionId) {
             setMessages([]);
-            setStatus("Selecciona un problema para empezar.");
+            setStatus("Listo");
             return;
         }
 
@@ -208,7 +208,10 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
         ]);
 
         setLoading(true);
-        setStatus(normalizedCode ? "Generando respuesta con tu seleccion de código..." : "Generando respuesta...");
+        setStatus("Generando respuesta...");
+
+        const requestStartedAt = performance.now();
+        let firstTokenAt: number | null = null;
 
         const applyAssistantText = (updater: (currentText: string) => string) => {
             setMessages((prev) =>
@@ -261,25 +264,30 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
                             return;
                         }
 
+                        if (firstTokenAt === null) {
+                            firstTokenAt = performance.now();
+                        }
+
                         applyAssistantText((currentText) => `${currentText}${deltaText}`);
-                    },
-                    onToolStart: (toolName) => {
-                        setStatus(`Ejecutando herramienta: ${toolName}...`);
                     },
                     onToolResult: (toolName, result) => {
                         insertToolResultMessage(toolName, result);
-                        setStatus(`Resultado ${toolName}: ${toSingleLinePreview(result)}`);
                     },
                 },
             );
 
             applyAssistantText(() => response.assistantText);
 
-            if (response.usage) {
-                setStatus(`Respuesta recibida - ${response.usage.total_tokens} tokens usados`);
-            } else {
-                setStatus("Respuesta recibida.");
-            }
+            const totalSec = ((performance.now() - requestStartedAt) / 1000).toFixed(1);
+            const ttftSec = firstTokenAt !== null
+                ? ((firstTokenAt - requestStartedAt) / 1000).toFixed(1)
+                : null;
+
+            const statusParts = [`tiempo total ${totalSec}s`];
+            if (ttftSec !== null) statusParts.push(`primer token ${ttftSec}s`);
+            if (response.usage) statusParts.push(`${response.usage.total_tokens} tokens`);
+
+            setStatus(`Respuesta recibida — ${statusParts.join(", ")}`);
 
             return "success";
         } catch (error) {
@@ -308,7 +316,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
 
     const clearConversation = useCallback(() => {
         resetConversation();
-        setStatus("Conversación borrada.");
+        setStatus("Listo");
     }, [resetConversation]);
 
     return {

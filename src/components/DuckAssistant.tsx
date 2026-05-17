@@ -2,8 +2,7 @@ import { DuckState } from "../types";
 import duckConfused from "../assets/pato/pato-extrañado.png";
 import duckNormal from "../assets/pato/pato-normal.png";
 import duckThinking from "../assets/pato/pato-pensando.png";
-// victory image falls back to normal until pato-victoria.png is provided
-const duckVictory = duckNormal;
+import duckVictory from "../assets/pato/pato-victoria.png";
 
 interface DuckAssistantProps {
     state: DuckState;
