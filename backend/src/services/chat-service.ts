@@ -38,6 +38,7 @@ interface ChatRequestInput {
   editorCode?: string;
   selectedCode?: string;
   language?: "javascript" | "python";
+  responseLanguage?: "es" | "en";
 }
 
 interface ChatUsage {
@@ -129,7 +130,18 @@ function buildToolInstructions(): string {
   return instructions.join("\n");
 }
 
-function buildSystemPrompt(problemTitle: string, problemStatement: string): string {
+function buildLanguageInstruction(responseLanguage: "es" | "en" | undefined): string {
+  if (responseLanguage === "en") {
+    return "Respond to the user in English by default. If the user explicitly asks you to switch to another language (for example Spanish), follow that request.";
+  }
+  return "";
+}
+
+function buildSystemPrompt(
+  problemTitle: string,
+  problemStatement: string,
+  responseLanguage?: "es" | "en",
+): string {
   return [
     BASE_SYSTEM_PROMPT,
     buildToolInstructions(),
@@ -137,7 +149,8 @@ function buildSystemPrompt(problemTitle: string, problemStatement: string): stri
     `Titulo: ${problemTitle}`,
     `Enunciado:\n${problemStatement}`,
     "No inventes requisitos que no esten en el enunciado.",
-  ].join("\n\n");
+    buildLanguageInstruction(responseLanguage),
+  ].filter((part) => part.length > 0).join("\n\n");
 }
 
 function buildUserContentForModel(
@@ -514,7 +527,7 @@ export class ChatService {
       conversation: [
         {
           role: "system",
-          content: buildSystemPrompt(problem.title, problem.statement),
+          content: buildSystemPrompt(problem.title, problem.statement, input.responseLanguage),
         },
         ...historyForModel,
       ],
