@@ -1,12 +1,11 @@
 import { DuckState } from "../types";
-import duckConfused from "../assets/pato/pato-extrañado.png";
-import duckNormal from "../assets/pato/pato-normal.png";
-import duckThinking from "../assets/pato/pato-pensando.png";
-import duckVictory from "../assets/pato/pato-victoria.png";
+import duckConfused from "../assets/pato/pato-extrañado.webp";
+import duckNormal from "../assets/pato/pato-normal.webp";
+import duckThinking from "../assets/pato/pato-pensando.webp";
+import duckVictory from "../assets/pato/pato-victoria.webp";
 import { useTranslation } from "../i18n/LanguageContext";
 
-// Precarga las 4 imágenes al importar el módulo para evitar el lag visible
-// la primera vez que el pato cambia a un estado distinto del inicial.
+// tengo que precargar las 4 imágenes para evitar el lag cuando se cargan por primera vez
 [duckNormal, duckThinking, duckConfused, duckVictory].forEach((src) => {
     const img = new Image();
     img.src = src;
