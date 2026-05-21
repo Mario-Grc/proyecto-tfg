@@ -1,5 +1,7 @@
 import type { ProblemRecord } from "../../shared/types";
 import useConfirmAction from "../hooks/useConfirmAction";
+import LanguageToggle from "../components/LanguageToggle";
+import { useTranslation } from "../i18n/LanguageContext";
 
 interface ProblemSelectorPageProps {
     problems: ProblemRecord[];
@@ -18,6 +20,7 @@ interface ProblemCardDeleteBtnProps {
 }
 
 function ProblemCardDeleteBtn({ onDelete }: ProblemCardDeleteBtnProps) {
+    const { translate } = useTranslation();
     const { pending, trigger } = useConfirmAction(onDelete);
 
     return (
@@ -26,7 +29,7 @@ function ProblemCardDeleteBtn({ onDelete }: ProblemCardDeleteBtnProps) {
             className={`problem-card-delete-btn${pending ? " confirming" : ""}`}
             onClick={trigger}
         >
-            {pending ? "¿Eliminar?" : "Eliminar"}
+            {pending ? translate("selector.card.deleteConfirm") : translate("selector.card.delete")}
         </button>
     );
 }
@@ -42,43 +45,48 @@ export default function ProblemSelectorPage({
     onEdit,
     onDelete,
 }: ProblemSelectorPageProps) {
+    const { translate } = useTranslation();
+
     return (
         <div className="app-shell">
+            <div className="page-corner-actions">
+                <LanguageToggle />
+            </div>
             <section className="selector-screen">
                 <div className="selector-surface">
                     <header className="selector-header">
                         <div>
-                            <p className="landing-kicker">Seleccion de problema</p>
-                            <h2>Elige un reto para trabajar</h2>
+                            <p className="landing-kicker">{translate("selector.kicker")}</p>
+                            <h2>{translate("selector.title")}</h2>
                         </div>
 
                         <div className="selector-actions">
                             <button type="button" className="ghost-btn" onClick={onBack}>
-                                Volver
+                                {translate("selector.back")}
                             </button>
                             <button type="button" className="ghost-btn" onClick={onUploadProblem}>
-                                Problema personalizado
+                                {translate("selector.upload")}
                             </button>
                         </div>
                     </header>
 
                     <div className="problem-grid">
-                        {loading && <p>Cargando problemas...</p>}
+                        {loading && <p>{translate("selector.loading")}</p>}
 
                         {!loading && errorMessage && (
                             <article className="problem-card">
                                 <div className="problem-main">
-                                    <h3>No se pudo cargar el catalogo</h3>
+                                    <h3>{translate("selector.errorTitle")}</h3>
                                     <p>{errorMessage}</p>
                                 </div>
                                 <button type="button" onClick={onRetry}>
-                                    Reintentar
+                                    {translate("selector.retry")}
                                 </button>
                             </article>
                         )}
 
                         {!loading && !errorMessage && problems.length === 0 && (
-                            <p>No hay problemas disponibles en el backend.</p>
+                            <p>{translate("selector.empty")}</p>
                         )}
 
                         {!loading && !errorMessage && problems.map((problem) => (
@@ -89,7 +97,7 @@ export default function ProblemSelectorPage({
                                         <span className={`problem-difficulty difficulty-${problem.difficulty.toLowerCase()}`}>
                                             {problem.difficulty}
                                         </span>
-                                        {problem.source === "user" && <span className="problem-source-badge">Tu problema</span>}
+                                        {problem.source === "user" && <span className="problem-source-badge">{translate("selector.card.userBadge")}</span>}
                                         <span>{problem.topic}</span>
                                     </div>
                                 </div>
@@ -101,13 +109,13 @@ export default function ProblemSelectorPage({
                                                 className="problem-card-edit-btn"
                                                 onClick={() => onEdit(problem)}
                                             >
-                                                Editar
+                                                {translate("selector.card.edit")}
                                             </button>
                                             <ProblemCardDeleteBtn onDelete={() => onDelete(problem)} />
                                         </>
                                     )}
                                     <button type="button" onClick={() => onSelect(problem)}>
-                                        Seleccionar
+                                        {translate("selector.card.select")}
                                     </button>
                                 </div>
                             </article>

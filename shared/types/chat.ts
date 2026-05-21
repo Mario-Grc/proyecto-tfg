@@ -7,12 +7,15 @@ export interface LLMConversationMessage {
   content: string;
 }
 
+export type ResponseLanguage = "es" | "en";
+
 export interface ChatRequest {
   sessionId: string;
   text: string;
   editorCode?: string;
   selectedCode?: string;
   language?: CodeLanguage;
+  responseLanguage?: ResponseLanguage;
 }
 
 export interface ChatUsage {

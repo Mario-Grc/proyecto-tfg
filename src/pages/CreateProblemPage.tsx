@@ -1,5 +1,7 @@
 import { useState } from "react";
 import type { CreateProblemInput, ProblemDifficulty, ProblemRecord } from "../../shared/types";
+import LanguageToggle from "../components/LanguageToggle";
+import { useTranslation } from "../i18n/LanguageContext";
 
 interface CreateProblemPageProps {
     onBack: () => void;
@@ -9,15 +11,16 @@ interface CreateProblemPageProps {
 
 const DIFFICULTY_OPTIONS: ProblemDifficulty[] = ["Facil", "Media", "Dificil"];
 
-function getErrorMessage(error: unknown): string {
-    return error instanceof Error ? error.message : "Error desconocido";
-}
-
 const TEST_CASES_PLACEHOLDER =
     `[\n  { "input": [2, 7], "expected": 9 },\n  { "input": [1, 3], "expected": 4 }\n]`;
 
 export default function CreateProblemPage({ onBack, onSubmit, editingProblem }: CreateProblemPageProps) {
+    const { translate } = useTranslation();
     const isEditing = editingProblem !== undefined;
+
+    function getErrorMessage(error: unknown): string {
+        return error instanceof Error ? error.message : translate("create.error.unknown");
+    }
 
     const [title, setTitle] = useState(editingProblem?.title ?? "");
     const [difficulty, setDifficulty] = useState<ProblemDifficulty>(editingProblem?.difficulty ?? "Media");
@@ -38,7 +41,7 @@ export default function CreateProblemPage({ onBack, onSubmit, editingProblem }: 
         if (submitting) return;
 
         if (!title.trim() || !topic.trim() || !statement.trim()) {
-            setErrorMessage("Completa título, tema y enunciado antes de continuar.");
+            setErrorMessage(translate("create.error.requiredFields"));
             return;
         }
 
@@ -47,26 +50,26 @@ export default function CreateProblemPage({ onBack, onSubmit, editingProblem }: 
 
         if (rawTrimmed) {
             if (!functionName.trim()) {
-                setErrorMessage("Si añades casos de prueba, indica también el nombre de la función.");
+                setErrorMessage(translate("create.error.functionNeeded"));
                 return;
             }
 
             try {
                 const parsed = JSON.parse(rawTrimmed) as unknown;
                 if (!Array.isArray(parsed) || parsed.length === 0) {
-                    setErrorMessage("Los casos de prueba deben ser un array JSON no vacío.");
+                    setErrorMessage(translate("create.error.testsNotArray"));
                     return;
                 }
                 for (const item of parsed) {
                     const c = item as { input?: unknown; expected?: unknown };
                     if (!Array.isArray(c.input) || !("expected" in c)) {
-                        setErrorMessage("Cada caso debe tener \"input\" (array) y \"expected\".");
+                        setErrorMessage(translate("create.error.caseShape"));
                         return;
                     }
                 }
                 parsedTestCases = JSON.stringify(parsed);
             } catch {
-                setErrorMessage("Los casos de prueba no son JSON válido. Revisa el formato.");
+                setErrorMessage(translate("create.error.invalidJson"));
                 return;
             }
         }
@@ -92,19 +95,28 @@ export default function CreateProblemPage({ onBack, onSubmit, editingProblem }: 
         }
     }
 
+    const headerKicker = isEditing ? translate("create.edit.kicker") : translate("create.new.kicker");
+    const headerTitle = isEditing ? translate("create.edit.title") : translate("create.new.title");
+    const submitLabel = submitting
+        ? (isEditing ? translate("create.submit.saving") : translate("create.submit.creating"))
+        : (isEditing ? translate("create.submit.edit") : translate("create.submit.new"));
+
     return (
         <div className="app-shell">
+            <div className="page-corner-actions">
+                <LanguageToggle />
+            </div>
             <section className="create-problem-screen">
                 <div className="create-problem-surface">
                     <header className="selector-header">
                         <div>
-                            <p className="landing-kicker">{isEditing ? "Editar problema" : "Subir problema"}</p>
-                            <h2>{isEditing ? "Modifica tu reto" : "Crea tu propio reto"}</h2>
+                            <p className="landing-kicker">{headerKicker}</p>
+                            <h2>{headerTitle}</h2>
                         </div>
 
                         <div className="selector-actions">
                             <button type="button" className="ghost-btn" onClick={onBack} disabled={submitting}>
-                                Volver
+                                {translate("create.back")}
                             </button>
                         </div>
                     </header>
@@ -112,33 +124,33 @@ export default function CreateProblemPage({ onBack, onSubmit, editingProblem }: 
                     <form className="create-problem-form" onSubmit={handleSubmit}>
                         <div className="create-problem-grid">
                             <label className="create-problem-field">
-                                <span>Titulo</span>
+                                <span>{translate("create.field.title")}</span>
                                 <input
                                     className="create-problem-input"
                                     type="text"
                                     value={title}
                                     onChange={(event) => setTitle(event.target.value)}
-                                    placeholder="Ejemplo: Reverse Linked List"
+                                    placeholder={translate("create.field.titlePlaceholder")}
                                     disabled={submitting}
                                     maxLength={120}
                                 />
                             </label>
 
                             <label className="create-problem-field">
-                                <span>Tema</span>
+                                <span>{translate("create.field.topic")}</span>
                                 <input
                                     className="create-problem-input"
                                     type="text"
                                     value={topic}
                                     onChange={(event) => setTopic(event.target.value)}
-                                    placeholder="Ejemplo: Linked List"
+                                    placeholder={translate("create.field.topicPlaceholder")}
                                     disabled={submitting}
                                     maxLength={80}
                                 />
                             </label>
 
                             <label className="create-problem-field create-problem-field-full">
-                                <span>Dificultad</span>
+                                <span>{translate("create.field.difficulty")}</span>
                                 <select
                                     className="create-problem-select"
                                     value={difficulty}
@@ -155,21 +167,21 @@ export default function CreateProblemPage({ onBack, onSubmit, editingProblem }: 
                         </div>
 
                         <label className="create-problem-field create-problem-field-full">
-                            <span>Enunciado (Markdown)</span>
+                            <span>{translate("create.field.statement")}</span>
                             <textarea
                                 className="create-problem-textarea"
                                 value={statement}
                                 onChange={(event) => setStatement(event.target.value)}
-                                placeholder="Describe el problema, entradas/salidas, ejemplos y restricciones..."
+                                placeholder={translate("create.field.statementPlaceholder")}
                                 disabled={submitting}
                                 spellCheck={false}
                             />
                         </label>
 
-                        <div className="create-problem-section-label">Tests automáticos (opcional)</div>
+                        <div className="create-problem-section-label">{translate("create.section.tests")}</div>
 
                         <label className="create-problem-field create-problem-field-full">
-                            <span>Nombre de la función</span>
+                            <span>{translate("create.field.functionName")}</span>
                             <input
                                 className="create-problem-input"
                                 type="text"
@@ -182,7 +194,7 @@ export default function CreateProblemPage({ onBack, onSubmit, editingProblem }: 
                         </label>
 
                         <label className="create-problem-field create-problem-field-full">
-                            <span>Casos de prueba (JSON)</span>
+                            <span>{translate("create.field.testCases")}</span>
                             <textarea
                                 className="create-problem-textarea create-problem-textarea--short"
                                 value={testCasesRaw}
@@ -197,10 +209,7 @@ export default function CreateProblemPage({ onBack, onSubmit, editingProblem }: 
 
                         <div className="create-problem-actions">
                             <button type="submit" disabled={submitting}>
-                                {submitting
-                                    ? isEditing ? "Guardando cambios..." : "Creando problema..."
-                                    : isEditing ? "Guardar cambios" : "Crear problema"
-                                }
+                                {submitLabel}
                             </button>
                         </div>
                     </form>

@@ -7,6 +7,16 @@
   padding: 0;
 }
 
+/* Floating top-right actions for landing / selector / create pages */
+.page-corner-actions {
+  position: fixed;
+  top: clamp(12px, 2.5vw, 24px);
+  right: clamp(12px, 2.5vw, 24px);
+  z-index: 50;
+  display: flex;
+  gap: var(--space-3);
+}
+
 .landing-screen,
 .selector-screen,
 .create-problem-screen {

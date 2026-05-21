@@ -1,3 +1,6 @@
+import LanguageToggle from "../components/LanguageToggle";
+import { useTranslation } from "../i18n/LanguageContext";
+
 interface LandingPageProps {
     onStart: () => void;
     canContinue: boolean;
@@ -5,23 +8,27 @@ interface LandingPageProps {
 }
 
 export default function LandingPage({ onStart, canContinue, onContinue }: LandingPageProps) {
+    const { translate } = useTranslation();
+
     return (
         <div className="landing-screen">
+            <div className="page-corner-actions">
+                <LanguageToggle />
+            </div>
             <main className="landing-container">
                 <header className="landing-hero">
                     <h1 className="landing-title">QuackCode</h1>
                     <p className="landing-subtitle">
-                        Mejora tu lógica de programación con un tutor integrado. 
-                        Lee, piensa, codifica y entiende el <em>porqué</em> de cada solución.
+                        {translate("landing.subtitle")}
                     </p>
-                    
+
                     <div className="landing-actions">
                         <button type="button" className="landing-btn-primary" onClick={onStart}>
-                            Comenzar
+                            {translate("landing.start")}
                         </button>
                         {canContinue && (
                             <button type="button" className="landing-btn-secondary" onClick={onContinue}>
-                                Continuar sesión
+                                {translate("landing.continue")}
                             </button>
                         )}
                     </div>
@@ -32,24 +39,23 @@ export default function LandingPage({ onStart, canContinue, onContinue }: Landin
                 <section className="landing-steps">
                     <article className="landing-step">
                         <div className="step-number">01</div>
-                        <h2>Selecciona un problema</h2>
-                        <p>Escoge un reto acorde a tu nivel. La idea es mantener una práctica constante y focalizada.</p>
+                        <h2>{translate("landing.step1.title")}</h2>
+                        <p>{translate("landing.step1.desc")}</p>
                     </article>
 
                     <article className="landing-step">
                         <div className="step-number">02</div>
-                        <h2>Piensa y ejecuta</h2>
-                        <p>Usa el editor al lado de las instrucciones. Ejecuta y prueba tu código al instante para validar tu lógica.</p>
+                        <h2>{translate("landing.step2.title")}</h2>
+                        <p>{translate("landing.step2.desc")}</p>
                     </article>
 
                     <article className="landing-step">
                         <div className="step-number">03</div>
-                        <h2>Apóyate en el tutor</h2>
-                        <p>¿Bloqueado? Pide pistas, no respuestas. El modelo te guía didácticamente viendo el mismo código que tú.</p>
+                        <h2>{translate("landing.step3.title")}</h2>
+                        <p>{translate("landing.step3.desc")}</p>
                     </article>
                 </section>
             </main>
         </div>
     );
 }
-

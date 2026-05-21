@@ -65,6 +65,26 @@
   min-width: 110px;
 }
 
+/* Language toggle (ES/EN) — shared across landing, selector and create pages */
+.lang-toggle {
+  min-width: 48px;
+  min-height: var(--min-height-button);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-bg-surface-muted);
+  color: var(--color-text-base);
+  border: var(--border-width) solid var(--color-border-soft);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+.lang-toggle:hover:not(:disabled) {
+  background: var(--color-bg-message);
+  color: var(--color-text-heading);
+}
+
 .options-overlay {
   position: fixed;
   inset: 0;
@@ -169,6 +189,29 @@
   color: #fff;
   border-color: transparent;
   font-weight: 600;
+}
+
+.options-item.is-active {
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+  border-color: var(--color-primary);
+  font-weight: 600;
+}
+
+.options-item.is-active:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+  filter: brightness(1.08);
+}
+
+.options-language-row {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.options-language-row .options-item {
+  min-width: 110px;
 }
 
 .options-field-label {

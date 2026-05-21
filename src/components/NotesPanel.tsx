@@ -1,4 +1,5 @@
 import usePersistentState from "../hooks/usePersistentState";
+import { useTranslation } from "../i18n/LanguageContext";
 
 interface NotesPanelProps {
     problemId: string;
@@ -6,19 +7,20 @@ interface NotesPanelProps {
 }
 
 export default function NotesPanel({ problemId, onHide }: NotesPanelProps) {
+    const { translate } = useTranslation();
     const [notes, setNotes] = usePersistentState<string>(`notes_${problemId}`, "");
 
     return (
-        <section className="notes-panel" aria-label="Notas">
+        <section className="notes-panel" aria-label={translate("notes.ariaLabel")}>
             <header className="notes-panel-header">
-                <span className="notes-panel-title">Notas</span>
-                <button type="button" className="panel-toggle-btn" onClick={onHide}>Ocultar</button>
+                <span className="notes-panel-title">{translate("notes.title")}</span>
+                <button type="button" className="panel-toggle-btn" onClick={onHide}>{translate("notes.hide")}</button>
             </header>
             <textarea
                 className="notes-textarea"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Escribe aquí tus notas..."
+                placeholder={translate("notes.placeholder")}
                 spellCheck={false}
             />
         </section>

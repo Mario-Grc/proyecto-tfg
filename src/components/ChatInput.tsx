@@ -1,6 +1,7 @@
 // Textarea + botón de enviar
 
 import { useEffect } from "react";
+import { useTranslation } from "../i18n/LanguageContext";
 
 interface ChatInputProps {
     value: string;
@@ -11,6 +12,7 @@ interface ChatInputProps {
 }
 
 export default function ChatInput({ value, onChange, onSend, disabled, textareaRef }: ChatInputProps) {
+    const { translate } = useTranslation();
 
     // resize del textarea cuando cambia el contenido
     useEffect(() => {
@@ -55,7 +57,7 @@ export default function ChatInput({ value, onChange, onSend, disabled, textareaR
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Escribe tu mensaje..."
+                    placeholder={translate("chat.placeholder")}
                     rows={1}
                     required
                 />
@@ -66,7 +68,7 @@ export default function ChatInput({ value, onChange, onSend, disabled, textareaR
                     </div>
 
                     <button type="submit" className="chat-btn-send" disabled={disabled || !value.trim()}>
-                        Enviar
+                        {translate("chat.send")}
                     </button>
                 </div>
             </div>

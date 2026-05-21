@@ -5,6 +5,7 @@ import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github-dark.css";
 import remarkGfm from "remark-gfm";
 import { Message } from "../types";
+import { useTranslation } from "../i18n/LanguageContext";
 
 interface ChatBubbleProps {
     text: string;
@@ -12,6 +13,7 @@ interface ChatBubbleProps {
 }
 
 function MarkdownPre(props: ComponentPropsWithoutRef<"pre">) {
+    const { translate } = useTranslation();
     const preRef = useRef<HTMLPreElement>(null);
     const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
 
@@ -34,12 +36,16 @@ function MarkdownPre(props: ComponentPropsWithoutRef<"pre">) {
         }, 1400);
     }
 
-    const buttonLabel = copyState === "copied" ? "Copiado" : copyState === "error" ? "Error" : "Copiar";
+    const buttonLabel = copyState === "copied"
+        ? translate("chat.copy.copied")
+        : copyState === "error"
+            ? translate("chat.copy.error")
+            : translate("chat.copy.copy");
     const buttonClassName = `copy-code-btn ${copyState === "copied" ? "is-copied" : ""} ${copyState === "error" ? "is-error" : ""}`.trim();
 
     return (
         <div className="code-block-shell">
-            <button type="button" className={buttonClassName} onClick={handleCopy} aria-label="Copiar bloque de código">
+            <button type="button" className={buttonClassName} onClick={handleCopy} aria-label={translate("chat.copy.ariaLabel")}>
                 {buttonLabel}
             </button>
             <pre {...props} ref={preRef} />

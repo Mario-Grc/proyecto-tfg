@@ -20,16 +20,19 @@ import useCodeRunner from "./hooks/useCodeRunner";
 import usePersistentState from "./hooks/usePersistentState";
 import useTutorChat from "./hooks/useTutorChat";
 import useWorkspacePanels from "./hooks/useWorkspacePanels";
+import { useTranslation } from "./i18n/LanguageContext";
 import "./App.css";
 
 type ThemeMode = "dark" | "light";
 type AppView = "landing" | "selector" | "create-problem" | "edit-problem" | "workspace";
 
-function getErrorMessage(error: unknown): string {
-    return error instanceof Error ? error.message : "Error desconocido";
-}
-
 function App() {
+    const { translate } = useTranslation();
+
+    function getErrorMessage(error: unknown): string {
+        return error instanceof Error ? error.message : translate("create.error.unknown");
+    }
+
     const [themeMode, setThemeMode] = usePersistentState<ThemeMode>("theme_mode", "dark");
     const [problemText, setProblemText] = usePersistentState<string>("problem_text", "");
     const [selectedProblemId, setSelectedProblemId] = usePersistentState<string | null>("selected_problem_id", null);
@@ -244,22 +247,22 @@ function App() {
 
     async function handleClearConversation() {
         if (!selectedProblem) {
-            setStatus("Selecciona un problema antes de reiniciar la conversación.");
+            setStatus(translate("status.selectProblemBeforeReset"));
             return;
         }
 
         setThinking();
-        setStatus("Reiniciando conversación...");
+        setStatus(translate("status.resetting"));
 
         try {
             const newSession = await createSession(selectedProblem.id);
             setActiveSessionId(newSession.id);
             clearConversation();
-            setStatus("Conversación reiniciada.");
+            setStatus(translate("status.resetDone"));
             setNormal();
         } catch (error) {
             const message = getErrorMessage(error);
-            setStatus(`No se pudo reiniciar: ${message}`);
+            setStatus(translate("status.resetError", { message }));
             setConfused();
         }
     }
@@ -291,7 +294,7 @@ function App() {
     async function handleSelectProblem(problem: ProblemRecord) {
         if (selectedProblemId === problem.id && activeSessionId) {
             setThinking();
-            setStatus(`Reanudando sesión para ${problem.title}...`);
+            setStatus(translate("status.resumingSession", { title: problem.title }));
             try {
                 const session = await fetchLatestSessionForProblem(problem.id);
                 if (session) {
@@ -299,33 +302,33 @@ function App() {
                 }
                 setProblemVisible(true);
                 setCurrentView("workspace");
-                setStatus(`Sesión reanudada: ${problem.title}`);
+                setStatus(translate("status.sessionResumed", { title: problem.title }));
                 setNormal();
             } catch (error) {
                 const message = getErrorMessage(error);
-                setStatus(`Error al reanudar: ${message}`);
+                setStatus(translate("status.resumeError", { message }));
                 setConfused();
             }
             return;
         }
 
         setThinking();
-        setStatus(`Abriendo sesión para ${problem.title}...`);
+        setStatus(translate("status.openingSession", { title: problem.title }));
 
         try {
             await activateProblem(problem, { allowResumeLatest: true });
-            setStatus(`Problema cargado: ${problem.title}`);
+            setStatus(translate("status.problemLoaded", { title: problem.title }));
             setNormal();
         } catch (error) {
             const message = getErrorMessage(error);
-            setStatus(`No se pudo abrir la sesión: ${message}`);
+            setStatus(translate("status.openSessionError", { message }));
             setConfused();
         }
     }
 
     async function handleSubmitProblem(input: CreateProblemInput) {
         if (editingProblem) {
-            setStatus("Guardando cambios...");
+            setStatus(translate("status.savingChanges"));
 
             try {
                 const updated = await updateProblem(editingProblem.id, input);
@@ -339,14 +342,14 @@ function App() {
 
                 setEditingProblem(null);
                 setCurrentView("selector");
-                setStatus(`Problema actualizado: ${updated.title}`);
+                setStatus(translate("status.problemUpdated", { title: updated.title }));
             } catch (error) {
                 const message = getErrorMessage(error);
-                setStatus(`No se pudo guardar: ${message}`);
+                setStatus(translate("status.saveError", { message }));
                 throw new Error(message);
             }
         } else {
-            setStatus("Creando problema personalizado...");
+            setStatus(translate("status.creatingProblem"));
 
             try {
                 const createdProblem = await createProblem(input);
@@ -355,12 +358,12 @@ function App() {
                     ...previous.filter((problem) => problem.id !== createdProblem.id),
                 ]);
 
-                setStatus(`Problema creado: ${createdProblem.title}. Creando sesión...`);
+                setStatus(translate("status.problemCreatedCreatingSession", { title: createdProblem.title }));
                 await activateProblem(createdProblem, { allowResumeLatest: false });
-                setStatus(`Problema cargado: ${createdProblem.title}`);
+                setStatus(translate("status.problemLoaded", { title: createdProblem.title }));
             } catch (error) {
                 const message = getErrorMessage(error);
-                setStatus(`No se pudo crear el problema: ${message}`);
+                setStatus(translate("status.createProblemError", { message }));
                 throw new Error(message);
             }
         }
@@ -385,10 +388,10 @@ function App() {
                 resetConversation();
             }
 
-            setStatus("Problema eliminado.");
+            setStatus(translate("status.problemDeleted"));
         } catch (error) {
             const message = getErrorMessage(error);
-            setStatus(`No se pudo eliminar: ${message}`);
+            setStatus(translate("status.deleteError", { message }));
         }
     }
 
@@ -396,8 +399,8 @@ function App() {
         if (!selectedProblemId || !activeSessionId) return;
 
         setThinking();
-        setStatus("Reanudando sesión guardada...");
-        
+        setStatus(translate("status.resumingSaved"));
+
         try {
             const session = await fetchLatestSessionForProblem(selectedProblemId);
             if (session) {
@@ -405,16 +408,16 @@ function App() {
             }
             setProblemVisible(true);
             setCurrentView("workspace");
-            setStatus(`Sesión reanudada: ${selectedProblem?.title ?? ""}`);
+            setStatus(translate("status.sessionResumed", { title: selectedProblem?.title ?? "" }));
             setNormal();
         } catch (error) {
             const message = getErrorMessage(error);
-            setStatus(`Error al reanudar: ${message}`);
+            setStatus(translate("status.resumeError", { message }));
             setConfused();
         }
     }
 
-    const selectedProblemTitle = selectedProblem?.title ?? "Problema seleccionado";
+    const selectedProblemTitle = selectedProblem?.title ?? translate("status.defaultProblemTitle");
     const canContinueSession = Boolean(selectedProblemId && activeSessionId);
 
     if (currentView === "landing") {

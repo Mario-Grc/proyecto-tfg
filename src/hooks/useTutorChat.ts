@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { CodeLanguage, MessageRole, SessionMessageRecord } from "../../shared/types";
 import { fetchSessionMessages, sendChatRequest } from "../services/backendApi";
 import type { Message } from "../types";
+import { useTranslation } from "../i18n/LanguageContext";
 
 interface SendPromptOptions {
     text: string;
@@ -147,40 +148,41 @@ function buildToolResultMessage(toolName: string, result: string): string {
 }
 
 export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
+    const { translate, language: uiLanguage } = useTranslation();
     const [messages, setMessages] = useState<Message[]>([]);
-    const [status, setStatus] = useState("Listo");
+    const [status, setStatus] = useState(() => translate("status.idle"));
     const [loading, setLoading] = useState(false);
     const [inputText, setInputText] = useState("");
     const localMessageSeqRef = useRef<number>(1);
 
     const loadSessionHistory = useCallback(async (targetSessionId: string) => {
         setLoading(true);
-        setStatus("Cargando historial de la sesión...");
+        setStatus(translate("status.loadingHistory"));
 
         try {
             const storedMessages = await fetchSessionMessages(targetSessionId);
             setMessages(mapStoredMessagesToChat(storedMessages));
-            setStatus("Listo");
+            setStatus(translate("status.idle"));
         } catch (error) {
             const message = getErrorMessage(error);
             setMessages([]);
-            setStatus(`No se pudo cargar la sesión: ${message}`);
+            setStatus(translate("status.loadHistoryError", { message }));
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [translate]);
 
     useEffect(() => {
         setInputText("");
 
         if (!sessionId) {
             setMessages([]);
-            setStatus("Listo");
+            setStatus(translate("status.idle"));
             return;
         }
 
         void loadSessionHistory(sessionId);
-    }, [loadSessionHistory, sessionId]);
+    }, [loadSessionHistory, sessionId, translate]);
 
     const sendPrompt = useCallback(
         async ({ text, editorCode = "", selectedCode = "", language }: SendPromptOptions): Promise<ChatSendResult> => {
@@ -191,7 +193,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
         }
 
         if (!sessionId) {
-            setStatus("No hay una sesión activa para enviar mensajes.");
+            setStatus(translate("status.noSession"));
             return "error";
         }
 
@@ -208,7 +210,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
         ]);
 
         setLoading(true);
-        setStatus("Generando respuesta...");
+        setStatus(translate("status.generating"));
 
         const requestStartedAt = performance.now();
         let firstTokenAt: number | null = null;
@@ -257,6 +259,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
                     editorCode: normalizedEditorCode || undefined,
                     selectedCode: normalizedCode || undefined,
                     language,
+                    responseLanguage: uiLanguage,
                 },
                 {
                     onDelta: (deltaText) => {
@@ -283,11 +286,11 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
                 ? ((firstTokenAt - requestStartedAt) / 1000).toFixed(1)
                 : null;
 
-            const statusParts = [`tiempo total ${totalSec}s`];
-            if (ttftSec !== null) statusParts.push(`primer token ${ttftSec}s`);
-            if (response.usage) statusParts.push(`${response.usage.total_tokens} tokens`);
+            const statusParts = [`${translate("status.totalTime")} ${totalSec}s`];
+            if (ttftSec !== null) statusParts.push(`${translate("status.firstToken")} ${ttftSec}s`);
+            if (response.usage) statusParts.push(`${response.usage.total_tokens} ${translate("status.tokens")}`);
 
-            setStatus(`Respuesta recibida — ${statusParts.join(", ")}`);
+            setStatus(`${translate("status.responseReceived")} — ${statusParts.join(", ")}`);
 
             return "success";
         } catch (error) {
@@ -300,13 +303,13 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
 
                 return [...withoutEmptyAssistant, { id: errorId, text: message, type: "llm" }];
             });
-            setStatus(`Fallo: ${message}`);
+            setStatus(translate("status.failure", { message }));
 
             return "error";
         } finally {
             setLoading(false);
         }
-    }, [loading, sessionId]);
+    }, [loading, sessionId, translate, uiLanguage]);
 
     const resetConversation = useCallback(() => {
         setMessages([]);
@@ -316,8 +319,8 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
 
     const clearConversation = useCallback(() => {
         resetConversation();
-        setStatus("Listo");
-    }, [resetConversation]);
+        setStatus(translate("status.idle"));
+    }, [resetConversation, translate]);
 
     return {
         messages,

@@ -10,6 +10,7 @@ import NotesPanel from "../components/NotesPanel";
 import OptionsMenu from "../components/OptionsMenu";
 import ProblemPanel from "../components/ProblemPanel";
 import { DuckState, Message } from "../types";
+import { useTranslation } from "../i18n/LanguageContext";
 
 type ThemeMode = "dark" | "light";
 
@@ -100,6 +101,7 @@ export default function WorkspacePage({
     onGoSelector,
     onGoHome,
 }: WorkspacePageProps) {
+    const { translate } = useTranslation();
     const [notesVisible, setNotesVisible] = useState(false);
     const [outputTab, setOutputTab] = useState<"run" | "check">("run");
 
@@ -122,7 +124,7 @@ export default function WorkspacePage({
                     </button>
                     <div className="topbar-actions">
                         <button type="button" className="panel-quick-btn" onClick={onGoSelector}>
-                            Cambiar problema
+                            {translate("workspace.changeProblem")}
                         </button>
                         <OptionsMenu
                             themeMode={themeMode}
@@ -146,7 +148,7 @@ export default function WorkspacePage({
                                     </div>
 
                                     <button type="button" className="panel-toggle-btn" onClick={onHideChat}>
-                                        Ocultar
+                                        {translate("workspace.hide")}
                                     </button>
                                 </header>
 
@@ -166,20 +168,20 @@ export default function WorkspacePage({
                             <div
                                 className="resize-handle"
                                 onMouseDown={onChatResizeMouseDown}
-                                title="Arrastra para redimensionar"
+                                title={translate("workspace.resizeTitle")}
                             />
                         </>
                     ) : (
                         <aside className="collapsed-rail collapsed-rail-left">
-                            <button type="button" className="collapsed-rail-btn" onClick={onToggleChat} title="Mostrar chat">
-                                Chat
+                            <button type="button" className="collapsed-rail-btn" onClick={onToggleChat} title={translate("workspace.showChatTitle")}>
+                                {translate("workspace.chatLabel")}
                             </button>
                         </aside>
                     )}
 
                     <section className="editor-panel">
                         <div className="editor-runner-toolbar">
-                            <div className="language-toggle" role="group" aria-label="Lenguaje del editor">
+                            <div className="language-toggle" role="group" aria-label={translate("workspace.language.ariaLabel")}>
                                 <button
                                     type="button"
                                     className={`language-toggle-btn${language === "javascript" ? " language-toggle-btn--active" : ""}`}
@@ -198,29 +200,29 @@ export default function WorkspacePage({
                                 </button>
                             </div>
 
-                            <div className="run-test-group" role="group" aria-label="Ejecutar y comprobar">
+                            <div className="run-test-group" role="group" aria-label={translate("workspace.runTestGroup.ariaLabel")}>
                                 <button
                                     type="button"
                                     className="run-test-btn run-test-btn--run"
                                     onClick={onRunCode}
                                     disabled={runningCode || checking}
-                                    title="Ejecutar código"
+                                    title={translate("workspace.runCode.title")}
                                 >
-                                    {runningCode ? "Ejecutando..." : "Ejecutar"}
+                                    {runningCode ? translate("workspace.runCode.running") : translate("workspace.runCode.label")}
                                 </button>
                                 <button
                                     type="button"
                                     className="run-test-btn run-test-btn--test"
                                     onClick={handleCheckClick}
                                     disabled={!canCheck || checking || runningCode}
-                                    title={canCheck ? "Comprobar solución contra los tests" : "Este problema no tiene tests configurados"}
+                                    title={canCheck ? translate("workspace.check.titleEnabled") : translate("workspace.check.titleDisabled")}
                                 >
-                                    {checking ? "Comprobando..." : "Test"}
+                                    {checking ? translate("workspace.check.checking") : translate("workspace.check.label")}
                                 </button>
                             </div>
 
                             <span className="save-status">
-                                {isSavingCode ? "Guardando..." : "Guardado"}
+                                {isSavingCode ? translate("workspace.saving") : translate("workspace.saved")}
                             </span>
                         </div>
 
@@ -231,21 +233,21 @@ export default function WorkspacePage({
                             onChange={onEditorChange}
                         />
 
-                        <section className="editor-output" aria-label="Salida de ejecucion de codigo">
+                        <section className="editor-output" aria-label={translate("workspace.output.ariaLabel")}>
                             <div className="editor-output-tabs">
                                 <button
                                     type="button"
                                     className={`editor-output-tab${outputTab === "run" ? " editor-output-tab--active" : ""}`}
                                     onClick={() => setOutputTab("run")}
                                 >
-                                    Salida
+                                    {translate("workspace.output.run")}
                                 </button>
                                 <button
                                     type="button"
                                     className={`editor-output-tab${outputTab === "check" ? " editor-output-tab--active" : ""}`}
                                     onClick={() => setOutputTab("check")}
                                 >
-                                    Comprobación
+                                    {translate("workspace.output.check")}
                                 </button>
                             </div>
 
@@ -264,7 +266,7 @@ export default function WorkspacePage({
                             <div
                                 className="resize-handle"
                                 onMouseDown={onProblemResizeMouseDown}
-                                title="Arrastra para redimensionar"
+                                title={translate("workspace.resizeTitle")}
                             />
 
                             <aside className="problem-side" style={{ width: problemWidth, flexShrink: 0 }}>
@@ -291,7 +293,7 @@ export default function WorkspacePage({
                                             className="notes-show-btn"
                                             onClick={() => setNotesVisible(true)}
                                         >
-                                            + Mostrar notas
+                                            {translate("workspace.notes.show")}
                                         </button>
                                     )}
                                 </div>
@@ -299,8 +301,8 @@ export default function WorkspacePage({
                         </>
                     ) : (
                         <aside className="collapsed-rail collapsed-rail-right">
-                            <button type="button" className="collapsed-rail-btn" onClick={onToggleProblem} title="Mostrar enunciado">
-                                Enunciado
+                            <button type="button" className="collapsed-rail-btn" onClick={onToggleProblem} title={translate("workspace.showProblemTitle")}>
+                                {translate("workspace.problemLabel")}
                             </button>
                         </aside>
                     )}

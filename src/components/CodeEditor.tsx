@@ -7,21 +7,7 @@ import { python } from "@codemirror/lang-python";
 import { keymap } from "@codemirror/view";
 import { insertTab } from "@codemirror/commands";
 import type { CodeLanguage } from "../../shared/types";
-
-const PLACEHOLDER_JS = `// Escribe tu código JavaScript aquí...
-function saludar(nombre) {
-    console.log("¡Hola, " + nombre + "!");
-}
-
-saludar("Usuario");
-`;
-
-const PLACEHOLDER_PY = `# Escribe tu código Python aquí...
-def saludar(nombre):
-    print(f"¡Hola, {nombre}!")
-
-saludar("Usuario")
-`;
+import { useTranslation } from "../i18n/LanguageContext";
 
 interface CodeEditorProps {
     language?: CodeLanguage;
@@ -31,6 +17,7 @@ interface CodeEditorProps {
 }
 
 export default function CodeEditor({ language = "javascript", onEditorReady, initialCode, onChange }: CodeEditorProps) {
+    const { translate } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
     const viewRef = useRef<EditorView | null>(null);
     const languageRef = useRef<CodeLanguage>(language);
@@ -39,15 +26,18 @@ export default function CodeEditor({ language = "javascript", onEditorReady, ini
     useEffect(() => {
         if (!containerRef.current) return;
 
+        const placeholderJs = translate("editor.placeholder.js");
+        const placeholderPy = translate("editor.placeholder.python");
+
         const prevDoc = viewRef.current?.state.doc.toString();
         const prevLanguage = languageRef.current;
-        const prevPlaceholder = prevLanguage === "python" ? PLACEHOLDER_PY : PLACEHOLDER_JS;
+        const prevPlaceholder = prevLanguage === "python" ? placeholderPy : placeholderJs;
 
         viewRef.current?.destroy();
         viewRef.current = null;
 
         const langExtension = language === "python" ? python() : javascript();
-        const placeholder = language === "python" ? PLACEHOLDER_PY : PLACEHOLDER_JS;
+        const placeholder = language === "python" ? placeholderPy : placeholderJs;
 
         let doc: string;
         if (prevDoc === undefined) {

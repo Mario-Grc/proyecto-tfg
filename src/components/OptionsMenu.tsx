@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import useConfirmAction from "../hooks/useConfirmAction";
+import { useTranslation } from "../i18n/LanguageContext";
+import type { Language } from "../i18n/translations";
 
 interface OptionsMenuProps {
     themeMode: "dark" | "light";
@@ -12,6 +14,7 @@ export default function OptionsMenu({
     onToggleTheme,
     onClearConversation,
 }: OptionsMenuProps) {
+    const { translate, language, setLanguage } = useTranslation();
     const [open, setOpen] = useState(false);
     const { pending: clearPending, trigger: triggerClear } = useConfirmAction(onClearConversation);
 
@@ -33,6 +36,20 @@ export default function OptionsMenu({
         };
     }, [open]);
 
+    function renderLanguageButton(target: Language, label: string) {
+        const isActive = language === target;
+        return (
+            <button
+                type="button"
+                className={`options-item${isActive ? " is-active" : ""}`}
+                onClick={() => setLanguage(target)}
+                aria-pressed={isActive}
+            >
+                {label}
+            </button>
+        );
+    }
+
     return (
         <div className="options-menu">
             <button
@@ -43,7 +60,7 @@ export default function OptionsMenu({
                 aria-expanded={open}
                 aria-controls="app-settings-dialog"
             >
-                Ajustes
+                {translate("options.trigger")}
             </button>
 
             {open && (
@@ -58,39 +75,51 @@ export default function OptionsMenu({
                     >
                         <header className="options-modal-header">
                             <div>
-                                <h2 id="options-modal-title" className="options-modal-title">Ajustes</h2>
-                                <p className="options-modal-subtitle">Personaliza la interfaz y el estado de la sesión.</p>
+                                <h2 id="options-modal-title" className="options-modal-title">{translate("options.title")}</h2>
+                                <p className="options-modal-subtitle">{translate("options.subtitle")}</p>
                             </div>
                             <button
                                 type="button"
                                 className="options-close-btn"
                                 onClick={() => setOpen(false)}
-                                aria-label="Cerrar ajustes"
+                                aria-label={translate("options.closeAria")}
                             >
-                                Cerrar
+                                {translate("options.close")}
                             </button>
                         </header>
 
                         <div className="options-modal-body">
                             <section className="options-section">
-                                <h3 className="options-section-title">Apariencia</h3>
+                                <h3 className="options-section-title">{translate("options.section.appearance")}</h3>
                                 <button
                                     type="button"
                                     className="options-item"
                                     onClick={onToggleTheme}
                                 >
-                                    {themeMode === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+                                    {themeMode === "dark"
+                                        ? translate("options.toggleTheme.toLight")
+                                        : translate("options.toggleTheme.toDark")}
                                 </button>
                             </section>
 
                             <section className="options-section">
-                                <h3 className="options-section-title">Conversación</h3>
+                                <h3 className="options-section-title">{translate("options.section.language")}</h3>
+                                <div className="options-language-row">
+                                    {renderLanguageButton("es", translate("options.language.spanish"))}
+                                    {renderLanguageButton("en", translate("options.language.english"))}
+                                </div>
+                            </section>
+
+                            <section className="options-section">
+                                <h3 className="options-section-title">{translate("options.section.conversation")}</h3>
                                 <button
                                     type="button"
                                     className={`options-item danger${clearPending ? " confirming" : ""}`}
                                     onClick={triggerClear}
                                 >
-                                    {clearPending ? "¿Seguro? Pulsa de nuevo para confirmar" : "Borrar conversación"}
+                                    {clearPending
+                                        ? translate("options.clearConversation.confirm")
+                                        : translate("options.clearConversation")}
                                 </button>
                             </section>
                         </div>
