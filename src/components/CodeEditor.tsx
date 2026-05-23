@@ -21,6 +21,7 @@ export default function CodeEditor({ language = "javascript", onEditorReady, ini
     const containerRef = useRef<HTMLDivElement>(null);
     const viewRef = useRef<EditorView | null>(null);
     const languageRef = useRef<CodeLanguage>(language);
+    const lastDocRef = useRef<string | null>(null);
 
     // Recrear el editor cuando cambia el lenguaje
     useEffect(() => {
@@ -29,18 +30,16 @@ export default function CodeEditor({ language = "javascript", onEditorReady, ini
         const placeholderJs = translate("editor.placeholder.js");
         const placeholderPy = translate("editor.placeholder.python");
 
-        const prevDoc = viewRef.current?.state.doc.toString();
+        // hay que leer el contenido del ref porque el efecto anterior destruye la vista, poniendo el viewRef a null haciendo que se pierda el código
+        const prevDoc = lastDocRef.current;
         const prevLanguage = languageRef.current;
         const prevPlaceholder = prevLanguage === "python" ? placeholderPy : placeholderJs;
-
-        viewRef.current?.destroy();
-        viewRef.current = null;
 
         const langExtension = language === "python" ? python() : javascript();
         const placeholder = language === "python" ? placeholderPy : placeholderJs;
 
         let doc: string;
-        if (prevDoc === undefined) {
+        if (prevDoc === null) {
             doc = initialCode ?? placeholder;
         } else if (prevLanguage !== language) {
             // Si estaba "limpio" (solo el placeholder anterior), mostrar el nuevo placeholder.
@@ -51,6 +50,7 @@ export default function CodeEditor({ language = "javascript", onEditorReady, ini
         }
 
         languageRef.current = language;
+        lastDocRef.current = doc;
 
         const state = EditorState.create({
             doc,
@@ -60,8 +60,10 @@ export default function CodeEditor({ language = "javascript", onEditorReady, ini
                 oneDark,
                 keymap.of([{ key: "Tab", run: insertTab }]),
                 EditorView.updateListener.of((update) => {
-                    if (update.docChanged && onChange) {
-                        onChange(update.state.doc.toString());
+                    if (update.docChanged) {
+                        const value = update.state.doc.toString();
+                        lastDocRef.current = value;
+                        onChange?.(value);
                     }
                 }),
             ],
