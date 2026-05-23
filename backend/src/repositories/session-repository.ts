@@ -49,12 +49,6 @@ export class SessionRepository {
     LIMIT 1
   `);
 
-  private readonly touchStmt = this.db.prepare(`
-    UPDATE sessions
-    SET updated_at = CURRENT_TIMESTAMP
-    WHERE id = ?
-  `);
-
   private readonly updateCodeStmt = this.db.prepare(`
     UPDATE sessions
     SET editor_code = @editorCode, updated_at = CURRENT_TIMESTAMP
@@ -85,9 +79,5 @@ export class SessionRepository {
 
   updateCode(sessionId: string, editorCode: string | null): void {
     this.updateCodeStmt.run({ id: sessionId, editorCode });
-  }
-
-  touch(sessionId: string): void {
-    this.touchStmt.run(sessionId);
   }
 }

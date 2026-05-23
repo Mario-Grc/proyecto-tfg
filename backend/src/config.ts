@@ -1,7 +1,7 @@
 import path from "node:path";
 import dotenv from "dotenv";
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 function parsePort(rawPort: string | undefined): number {
   const parsed = Number(rawPort);

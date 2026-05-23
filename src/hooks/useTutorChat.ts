@@ -21,10 +21,6 @@ function getErrorMessage(error: unknown): string {
     return error instanceof Error ? error.message : "Error desconocido";
 }
 
-function buildContentForChat(trimmedText: string, _selectedCode: string): string {
-    return trimmedText;
-}
-
 function normalizeUserMessageForChat(text: string): string {
     const codeContextMarker = "\n\nEste es el codigo completo del editor actual del usuario:";
     const markerIndex = text.indexOf(codeContextMarker);
@@ -199,13 +195,12 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
 
         const normalizedEditorCode = editorCode.trim();
         const normalizedCode = selectedCode.trim();
-        const userContentForChat = buildContentForChat(trimmedText, normalizedCode);
 
         const userId = buildLocalMessageId("user", localMessageSeqRef.current++);
         const assistantId = buildLocalMessageId("assistant", localMessageSeqRef.current++);
         setMessages((prev) => [
             ...prev,
-            { id: userId, text: userContentForChat, type: "user" },
+            { id: userId, text: trimmedText, type: "user" },
             { id: assistantId, text: "", type: "llm" },
         ]);
 

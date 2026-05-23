@@ -51,8 +51,8 @@
 }
 
 .language-toggle-btn:hover:not(:disabled) {
-  background: var(--color-bg-hover, var(--color-bg-elevated));
-  color: var(--color-text-primary);
+  background: var(--color-bg-surface-muted);
+  color: var(--color-text-base);
 }
 
 .language-toggle-btn--active {
