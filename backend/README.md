@@ -23,7 +23,7 @@ Variables necesarias para el arranque:
 Variables por defecto (no hace falta editarlas para que funcione el proyecto, solo para personalizarlo):
 - `ENABLE_TOOL_CALLING`: activa o desactiva el uso de herramientas.
 - `TOOL_CALL_MAX_ROUNDS`: número máximo de llamadas a herramientas por mensaje.
-- `CODE_RUNNER_TIMEOUT_MS`: tiempo máximo de ejecución del runner de JavaScript.
+- `CODE_RUNNER_TIMEOUT_MS`: tiempo máximo de ejecución del runner de código (JavaScript y Python).
 - `CODE_RUNNER_MAX_CODE_CHARS`: límite de tamaño del código a ejecutar.
 - `DATA_DIR`: carpeta donde se guarda la base de datos.
 - `DB_FILE_NAME`: nombre del fichero SQLite.
@@ -37,8 +37,8 @@ Variables por defecto (no hace falta editarlas para que funcione el proyecto, so
 ## Estado actual
 
 El backend está estructurado usando un patrón Repository/Service robusto e incluye:
-- **Rutas API**: Endpoints para Chat (`/api/chat`), Problemas de programación (`/api/problems`) y Sesiones (`/api/sessions`).
+- **Rutas API**: Endpoints para Chat (`/api/chat`), Problemas de programación (`/api/problems`), Sesiones (`/api/sessions`) y Ejecución de código (`/api/run`).
 - **Base de datos**: Integración con `better-sqlite3`, sistema de migraciones (`db/migrations`) y seeds (datos iniciales).
-- **Herramientas LLM y MCP**: Motores para ejecutar JavaScript de forma segura (`code-runner`) e integración con Tavily vía el cliente MCP para búsquedas web.
+- **Herramientas LLM y MCP**: Motores para ejecutar JavaScript y Python de forma segura (`code-runner`) e integración con Tavily vía el cliente MCP para búsquedas web.
 - **Validación**: Validaciones de esquema con `zod`.
 - **Manejo de errores**: Middleware centralizado para manejo de errores y validaciones.

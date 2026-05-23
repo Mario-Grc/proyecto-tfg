@@ -1,12 +1,12 @@
-# TFG - Ayudante de aprendizaje (nombre provisional)
-**Actualmente en desarrollo ...**
+# QuackCode
+**TFG — Ayudante de aprendizaje con IA. Actualmente en desarrollo ...**
 
 Aplicación web para practicar problemas de programación con tres elementos principales:
-- editor de código
+- editor de código (JavaScript y Python)
 - chat con LLM local (LM Studio)
-- ejecución JavaScript en navegador
+- ejecución y comprobación del código con casos de prueba
 
-Esta aplicación implementa un entorno de apoyo al aprendizaje de programación basado en práctica guiada. El usuario selecciona un problema, desarrolla su solución en el editor, consulta dudas al asistente LLM local y valida su razonamiento mediante ejecución JavaScript básica.
+Esta aplicación implementa un entorno de apoyo al aprendizaje de programación basado en práctica guiada. El usuario selecciona un problema, desarrolla su solución en el editor, consulta dudas al asistente LLM local y valida su razonamiento ejecutando el código (JavaScript o Python) y comprobándolo contra los casos de prueba del problema. La interfaz está disponible en español e inglés.
 
 Además, el entorno cuenta con un compañero interactivo (un **pato de goma virtual**) que reacciona a tus acciones de forma dinámica. Dependiendo de si estás pensando un problema, ejecutando código o hablando por el chat, el pato cambiará su estado y expresiones para acompañarte, haciendo la experiencia de aprendizaje (y el famoso *Rubber Duck Debugging*) mucho más amena visualmente.
 
@@ -87,14 +87,18 @@ Para ejecutar el proyecto en tu máquina, sigue estos pasos:
 
     Edita `backend/.env` si quieres cambiar el puerto, la URL de LM Studio o activar la búsqueda en internet con Tavily. Con la configuración por defecto la aplicación funciona sin búsqueda web. Para más detalle sobre estas variables, consulta el [README](./backend/README.md) del backend.
 
-6. Ejecutar el backend (terminal 1):
+6. Ejecutar la aplicación. Opción recomendada: un solo comando desde la raíz que levanta backend y frontend a la vez:
     ```bash
-    cd backend
-    npm run dev
+    npm run dev:all
     ```
 
-7. Ejecutar el frontend (terminal 2, desde la raiz del proyecto):
+    Alternativa, en dos terminales:
     ```bash
+    # Terminal 1 (backend)
+    cd backend
+    npm run dev
+
+    # Terminal 2 (frontend, desde la raiz del proyecto)
     npm run dev
     ```
 
