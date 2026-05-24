@@ -7,12 +7,16 @@ interface OptionsMenuProps {
     themeMode: "dark" | "light";
     onToggleTheme: () => void;
     onClearConversation: () => void;
+    proactiveEnabled: boolean;
+    onToggleProactive: () => void;
 }
 
 export default function OptionsMenu({
     themeMode,
     onToggleTheme,
     onClearConversation,
+    proactiveEnabled,
+    onToggleProactive,
 }: OptionsMenuProps) {
     const { translate, language, setLanguage } = useTranslation();
     const [open, setOpen] = useState(false);
@@ -108,6 +112,20 @@ export default function OptionsMenu({
                                     {renderLanguageButton("es", translate("options.language.spanish"))}
                                     {renderLanguageButton("en", translate("options.language.english"))}
                                 </div>
+                            </section>
+
+                            <section className="options-section">
+                                <h3 className="options-section-title">{translate("options.section.proactive")}</h3>
+                                <button
+                                    type="button"
+                                    className={`options-item${proactiveEnabled ? " is-active" : ""}`}
+                                    onClick={onToggleProactive}
+                                    aria-pressed={proactiveEnabled}
+                                >
+                                    {proactiveEnabled
+                                        ? translate("options.proactive.on")
+                                        : translate("options.proactive.off")}
+                                </button>
                             </section>
 
                             <section className="options-section">

@@ -28,6 +28,11 @@ export default function useDuckState() {
         setDuckState("thinking");
     }, [clearResetTimeout]);
 
+    const setIdea = useCallback(() => {
+        clearResetTimeout();
+        setDuckState("idea");
+    }, [clearResetTimeout]);
+
     const setConfused = useCallback((durationMs = AUTO_RESET_MS) => {
         clearResetTimeout();
         setDuckState("confused");
@@ -66,5 +71,6 @@ export default function useDuckState() {
         setThinking,
         setConfused,
         setVictory,
+        setIdea,
     };
 }

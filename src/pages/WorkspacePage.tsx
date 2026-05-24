@@ -10,6 +10,7 @@ import NotesPanel from "../components/NotesPanel";
 import OptionsMenu from "../components/OptionsMenu";
 import ProblemPanel from "../components/ProblemPanel";
 import { DuckState, Message } from "../types";
+import type { ProactiveBubble } from "../hooks/useProactiveAssistant";
 import { useTranslation } from "../i18n/LanguageContext";
 
 type ThemeMode = "dark" | "light";
@@ -23,6 +24,11 @@ interface WorkspacePageProps {
     isSavingCode?: boolean;
     duckState: DuckState;
     duckCompact: boolean;
+    proactiveBubble: ProactiveBubble | null;
+    onAskInChat: () => void;
+    onDismissBubble: () => void;
+    proactiveEnabled: boolean;
+    onToggleProactive: () => void;
     runningCode: boolean;
     runOutput: string;
     checking: boolean;
@@ -67,6 +73,11 @@ export default function WorkspacePage({
     isSavingCode,
     duckState,
     duckCompact,
+    proactiveBubble,
+    onAskInChat,
+    onDismissBubble,
+    proactiveEnabled,
+    onToggleProactive,
     runningCode,
     runOutput,
     checking,
@@ -130,6 +141,8 @@ export default function WorkspacePage({
                             themeMode={themeMode}
                             onToggleTheme={onToggleTheme}
                             onClearConversation={onClearConversation}
+                            proactiveEnabled={proactiveEnabled}
+                            onToggleProactive={onToggleProactive}
                         />
                     </div>
                 </header>
@@ -144,6 +157,9 @@ export default function WorkspacePage({
                                             state={duckState}
                                             compact={duckCompact}
                                             onToggleCompact={onToggleDuckCompact}
+                                            bubble={proactiveBubble}
+                                            onAskInChat={onAskInChat}
+                                            onDismissBubble={onDismissBubble}
                                         />
                                     </div>
 

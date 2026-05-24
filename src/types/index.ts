@@ -4,4 +4,4 @@ export interface Message {
     type: "user" | "llm" | "tool";
 }
 
-export type DuckState = "normal" | "thinking" | "confused" | "victory";
+export type DuckState = "normal" | "thinking" | "confused" | "victory" | "idea";

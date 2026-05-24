@@ -306,6 +306,17 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
         }
     }, [loading, sessionId, translate, uiLanguage]);
 
+    const appendAssistantMessage = useCallback((text: string) => {
+        const trimmed = text.trim();
+
+        if (!trimmed) {
+            return;
+        }
+
+        const assistantId = buildLocalMessageId("assistant", localMessageSeqRef.current++);
+        setMessages((prev) => [...prev, { id: assistantId, text: trimmed, type: "llm" }]);
+    }, []);
+
     const resetConversation = useCallback(() => {
         setMessages([]);
         setInputText("");
@@ -325,6 +336,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
         inputText,
         setInputText,
         sendPrompt,
+        appendAssistantMessage,
         clearConversation,
         resetConversation,
     };

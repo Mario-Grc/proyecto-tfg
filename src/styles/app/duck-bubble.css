@@ -1,0 +1,130 @@
+/* Bocadillo del pato para las intervenciones proactivas */
+
+/* el widget permite que el bocadillo caiga debajo del avatar */
+.duck-widget {
+  flex-wrap: wrap;
+}
+
+.duck-bubble {
+  position: relative;
+  flex-basis: 100%;
+  margin-top: var(--space-4);
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  border: var(--border-width) solid var(--color-primary-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-message);
+  box-shadow: 0 6px 18px var(--color-shadow-soft);
+  animation: duck-bubble-in 0.25s ease;
+}
+
+/* cola del bocadillo apuntando hacia el pato */
+.duck-bubble::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  transform: translateX(-50%) rotate(45deg);
+  background: var(--color-bg-message);
+  border-top: var(--border-width) solid var(--color-primary-border);
+  border-left: var(--border-width) solid var(--color-primary-border);
+}
+
+.duck-bubble-content {
+  font-size: var(--font-size-sm);
+  line-height: 1.45;
+  color: var(--color-text-base);
+}
+
+.duck-bubble-content p {
+  margin: 0;
+}
+
+.duck-bubble-content p + p {
+  margin-top: var(--space-3);
+}
+
+.duck-bubble-content code {
+  padding: 1px var(--space-1);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-code-inline);
+  color: var(--color-text-base);
+  font-size: var(--font-size-code);
+}
+
+.duck-bubble-dismiss {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-2);
+  min-width: 22px;
+  min-height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.duck-bubble-dismiss:hover {
+  color: var(--color-text-base);
+  background: var(--color-bg-surface-muted);
+}
+
+.duck-bubble-actions {
+  margin-top: var(--space-3);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.duck-bubble-ask {
+  padding: var(--space-2) var(--space-5);
+  border: var(--border-width) solid var(--color-primary-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+
+.duck-bubble-ask:hover {
+  filter: brightness(1.08);
+}
+
+/* en modo compacto el bocadillo flota debajo del pato pequeno */
+.duck-widget.is-compact {
+  position: relative;
+}
+
+.duck-widget.is-compact .duck-bubble {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  left: 0;
+  z-index: 5;
+  flex-basis: auto;
+  width: min(18rem, 70vw);
+  margin-top: 0;
+}
+
+/* la cola del bocadillo se centra sobre el pato pequeno en modo compacto */
+.duck-widget.is-compact .duck-bubble::before {
+  left: 23px;
+}
+
+@keyframes duck-bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

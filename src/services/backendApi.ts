@@ -5,6 +5,8 @@ import type {
     ChatStreamEvent,
     CheckResult,
     CreateProblemInput,
+    ProactiveRequest,
+    ProactiveResponse,
     ProblemRecord,
     SessionMessageRecord,
     SessionRecord,
@@ -95,7 +97,6 @@ async function requestJson<TResponse>(path: string, init?: RequestInit): Promise
         headers.set("Accept", "application/json");
     }
 
-    // Set Content-Type only when the request actually sends a body.
     if (init?.body !== undefined && !headers.has("Content-Type")) {
         headers.set("Content-Type", "application/json");
     }
@@ -178,6 +179,17 @@ export async function fetchLatestSessionForProblem(problemId: string): Promise<S
 export async function fetchSessionMessages(sessionId: string): Promise<SessionMessageRecord[]> {
     return requestJson<SessionMessageRecord[]>(`/sessions/${encodeURIComponent(sessionId)}/messages`, {
         method: "GET",
+    });
+}
+
+export async function requestProactiveIntervention(
+    payload: ProactiveRequest,
+    signal?: AbortSignal,
+): Promise<ProactiveResponse> {
+    return requestJson<ProactiveResponse>("/proactive", {
+        method: "POST",
+        body: JSON.stringify(payload),
+        signal,
     });
 }
 

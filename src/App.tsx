@@ -19,6 +19,7 @@ import useDuckState from "./hooks/useDuckState";
 import useCodeRunner from "./hooks/useCodeRunner";
 import usePersistentState from "./hooks/usePersistentState";
 import useTutorChat from "./hooks/useTutorChat";
+import useProactiveAssistant from "./hooks/useProactiveAssistant";
 import useWorkspacePanels from "./hooks/useWorkspacePanels";
 import { useTranslation } from "./i18n/LanguageContext";
 import "./App.css";
@@ -27,7 +28,7 @@ type ThemeMode = "dark" | "light";
 type AppView = "landing" | "selector" | "create-problem" | "edit-problem" | "workspace";
 
 function App() {
-    const { translate } = useTranslation();
+    const { translate, language: uiLanguage } = useTranslation();
 
     function getErrorMessage(error: unknown): string {
         return error instanceof Error ? error.message : translate("create.error.unknown");
@@ -51,6 +52,7 @@ function App() {
         inputText,
         setInputText,
         sendPrompt,
+        appendAssistantMessage,
         clearConversation,
         resetConversation,
     } = useTutorChat({
@@ -68,8 +70,10 @@ function App() {
         setThinking,
         setConfused,
         setVictory,
+        setIdea,
     } = useDuckState();
     const [language, setLanguage] = usePersistentState<CodeLanguage>("editor_language", "javascript");
+    const [proactiveEnabled, setProactiveEnabled] = usePersistentState<boolean>("proactive_enabled", true);
     const { runningCode, runOutput, runCode } = useCodeRunner(language);
     const {
         chatVisible,
@@ -87,6 +91,30 @@ function App() {
     const [initialEditorCode, setInitialEditorCode] = useState<string | null>(null);
     const [isSavingCode, setIsSavingCode] = useState(false);
     const saveCodeTimeoutRef = useRef<number | null>(null);
+
+    const proactive = useProactiveAssistant({
+        sessionId: activeSessionId,
+        enabled: proactiveEnabled,
+        language,
+        uiLanguage,
+        getEditorCode,
+        onIntervention: (message) => {
+            appendAssistantMessage(message);
+            setIdea();
+        },
+    });
+
+    function handleAskInChat() {
+        setChatVisible(true);
+        proactive.dismissBubble();
+        setNormal();
+        window.setTimeout(() => chatTextareaRef.current?.focus(), 0);
+    }
+
+    function handleDismissBubble() {
+        proactive.dismissBubble();
+        setNormal();
+    }
 
     const selectedProblem = selectedProblemId
         ? problems.find((problem) => problem.id === selectedProblemId)
@@ -198,6 +226,9 @@ function App() {
             } else {
                 setConfused();
             }
+
+            // el asistente evalua el resultado, pista si falla o reset si bien
+            proactive.notifyTestResult(result);
         } catch (error) {
             const message = getErrorMessage(error);
             setCheckResult({ tests: [], harnessError: message, allPassed: false });
@@ -485,6 +516,9 @@ function App() {
             isSavingCode={isSavingCode}
             duckState={duckState}
             duckCompact={duckCompact}
+            proactiveBubble={proactive.bubble}
+            onAskInChat={handleAskInChat}
+            onDismissBubble={handleDismissBubble}
             runningCode={runningCode}
             runOutput={runOutput}
             checking={checking}
@@ -510,6 +544,8 @@ function App() {
             onCheckSolution={() => { void handleCheckSolution(); }}
             onToggleTheme={toggleTheme}
             onClearConversation={handleClearConversation}
+            proactiveEnabled={proactiveEnabled}
+            onToggleProactive={() => setProactiveEnabled((prev) => !prev)}
             onToggleChat={() => setChatVisible((prev) => !prev)}
             onToggleProblem={() => setProblemVisible((prev) => !prev)}
             onHideChat={() => setChatVisible(false)}
