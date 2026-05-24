@@ -97,11 +97,9 @@ interface ToolDecisionResult {
 }
 
 const BASE_SYSTEM_PROMPT = [
-  "Eres un asistente tutor para aprender programacion.",
-  "Tu objetivo principal es ayudar al usuario a entender, no solo dar la respuesta final.",
-  "Explica el razonamiento paso a paso cuando sea util, resuelve dudas concretas y propone ejemplos pequenos.",
-  "Adapta el nivel de detalle a las preguntas del usuario y verifica que los conceptos queden claros.",
-  "Si no tienes suficiente contexto de codigo para responder con precision, pide al usuario un fragmento concreto del editor.",
+  "Eres un pato tutor que ayuda a aprender a programar.",
+  "Guía con pistas y preguntas para que el usuario llegue a la solución por sí mismo; no le des la solución completa de entrada, solo profundiza más si te la pide.",
+  "Explica con ejemplos pequeños y adapta el detalle a su nivel.",
 ].join(" ");
 
 function buildToolInstructions(): string {
@@ -111,17 +109,17 @@ function buildToolInstructions(): string {
 
   const instructions = [
     "Herramientas disponibles:",
-    "- ejecutar_codigo: usala cuando el usuario pida ejecutar, probar, depurar o validar codigo JavaScript.",
-    "- ejecutar_python: usala cuando el usuario pida ejecutar, probar, depurar o validar codigo Python.",
+    "- ejecutar_codigo: úsala cuando el usuario pida ejecutar, probar, depurar o validar código JavaScript.",
+    "- ejecutar_python: úsala cuando el usuario pida ejecutar, probar, depurar o validar código Python.",
   ];
 
   if (config.enableMcpWebSearch) {
-    instructions.push("- buscar_web: usala cuando necesites informacion actualizada o externa en internet.");
+    instructions.push("- buscar_web: úsala cuando necesites información actualizada o externa en internet.");
   }
 
   instructions.push(
     "Reglas de uso:",
-    "- Si una herramienta puede verificar la respuesta, usala en lugar de inventar el resultado.",
+    "- Si una herramienta puede verificar la respuesta, úsala en lugar de inventar el resultado.",
     "- No describas una salida como si la hubieras ejecutado si no has llamado a la herramienta.",
     "- Cuando uses una herramienta, espera su resultado y responde con base en ese resultado.",
     "- Si no hace falta ninguna herramienta, responde normalmente.",
@@ -146,9 +144,9 @@ function buildSystemPrompt(
     BASE_SYSTEM_PROMPT,
     buildToolInstructions(),
     "Contexto del problema activo:",
-    `Titulo: ${problemTitle}`,
+    `Título: ${problemTitle}`,
     `Enunciado:\n${problemStatement}`,
-    "No inventes requisitos que no esten en el enunciado.",
+    "No inventes requisitos que no estén en el enunciado.",
     buildLanguageInstruction(responseLanguage),
   ].filter((part) => part.length > 0).join("\n\n");
 }

@@ -59,11 +59,11 @@ const MAX_FAILING_TESTS_IN_PROMPT = 3;
 const SILENCE_SENTINEL = "SILENCIO";
 
 const BASE_PROACTIVE_PROMPT = [
-  "Eres un pato tutor que ayuda a aprender programacion.",
-  "Ahora intervienes de forma PROACTIVA: el usuario NO te ha preguntado nada.",
-  "Se MUY breve (1 o 2 frases), cercano y socratico.",
-  "Da una pista o una pregunta que le haga pensar; NUNCA escribas la solucion completa ni el codigo final.",
-  "No repitas algo que ya hayas dicho antes en la conversacion.",
+  "Eres un pato tutor que ayuda a aprender programacion, ahora estás acompañando a alguien mientras programa.",
+  "Ahora intervienes de forma PROACTIVA: el usuario NO te ha preguntado nada, así que sé prudente.",
+  "Se MUY breve (1 o 2 frases), cercano y socrático.",
+  "Da una pista o una pregunta que le haga pensar; NUNCA escribas la solución completa ni el código final.",
+  "No repitas algo que ya hayas dicho antes en la conversación.",
 ].join(" ");
 
 function normalizeErrorDetails(error: unknown): Record<string, unknown> {
@@ -94,22 +94,22 @@ function buildProactiveSystemPrompt(
 ): string {
   const triggerGuidance = trigger === "idle"
     ? [
-        "El usuario lleva un rato sin avanzar en su codigo.",
-        `Mira su codigo: si va por buen camino o no hay nada util que anadir, responde EXACTAMENTE '${SILENCE_SENTINEL}' y nada mas.`,
-        "Solo si esta claramente atascado o se ha equivocado, dale una pista muy breve.",
+        "El usuario lleva un rato sin avanzar en su código.",
+        `Mira su código: si va por buen camino o no hay nada útil que añadir, responde EXACTAMENTE ${SILENCE_SENTINEL} y nada más.`,
+        "Solo si está claramente atascado o se ha equivocado, dale una pista muy breve.",
       ].join(" ")
     : [
         "El usuario acaba de ejecutar los tests y han fallado.",
-        "Comenta la causa probable del fallo a partir de los casos que fallan, sin dar la solucion.",
+        "Comenta la causa probable del fallo a partir de los casos que fallan, sin dar la solución.",
       ].join(" ");
 
   return [
     BASE_PROACTIVE_PROMPT,
     triggerGuidance,
     "Contexto del problema activo:",
-    `Titulo: ${problemTitle}`,
+    `Título: ${problemTitle}`,
     `Enunciado:\n${problemStatement}`,
-    "No inventes requisitos que no esten en el enunciado.",
+    "No inventes requisitos que no estén en el enunciado.",
     buildLanguageInstruction(responseLanguage),
   ].filter((part) => part.length > 0).join("\n\n");
 }
@@ -154,32 +154,32 @@ function buildTriggerInstruction(input: ProactiveRequestInput): string {
       buildFailingTestsText(input.testSummary),
     );
   } else {
-    sections.push("El usuario lleva un rato sin tocar el codigo.");
+    sections.push("El usuario lleva un rato sin tocar el código.");
   }
 
   if (editorCode) {
-    sections.push("Codigo actual del editor:", `\`\`\`${language}`, editorCode, "```");
+    sections.push("Código actual del editor:", `\`\`\`${language}`, editorCode, "```");
   } else {
-    sections.push("El editor esta practicamente vacio.");
+    sections.push("El editor está prácticamente vacío.");
   }
 
   sections.push(
     input.trigger === "idle"
-      ? `Decide si conviene intervenir. Si no, responde '${SILENCE_SENTINEL}'.`
-      : "Dale una pista breve para que descubra el fallo por si mismo.",
+      ? `Decide si conviene intervenir. Si no, responde ${SILENCE_SENTINEL}.`
+      : "Dale una pista breve para que descubra el fallo por sí mismo.",
   );
 
   return sections.join("\n");
 }
 
 function isSilence(text: string): boolean {
-  const normalized = text.trim().toUpperCase();
+  // quitamos comillas, puntuación y espacios para detectar el silencio aunque venga adornado
+  const normalized = text.trim().toUpperCase().replace(/[^A-ZÑ]/g, "");
 
   if (!normalized) {
     return true;
   }
 
-  // si el modelo responde 'SILENCIO', 'SILENCIO.' o similar se interpreta igual
   return normalized.startsWith(SILENCE_SENTINEL);
 }
 

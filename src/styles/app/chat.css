@@ -40,9 +40,11 @@
 .llm-message {
   background: transparent;
   align-self: flex-start;
+  width: 100%;
   color: var(--color-text-base);
-  padding: 0;
+  padding: 0 0 var(--space-6);
   max-width: 100%;
+  border-bottom: var(--border-width) solid var(--color-border-soft);
 }
 
 .tool-message {
