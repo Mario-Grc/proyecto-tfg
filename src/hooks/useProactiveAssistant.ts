@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { CheckResult, CodeLanguage, ProactiveTestSummary, ProactiveTrigger } from "../../shared/types";
+import type { CheckResult, CodeLanguage, ProactiveRequest, ProactiveTestSummary, ProactiveTrigger } from "../../shared/types";
 import { requestProactiveIntervention } from "../services/backendApi";
 import type { Language } from "../i18n/translations";
 
@@ -7,6 +7,10 @@ const COOLDOWN_MS = 90_000;
 const TEST_FAIL_MIN_STREAK = 2;
 // cuantos test resumir
 const MAX_FAILING_TESTS = 3;
+// pausa sin teclear antes de poder chequear
+const SETTLE_MS = 4_000;
+// minimo entre chequeos idle al LLM
+const IDLE_CHECK_INTERVAL_MS = 60_000;
 
 export interface ProactiveBubble {
     message: string;
@@ -18,6 +22,7 @@ interface UseProactiveAssistantOptions {
     enabled: boolean;
     language: CodeLanguage;
     uiLanguage: Language;
+    chatLoading: boolean;
     getEditorCode: () => string;
     onIntervention: (message: string, trigger: ProactiveTrigger) => void;
 }
@@ -45,6 +50,7 @@ export default function useProactiveAssistant({
     enabled,
     language,
     uiLanguage,
+    chatLoading,
     getEditorCode,
     onIntervention,
 }: UseProactiveAssistantOptions) {
@@ -53,6 +59,12 @@ export default function useProactiveAssistant({
     const lastInterventionAtRef = useRef<number>(0);
     const testFailStreakRef = useRef<number>(0);
     const abortRef = useRef<AbortController | null>(null);
+
+    // Estado del chequeo periodico (idle).
+    const lastCodeRef = useRef<string>("");
+    const lastCheckedCodeRef = useRef<string>("");
+    const lastIdleCheckAtRef = useRef<number>(0);
+    const idleTimerRef = useRef<number | null>(null);
 
     // Refs para leer los valores mas recientes sin re-crear callbacks.
     const onInterventionRef = useRef(onIntervention);
@@ -66,15 +78,6 @@ export default function useProactiveAssistant({
         getEditorCodeRef.current = getEditorCode;
     }, [getEditorCode]);
 
-    // resetear contadores y cancelar peticiones en el cambio
-    useEffect(() => {
-        lastInterventionAtRef.current = 0;
-        testFailStreakRef.current = 0;
-        abortRef.current?.abort();
-        abortRef.current = null;
-        setBubble(null);
-    }, [sessionId]);
-
     const dismissBubble = useCallback(() => {
         setBubble(null);
     }, []);
@@ -84,6 +87,32 @@ export default function useProactiveAssistant({
         setBubble({ message, trigger });
         onInterventionRef.current(message, trigger);
     }, []);
+
+    // Lanza la peticion cancelando cualquier otra en vuelo y muestra la pista si la hay.
+    const runProactiveRequest = useCallback((payload: ProactiveRequest) => {
+        abortRef.current?.abort();
+        const controller = new AbortController();
+        abortRef.current = controller;
+
+        void requestProactiveIntervention(payload, controller.signal)
+            .then((response) => {
+                if (controller.signal.aborted) {
+                    return;
+                }
+
+                if (response.intervene && response.message) {
+                    surface(response.message, response.trigger);
+                }
+            })
+            .catch((error) => {
+                if (controller.signal.aborted) {
+                    return;
+                }
+
+                // la proactividad nunca debe molestar al usuario con errores
+                console.error("Proactive intervention failed:", error);
+            });
+    }, [surface]);
 
     // Filtro mecanico comun: interruptor, sesion y cooldown.
     const canIntervene = useCallback(() => {
@@ -111,47 +140,99 @@ export default function useProactiveAssistant({
             return;
         }
 
-        const summary = buildTestSummary(result);
+        testFailStreakRef.current = 0;
         const editorCode = getEditorCodeRef.current().trim();
 
+        runProactiveRequest({
+            sessionId,
+            trigger: "test_failure",
+            language,
+            responseLanguage: uiLanguage,
+            editorCode: editorCode || undefined,
+            testSummary: buildTestSummary(result),
+        });
+    }, [sessionId, language, uiLanguage, canIntervene, runProactiveRequest]);
+
+    // Chequeo periodico de atasco: tras la micro-pausa decide si pedir una pista.
+    const maybeIdleCheck = useCallback(() => {
+        const code = lastCodeRef.current.trim();
+
+        if (!code || !sessionId || !enabled || chatLoading) {
+            return;
+        }
+
+        if (Date.now() - lastIdleCheckAtRef.current < IDLE_CHECK_INTERVAL_MS) {
+            return;
+        }
+
+        if (!canIntervene() || code === lastCheckedCodeRef.current) {
+            return;
+        }
+
+        lastIdleCheckAtRef.current = Date.now();
+        lastCheckedCodeRef.current = code;
+
+        runProactiveRequest({
+            sessionId,
+            trigger: "idle",
+            language,
+            responseLanguage: uiLanguage,
+            editorCode: code,
+        });
+    }, [sessionId, enabled, chatLoading, language, uiLanguage, canIntervene, runProactiveRequest]);
+
+    const maybeIdleCheckRef = useRef(maybeIdleCheck);
+
+    useEffect(() => {
+        maybeIdleCheckRef.current = maybeIdleCheck;
+    }, [maybeIdleCheck]);
+
+    // Cada edicion: guarda el codigo, cancela peticiones en vuelo y rearma la micro-pausa.
+    const notifyEdit = useCallback((code: string) => {
+        lastCodeRef.current = code;
         abortRef.current?.abort();
-        const controller = new AbortController();
-        abortRef.current = controller;
 
-        void requestProactiveIntervention(
-            {
-                sessionId,
-                trigger: "test_failure",
-                language,
-                responseLanguage: uiLanguage,
-                editorCode: editorCode || undefined,
-                testSummary: summary,
-            },
-            controller.signal,
-        )
-            .then((response) => {
-                if (controller.signal.aborted) {
-                    return;
-                }
+        if (idleTimerRef.current !== null) {
+            window.clearTimeout(idleTimerRef.current);
+        }
 
-                if (response.intervene && response.message) {
-                    testFailStreakRef.current = 0;
-                    surface(response.message, "test_failure");
-                }
-            })
-            .catch((error) => {
-                if (controller.signal.aborted) {
-                    return;
-                }
+        idleTimerRef.current = window.setTimeout(() => {
+            idleTimerRef.current = null;
+            maybeIdleCheckRef.current();
+        }, SETTLE_MS);
+    }, []);
 
-                // la proactividad nunca debe molestar al usuario con errores
-                console.error("Proactive intervention failed:", error);
-            });
-    }, [sessionId, language, uiLanguage, canIntervene, surface]);
+    // Resetear estado y cancelar todo al cambiar de sesion.
+    useEffect(() => {
+        lastInterventionAtRef.current = 0;
+        testFailStreakRef.current = 0;
+        lastIdleCheckAtRef.current = 0;
+        lastCodeRef.current = "";
+        lastCheckedCodeRef.current = "";
+
+        if (idleTimerRef.current !== null) {
+            window.clearTimeout(idleTimerRef.current);
+            idleTimerRef.current = null;
+        }
+
+        abortRef.current?.abort();
+        abortRef.current = null;
+        setBubble(null);
+    }, [sessionId]);
+
+    // Limpieza al desmontar.
+    useEffect(() => () => {
+        if (idleTimerRef.current !== null) {
+            window.clearTimeout(idleTimerRef.current);
+        }
+
+        abortRef.current?.abort();
+    }, []);
 
     return {
         bubble,
         dismissBubble,
         notifyTestResult,
+        notifyEdit,
     };
 }

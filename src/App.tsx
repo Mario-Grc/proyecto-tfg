@@ -97,6 +97,7 @@ function App() {
         enabled: proactiveEnabled,
         language,
         uiLanguage,
+        chatLoading: loading,
         getEditorCode,
         onIntervention: (message) => {
             appendAssistantMessage(message);
@@ -161,6 +162,8 @@ function App() {
     const handleEditorChange = useCallback((code: string) => {
         if (!activeSessionId) return;
 
+        proactive.notifyEdit(code);
+
         if (saveCodeTimeoutRef.current !== null) {
             clearTimeout(saveCodeTimeoutRef.current);
         }
@@ -175,7 +178,7 @@ function App() {
                     setIsSavingCode(false);
                 });
         }, 2000);
-    }, [activeSessionId]);
+    }, [activeSessionId, proactive.notifyEdit]);
 
     useEffect(() => {
         return () => {
