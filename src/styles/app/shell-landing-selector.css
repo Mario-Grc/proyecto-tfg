@@ -239,6 +239,34 @@
   grid-column: 1 / -1;
 }
 
+.create-problem-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.create-problem-copy-btn {
+  padding: var(--space-1) var(--space-3);
+  border: var(--border-width) solid var(--color-border-soft);
+  background: var(--color-bg-surface-muted);
+  color: var(--color-text-base);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.create-problem-copy-btn:hover:not(:disabled) {
+  background: var(--color-bg-panel);
+  border-color: var(--color-border-muted);
+}
+
+.create-problem-copy-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .create-problem-input,
 .create-problem-select,
 .create-problem-textarea {

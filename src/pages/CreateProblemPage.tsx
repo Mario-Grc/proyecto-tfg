@@ -34,6 +34,17 @@ export default function CreateProblemPage({ onBack, onSubmit, editingProblem }: 
     );
     const [submitting, setSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [copyState, setCopyState] = useState<"idle" | "copied">("idle");
+
+    async function handleCopyTemplate() {
+        try {
+            await navigator.clipboard.writeText(TEST_CASES_PLACEHOLDER);
+            setCopyState("copied");
+            window.setTimeout(() => setCopyState("idle"), 1400);
+        } catch {
+            // si el portapapeles falla no molestamos al usuario
+        }
+    }
 
     async function handleSubmit(event: { preventDefault(): void }) {
         event.preventDefault();
@@ -194,7 +205,19 @@ export default function CreateProblemPage({ onBack, onSubmit, editingProblem }: 
                         </label>
 
                         <label className="create-problem-field create-problem-field-full">
-                            <span>{translate("create.field.testCases")}</span>
+                            <span className="create-problem-label-row">
+                                <span>{translate("create.field.testCases")}</span>
+                                <button
+                                    type="button"
+                                    className="create-problem-copy-btn"
+                                    onClick={handleCopyTemplate}
+                                    disabled={submitting}
+                                >
+                                    {copyState === "copied"
+                                        ? translate("create.testCases.copied")
+                                        : translate("create.testCases.copyTemplate")}
+                                </button>
+                            </span>
                             <textarea
                                 className="create-problem-textarea create-problem-textarea--short"
                                 value={testCasesRaw}
