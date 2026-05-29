@@ -194,12 +194,14 @@
 .selector-screen {
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   gap: var(--space-6);
 }
 
 .create-problem-screen {
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
 }
 
 .create-problem-surface {
@@ -207,6 +209,7 @@
   margin: 0 auto;
   display: grid;
   gap: var(--space-5);
+  padding-top: clamp(12px, 3vh, 32px);
 }
 
 .create-problem-form {
