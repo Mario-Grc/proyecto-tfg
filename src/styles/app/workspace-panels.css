@@ -478,7 +478,7 @@
 }
 
 .duck-widget.is-compact {
-  position: static;
+  position: relative;
   width: auto;
   display: inline-flex;
   align-items: center;

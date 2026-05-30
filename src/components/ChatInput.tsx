@@ -62,15 +62,15 @@ export default function ChatInput({ value, onChange, onSend, disabled, textareaR
                     required
                 />
 
-                <div className="chat-form-actions">
-                    <div className="chat-form-actions-left">
-                        {/* Se eliminó el botón de Insertar código porque ya se envía el código completo automáticamente */}
-                    </div>
-
-                    <button type="submit" className="chat-btn-send" disabled={disabled || !value.trim()}>
-                        {translate("chat.send")}
-                    </button>
-                </div>
+                <button
+                    type="submit"
+                    className="chat-btn-send"
+                    disabled={disabled || !value.trim()}
+                    title={translate("chat.send")}
+                    aria-label={translate("chat.send")}
+                >
+                    <span className="chat-btn-send-icon" aria-hidden="true" />
+                </button>
             </div>
         </form>
     );
