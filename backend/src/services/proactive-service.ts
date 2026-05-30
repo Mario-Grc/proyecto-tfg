@@ -5,7 +5,6 @@ import { ProblemRepository } from "../repositories/problem-repository";
 import { SessionRepository } from "../repositories/session-repository";
 
 // Tipos duplicados localmente: el backend no puede importar de shared/types por su rootDir:src
-// (mismo patron que chat-service.ts y check-service.ts).
 type ProactiveTrigger = "test_failure" | "idle";
 
 interface ProactiveFailingTest {
@@ -52,7 +51,8 @@ interface LMStudioNonStreamResponse {
 // max numero de mensajes de historial que se envian al llm
 const MAX_HISTORY_MESSAGES = 10;
 // Max de tokens de la intervencion para que sea corta
-const PROACTIVE_MAX_TOKENS = 256;
+const PROACTIVE_MAX_TOKENS = 512;
+
 // número maximo de tests que fallan que se describen al LLM
 const MAX_FAILING_TESTS_IN_PROMPT = 3;
 // palabra que el LLM responde cuando decide no decir nada
