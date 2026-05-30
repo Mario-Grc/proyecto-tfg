@@ -1,5 +1,5 @@
 # QuackCode
-**TFG — Ayudante de aprendizaje con IA. Actualmente en desarrollo ...**
+**TFG - Ayudante de aprendizaje con IA. Actualmente en desarrollo ...**
 
 Aplicación web para practicar problemas de programación con tres elementos principales:
 - editor de código (JavaScript y Python)
@@ -87,7 +87,7 @@ Para ejecutar el proyecto en tu máquina, sigue estos pasos:
 
     Edita `backend/.env` si quieres cambiar el puerto, la URL de LM Studio o activar la búsqueda en internet con Tavily. Con la configuración por defecto la aplicación funciona sin búsqueda web. Para más detalle sobre estas variables, consulta el [README](./backend/README.md) del backend.
 
-6. Ejecutar la aplicación. Opción recomendada: un solo comando desde la raíz que levanta backend y frontend a la vez:
+6. Ejecutar la aplicación. La opción recomendada es con un solo comando desde la raíz que levanta backend y frontend a la vez:
     ```bash
     npm run dev:all
     ```
