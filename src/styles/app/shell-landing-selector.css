@@ -30,12 +30,24 @@
   justify-content: center;
 }
 
+.landing-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  align-items: center;
+}
+
 .landing-container {
-  width: min(800px, 100%);
+  width: min(1080px, 100%);
   display: flex;
   flex-direction: column;
   gap: 3rem;
-  padding-top: 5vh;
+}
+
+.landing-layout {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: var(--space-8);
+  align-items: stretch;
 }
 
 .landing-hero {
@@ -43,6 +55,33 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 1.25rem;
+}
+
+.landing-divider-vertical {
+  width: 1px;
+  background: var(--color-border-soft);
+  align-self: stretch;
+}
+
+.landing-duck-corner {
+  position: fixed;
+  bottom: -40px;
+  left: clamp(16px, 3vw, 32px);
+  width: clamp(140px, 16vw, 200px);
+  height: auto;
+  user-select: none;
+  z-index: 1;
+  cursor: pointer;
+}
+
+.landing-duck-corner.is-pressed {
+  animation: duck-pulse 0.24s ease-in-out;
+}
+
+@keyframes duck-pulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.92); }
+  100% { transform: scale(1); }
 }
 
 .landing-badge {
@@ -65,6 +104,10 @@
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.02em;
+  color: var(--color-text-base);
+}
+
+.landing-title-accent {
   color: var(--color-text-heading);
 }
 
@@ -121,39 +164,50 @@
   border-color: var(--color-text-base);
 }
 
-.landing-divider {
-  width: 100%;
-  height: 1px;
-  background: var(--color-border-soft);
+.landing-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
 }
 
-.landing-steps {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 2rem;
+.landing-steps-overline {
+  margin: 0;
+  font-family: var(--font-family-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  color: var(--color-text-muted);
+  font-weight: 600;
 }
 
 .landing-step {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-5);
+  align-items: baseline;
 }
 
 .step-number {
   font-family: var(--font-family-mono);
   font-size: 0.875rem;
-  color: var(--color-text-muted);
+  font-weight: 600;
+  color: var(--color-text-heading);
 }
 
-.landing-step h2 {
+.landing-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.landing-step-body h3 {
   margin: 0;
   font-family: "Space Grotesk", var(--font-family-heading);
-  font-size: 1.125rem;
+  font-size: 1.0625rem;
   font-weight: 600;
   color: var(--color-text-base);
 }
 
-.landing-step p {
+.landing-step-body p {
   margin: 0;
   font-size: 0.9375rem;
   line-height: 1.5;
@@ -506,6 +560,19 @@
 
   .landing-actions button {
     width: 100%;
+  }
+
+  .landing-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .landing-divider-vertical {
+    display: none;
+  }
+
+  .landing-duck-corner {
+    display: none;
   }
 
   .problem-card {

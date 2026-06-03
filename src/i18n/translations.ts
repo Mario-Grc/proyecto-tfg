@@ -41,9 +41,10 @@ export const translations: Record<Language, Record<string, string>> = {
         "notes.placeholder": "Escribe aquí tus notas...",
 
         // Landing page
-        "landing.subtitle": "Mejora tu lógica de programación con un tutor integrado. Lee, piensa, codifica y entiende el porqué de cada solución.",
+        "landing.subtitle": "Mejora tu lógica de programación con un tutor integrado que no espera a que preguntes. Lee, piensa, codifica y entiende el porqué de cada solución.",
         "landing.start": "Comenzar",
         "landing.continue": "Continuar sesión",
+        "landing.howItWorks": "CÓMO FUNCIONA",
         "landing.step1.title": "Selecciona un problema",
         "landing.step1.desc": "Escoge un reto acorde a tu nivel. La idea es mantener una práctica constante y focalizada.",
         "landing.step2.title": "Piensa y ejecuta",
@@ -230,9 +231,10 @@ export const translations: Record<Language, Record<string, string>> = {
         "notes.placeholder": "Write your notes here...",
 
         // Landing page
-        "landing.subtitle": "Improve your programming logic with an integrated tutor. Read, think, code and understand the why behind every solution.",
+        "landing.subtitle": "Improve your programming logic with an integrated tutor that doesn't wait for you to ask. Read, think, code and understand the why behind every solution.",
         "landing.start": "Start",
         "landing.continue": "Continue session",
+        "landing.howItWorks": "HOW IT WORKS",
         "landing.step1.title": "Pick a problem",
         "landing.step1.desc": "Choose a challenge that matches your level. The idea is to keep a steady, focused practice.",
         "landing.step2.title": "Think and run",
