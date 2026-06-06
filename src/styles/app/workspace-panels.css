@@ -564,6 +564,20 @@ html[data-theme="light"] .run-test-btn--test {
   flex: 1;
   min-height: 0;
   overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-soft) transparent;
+}
+
+.problem-split-top::-webkit-scrollbar,
+.problem-markdown::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.problem-split-top::-webkit-scrollbar-thumb,
+.problem-markdown::-webkit-scrollbar-thumb {
+  background: var(--color-border-soft);
+  border-radius: var(--radius-sm);
 }
 
 .problem-split-bottom {
@@ -705,6 +719,8 @@ html[data-theme="light"] .run-test-btn--test {
   width: 100%;
   height: 100%;
   overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-soft) transparent;
   background: color-mix(in srgb, var(--color-bg-panel) 80%, var(--color-bg-surface) 20%);
   border-radius: var(--radius-md);
   padding: var(--space-4);
