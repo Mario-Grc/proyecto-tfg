@@ -51,7 +51,7 @@ export const translations: Record<Language, Record<string, string>> = {
         "landing.step2.title": "Piensa y ejecuta",
         "landing.step2.desc": "Usa el editor al lado de las instrucciones. Ejecuta y prueba tu código al instante para validar tu lógica.",
         "landing.step3.title": "Apóyate en el tutor",
-        "landing.step3.desc": "¿Bloqueado? Pide pistas, no respuestas. El modelo te guía didácticamente viendo el mismo código que tú.",
+        "landing.step3.desc": "El tutor te orienta con pistas en lugar de darte la solución, y se adelanta cuando detecta que te has quedado atascado.",
 
         // Problem selector page
         "selector.kicker": "Seleccion de problema",
@@ -242,7 +242,7 @@ export const translations: Record<Language, Record<string, string>> = {
         "landing.step2.title": "Think and run",
         "landing.step2.desc": "Use the editor next to the instructions. Run and test your code instantly to validate your logic.",
         "landing.step3.title": "Lean on the tutor",
-        "landing.step3.desc": "Stuck? Ask for hints, not answers. The model guides you didactically while seeing the same code you do.",
+        "landing.step3.desc": "The tutor guides you with hints instead of giving you the answer, and steps in proactively when it detects you are stuck.",
 
         // Problem selector page
         "selector.kicker": "Problem selection",
