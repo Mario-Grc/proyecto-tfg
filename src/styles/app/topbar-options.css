@@ -61,6 +61,12 @@
   color: #ffffff;
 }
 
+html[data-theme="light"] .panel-quick-btn {
+  background: var(--color-bg-surface-muted);
+  border-color: var(--color-border-soft);
+  color: var(--color-text-base);
+}
+
 .options-trigger {
   min-width: 110px;
 }

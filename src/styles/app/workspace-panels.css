@@ -110,6 +110,10 @@
   color: var(--color-primary);
 }
 
+html[data-theme="light"] .run-test-btn--test {
+  color: var(--color-text-base);
+}
+
 .save-status {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
@@ -154,6 +158,20 @@
   background: var(--color-bg-console);
   max-height: 180px;
   overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-soft) transparent;
+}
+
+.editor-output::-webkit-scrollbar,
+.editor-output-content--check::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.editor-output::-webkit-scrollbar-thumb,
+.editor-output-content--check::-webkit-scrollbar-thumb {
+  background: var(--color-border-soft);
+  border-radius: var(--radius-sm);
 }
 
 /* Output tabs */
@@ -194,6 +212,8 @@
   font-family: inherit;
   white-space: normal;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-soft) transparent;
 }
 
 /* Check result panel */

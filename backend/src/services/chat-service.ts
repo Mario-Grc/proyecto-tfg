@@ -5,8 +5,6 @@ import { ProblemRepository } from "../repositories/problem-repository";
 import { SessionRepository } from "../repositories/session-repository";
 import { buildToolRegistry, ToolExecutor } from "../tools";
 
-type ConversationRole = "system" | "user" | "assistant" | "tool";
-
 interface NormalizedToolCall {
   id: string;
   type: "function";

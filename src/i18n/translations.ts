@@ -69,9 +69,9 @@ export const translations: Record<Language, Record<string, string>> = {
 
         // Create / edit problem page
         "create.edit.kicker": "Editar problema",
-        "create.edit.title": "Modifica tu reto",
+        "create.edit.title": "Modifica tu problema",
         "create.new.kicker": "Subir problema",
-        "create.new.title": "Crea tu propio reto",
+        "create.new.title": "Crea tu propio problema",
         "create.back": "Volver",
         "create.field.title": "Titulo",
         "create.field.titlePlaceholder": "Ejemplo: Reverse Linked List",
@@ -158,8 +158,8 @@ export const translations: Record<Language, Record<string, string>> = {
         "duck.bubble.ariaLabel": "Sugerencia del pato",
 
         // Code editor placeholders
-        "editor.placeholder.js": "// Escribe tu código JavaScript aquí...\nfunction saludar(nombre) {\n    console.log(\"¡Hola, \" + nombre + \"!\");\n}\n\nsaludar(\"Usuario\");\n",
-        "editor.placeholder.python": "# Escribe tu código Python aquí...\ndef saludar(nombre):\n    print(f\"¡Hola, {nombre}!\")\n\nsaludar(\"Usuario\")\n",
+        "editor.placeholder.js": "// Escribe tu código JavaScript aquí...\nfunction saludar(nombre) {\n  console.log(\"¡Hola, \" + nombre + \"!\");\n}\n\nsaludar(\"Usuario\");\n",
+        "editor.placeholder.python": "# Escribe tu código Python aquí...\ndef saludar(nombre):\n  print(f\"¡Hola, {nombre}!\")\n\nsaludar(\"Usuario\")\n",
 
         // Status (chat hook + App)
         "status.idle": "Listo",
@@ -348,8 +348,8 @@ export const translations: Record<Language, Record<string, string>> = {
         "duck.bubble.ariaLabel": "Duck suggestion",
 
         // Code editor placeholders
-        "editor.placeholder.js": "// Write your JavaScript code here...\nfunction greet(name) {\n    console.log(\"Hello, \" + name + \"!\");\n}\n\ngreet(\"User\");\n",
-        "editor.placeholder.python": "# Write your Python code here...\ndef greet(name):\n    print(f\"Hello, {name}!\")\n\ngreet(\"User\")\n",
+        "editor.placeholder.js": "// Write your JavaScript code here...\nfunction greet(name) {\n  console.log(\"Hello, \" + name + \"!\");\n}\n\ngreet(\"User\");\n",
+        "editor.placeholder.python": "# Write your Python code here...\ndef greet(name):\n  print(f\"Hello, {name}!\")\n\ngreet(\"User\")\n",
 
         // Status (chat hook + App)
         "status.idle": "Ready",
