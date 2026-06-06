@@ -33,6 +33,7 @@ export const translations: Record<Language, Record<string, string>> = {
         "problem.ariaLabel": "Enunciado del problema",
         "problem.hide": "Ocultar",
         "problem.empty": "No hay enunciado cargado.",
+        "problem.functionName": "Función a implementar:",
 
         // Notes panel
         "notes.ariaLabel": "Notas",
@@ -223,6 +224,7 @@ export const translations: Record<Language, Record<string, string>> = {
         "problem.ariaLabel": "Problem statement",
         "problem.hide": "Hide",
         "problem.empty": "No statement loaded.",
+        "problem.functionName": "Function to implement:",
 
         // Notes panel
         "notes.ariaLabel": "Notes",

@@ -7,7 +7,7 @@ export type CodeRunStatus = "success" | "error" | "ignored";
 
 export default function useCodeRunner(language: CodeLanguage) {
     const [runningCode, setRunningCode] = useState(false);
-    const [runOutput, setRunOutput] = useState("Aun no has ejecutado código.");
+    const [runOutput, setRunOutput] = useState("Aún no has ejecutado código.");
 
     const runCode = useCallback(async (code: string): Promise<CodeRunStatus> => {
         if (runningCode) return "ignored";

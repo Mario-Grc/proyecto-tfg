@@ -693,6 +693,15 @@ html[data-theme="light"] .run-test-btn--test {
   line-height: var(--line-height-base);
 }
 
+.problem-panel-function code {
+  padding: 1px var(--space-1);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-code-inline);
+  color: var(--color-text-heading);
+  font-family: var(--font-family-mono);
+  font-size: 0.95em;
+}
+
 .problem-textarea {
   width: 100%;
   height: 100%;

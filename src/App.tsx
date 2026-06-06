@@ -513,6 +513,7 @@ function App() {
     return (
         <WorkspacePage
             selectedProblemTitle={selectedProblemTitle}
+            selectedProblemFunctionName={selectedProblem?.functionName ?? null}
             messages={messages}
             status={status}
             loading={loading}

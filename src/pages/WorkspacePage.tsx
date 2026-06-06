@@ -17,6 +17,7 @@ type ThemeMode = "dark" | "light";
 
 interface WorkspacePageProps {
     selectedProblemTitle: string;
+    selectedProblemFunctionName: string | null;
     selectedProblemId: string | null;
     messages: Message[];
     status: string;
@@ -66,6 +67,7 @@ interface WorkspacePageProps {
 
 export default function WorkspacePage({
     selectedProblemTitle,
+    selectedProblemFunctionName,
     selectedProblemId,
     messages,
     status,
@@ -290,6 +292,7 @@ export default function WorkspacePage({
                                     <div className="problem-split-top">
                                         <ProblemPanel
                                             title={selectedProblemTitle}
+                                            functionName={selectedProblemFunctionName}
                                             value={problemText}
                                             onHide={onHideProblem}
                                         />

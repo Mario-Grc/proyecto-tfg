@@ -285,7 +285,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
             if (ttftSec !== null) statusParts.push(`${translate("status.firstToken")} ${ttftSec}s`);
             if (response.usage) statusParts.push(`${response.usage.total_tokens} ${translate("status.tokens")}`);
 
-            setStatus(`${translate("status.responseReceived")} — ${statusParts.join(", ")}`);
+            setStatus(`${translate("status.responseReceived")}: ${statusParts.join(", ")}`);
 
             return "success";
         } catch (error) {
