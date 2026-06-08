@@ -64,7 +64,7 @@ Para ejecutar el proyecto en tu máquina, sigue estos pasos:
 
 1. Clonar el repositorio:
     ```bash
-    git clone https://github.com/Mario-Grc/proyecto-tft.git
+    git clone https://github.com/Mario-Grc/proyecto-tfg.git
     cd proyecto-tft
     ```
 
