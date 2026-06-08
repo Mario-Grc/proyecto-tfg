@@ -10,6 +10,13 @@ Esta aplicación implementa un entorno de apoyo al aprendizaje de programación 
 
 Además, el entorno cuenta con un compañero interactivo (un **pato de goma virtual**) que reacciona a tus acciones de forma dinámica. Dependiendo de si estás pensando un problema, ejecutando código o hablando por el chat, el pato cambiará su estado y expresiones para acompañarte, haciendo la experiencia de aprendizaje (y el famoso *Rubber Duck Debugging*) mucho más amena visualmente.
 
+## Demo
+
+
+https://github.com/user-attachments/assets/6824cf9d-bd1b-419f-8dfb-b475c9e79716
+
+
+
 ### Landing
 
 ![Landing](./public/capturas/landing.png)
