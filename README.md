@@ -16,7 +16,7 @@ Además, el entorno cuenta con un compañero interactivo (un **pato de goma virt
 
 ### Workspace
 
-![Workspace](./public/capturas/workspace.png)
+![Workspace](./public/capturas/workspaceCompleto.png)
 
 ## Stack
 
@@ -49,6 +49,7 @@ Además, el entorno cuenta con un compañero interactivo (un **pato de goma virt
 ## Requisitos
 
 - [Node.js](https://nodejs.org/) 20 o superior
+- [Python](https://www.python.org/) 3.x (para ejecutar código Python en el editor y los tests)
 - [LM Studio](https://lmstudio.ai/) con un modelo descargado y el servidor local activo en `http://localhost:1234`
 
 ## Instalación y ejecución
@@ -56,8 +57,8 @@ Para ejecutar el proyecto en tu máquina, sigue estos pasos:
 
 1. Clonar el repositorio:
     ```bash
-    git clone https://github.com/Mario-Grc/proyecto-tfg.git
-    cd proyecto-tfg
+    git clone https://github.com/Mario-Grc/proyecto-tft.git
+    cd proyecto-tft
     ```
 
 2. Instalar dependencias del frontend:

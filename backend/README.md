@@ -25,6 +25,7 @@ Variables por defecto (no hace falta editarlas para que funcione el proyecto, so
 - `TOOL_CALL_MAX_ROUNDS`: número máximo de llamadas a herramientas por mensaje.
 - `CODE_RUNNER_TIMEOUT_MS`: tiempo máximo de ejecución del runner de código (JavaScript y Python).
 - `CODE_RUNNER_MAX_CODE_CHARS`: límite de tamaño del código a ejecutar.
+- `PYTHON_BIN`: binario de Python a usar para ejecutar código Python (por defecto `python`). Ajústalo si en tu sistema el comando es `python3` u otra ruta.
 - `DATA_DIR`: carpeta donde se guarda la base de datos.
 - `DB_FILE_NAME`: nombre del fichero SQLite.
 
