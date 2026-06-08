@@ -15,7 +15,7 @@ interface UseTutorChatOptions {
     sessionId: string | null;
 }
 
-export type ChatSendResult = "success" | "error" | "ignored";
+export type ChatSendResult = "success" | "error" | "ignored" | "aborted";
 
 function getErrorMessage(error: unknown): string {
     return error instanceof Error ? error.message : "Error desconocido";
@@ -150,6 +150,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
     const [loading, setLoading] = useState(false);
     const [inputText, setInputText] = useState("");
     const localMessageSeqRef = useRef<number>(1);
+    const abortRef = useRef<AbortController | null>(null);
 
     const loadSessionHistory = useCallback(async (targetSessionId: string) => {
         setLoading(true);
@@ -169,6 +170,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
     }, [translate]);
 
     useEffect(() => {
+        abortRef.current?.abort();
         setInputText("");
 
         if (!sessionId) {
@@ -179,6 +181,10 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
 
         void loadSessionHistory(sessionId);
     }, [loadSessionHistory, sessionId, translate]);
+
+    useEffect(() => () => {
+        abortRef.current?.abort();
+    }, []);
 
     const sendPrompt = useCallback(
         async ({ text, editorCode = "", selectedCode = "", language }: SendPromptOptions): Promise<ChatSendResult> => {
@@ -203,6 +209,10 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
             { id: userId, text: trimmedText, type: "user" },
             { id: assistantId, text: "", type: "llm" },
         ]);
+
+        abortRef.current?.abort();
+        const controller = new AbortController();
+        abortRef.current = controller;
 
         setLoading(true);
         setStatus(translate("status.generating"));
@@ -271,6 +281,7 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
                     onToolResult: (toolName, result) => {
                         insertToolResultMessage(toolName, result);
                     },
+                    signal: controller.signal,
                 },
             );
 
@@ -289,6 +300,17 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
 
             return "success";
         } catch (error) {
+            // generacion cancelada al salir del workspace o cambiar de sesion
+            if (controller.signal.aborted) {
+                setMessages((prev) =>
+                    prev.filter(
+                        (chatMessage) => !(chatMessage.id === assistantId && chatMessage.text.trim().length === 0),
+                    ),
+                );
+                setStatus(translate("status.idle"));
+                return "aborted";
+            }
+
             const message = getErrorMessage(error);
             const errorId = buildLocalMessageId("error", localMessageSeqRef.current++);
             setMessages((prev) => {
@@ -317,6 +339,10 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
         setMessages((prev) => [...prev, { id: assistantId, text: trimmed, type: "llm" }]);
     }, []);
 
+    const stopGeneration = useCallback(() => {
+        abortRef.current?.abort();
+    }, []);
+
     const resetConversation = useCallback(() => {
         setMessages([]);
         setInputText("");
@@ -339,5 +365,6 @@ export default function useTutorChat({ sessionId }: UseTutorChatOptions) {
         appendAssistantMessage,
         clearConversation,
         resetConversation,
+        stopGeneration,
     };
 }

@@ -21,6 +21,7 @@ interface SendChatRequestOptions {
     onDelta: (deltaText: string) => void;
     onToolStart?: (toolName: string) => void;
     onToolResult?: (toolName: string, result: string) => void;
+    signal?: AbortSignal;
 }
 
 function buildApiUrl(path: string): string {
@@ -207,8 +208,13 @@ export async function sendChatRequest(
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(payload),
+            signal: options.signal,
         });
-    } catch {
+    } catch (error) {
+        if (options.signal?.aborted) {
+            throw error;
+        }
+
         throw new Error("No se pudo abrir el stream de chat.");
     }
 

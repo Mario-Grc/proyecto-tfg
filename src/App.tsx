@@ -55,6 +55,7 @@ function App() {
         appendAssistantMessage,
         clearConversation,
         resetConversation,
+        stopGeneration,
     } = useTutorChat({
         sessionId: activeSessionId,
     });
@@ -98,6 +99,7 @@ function App() {
         language,
         uiLanguage,
         chatLoading: loading,
+        active: currentView === "workspace",
         getEditorCode,
         onIntervention: (message) => {
             appendAssistantMessage(message);
@@ -194,6 +196,16 @@ function App() {
         document.documentElement.setAttribute("data-theme", themeMode);
     }, [themeMode]);
 
+    // al salir del workspace, cortar la generacion del chat en curso
+    useEffect(() => {
+        if (currentView === "workspace") {
+            return;
+        }
+
+        stopGeneration();
+        setNormal();
+    }, [currentView, stopGeneration, setNormal]);
+
     function getSelectedCodeFromEditor() {
         const view = editorViewRef.current;
 
@@ -224,10 +236,13 @@ function App() {
             const result = await checkSolution(selectedProblem.id, getEditorCode(), language);
             setCheckResult(result);
 
-            if (result.allPassed) {
-                setVictory();
-            } else {
-                setConfused();
+            // si el chat esta generando, no cambio el estado del pato
+            if (!loading) {
+                if (result.allPassed) {
+                    setVictory();
+                } else {
+                    setConfused();
+                }
             }
 
             // el asistente evalua el resultado, pista si falla o reset si bien
@@ -235,7 +250,9 @@ function App() {
         } catch (error) {
             const message = getErrorMessage(error);
             setCheckResult({ tests: [], harnessError: message, allPassed: false });
-            setConfused();
+            if (!loading) {
+                setConfused();
+            }
         } finally {
             setChecking(false);
         }
@@ -243,6 +260,11 @@ function App() {
 
     async function handleRunCode() {
         const runStatus = await runCode(getEditorCode());
+
+        // si el chat esta generando, dejo el pato como esta
+        if (loading) {
+            return;
+        }
 
         if (runStatus === "error") {
             setConfused();
@@ -255,6 +277,7 @@ function App() {
     }
 
     async function handleSend(text: string) {
+        proactive.cancel();
         setThinking();
 
         const sendStatus = await sendPrompt({
@@ -277,6 +300,12 @@ function App() {
     function handlePromptSend(text: string) {
         void handleSend(text);
         setInputText("");
+    }
+
+    // si se pone a escribir, cancelo la proactiva que este en curso
+    function handleChatInputChange(value: string) {
+        proactive.cancel();
+        setInputText(value);
     }
 
     async function handleClearConversation() {
@@ -539,7 +568,7 @@ function App() {
             initialEditorCode={initialEditorCode}
             onEditorReady={handleEditorReady}
             onEditorChange={handleEditorChange}
-            onInputChange={setInputText}
+            onInputChange={handleChatInputChange}
             onPromptSend={handlePromptSend}
             language={language}
             onLanguageChange={setLanguage}

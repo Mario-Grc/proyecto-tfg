@@ -316,6 +316,7 @@ function buildToolHistoryContent(
 
 async function callLLMForToolDecision(
   conversation: ConversationMessage[],
+  signal?: AbortSignal,
 ): Promise<ToolDecisionResult> {
   const tools = buildToolRegistry({
     enableMcpWebSearch: config.enableMcpWebSearch,
@@ -336,6 +337,7 @@ async function callLLMForToolDecision(
         stream: false,
         tools,
       }),
+      signal,
     });
   } catch (error) {
     throw new HttpError(502, "No se pudo conectar con el LLM local", normalizeErrorDetails(error));
@@ -368,6 +370,7 @@ async function callLLMForToolDecision(
 async function callLLMStreaming(
   conversation: ConversationMessage[],
   callbacks: ChatStreamCallbacks,
+  signal?: AbortSignal,
 ): Promise<{ rawText: string; usage?: ChatUsage }> {
   let response: Response;
 
@@ -386,6 +389,7 @@ async function callLLMStreaming(
           include_usage: true,
         },
       }),
+      signal,
     });
   } catch (error) {
     throw new HttpError(502, "No se pudo conectar con el LLM local", normalizeErrorDetails(error));
@@ -559,13 +563,14 @@ export class ChatService {
     sessionId: string,
     conversation: ConversationMessage[],
     callbacks: ChatStreamCallbacks,
+    signal?: AbortSignal,
   ): Promise<void> {
     if (!config.enableToolCalling) {
       return;
     }
 
     for (let round = 0; round < config.toolCallMaxRounds; round += 1) {
-      const decision = await callLLMForToolDecision(conversation);
+      const decision = await callLLMForToolDecision(conversation, signal);
 
       if (decision.toolCalls.length === 0) {
         return;
@@ -623,12 +628,12 @@ export class ChatService {
     });
   }
 
-  async reply(input: ChatRequestInput, callbacks: ChatStreamCallbacks): Promise<ChatResult> {
+  async reply(input: ChatRequestInput, callbacks: ChatStreamCallbacks, signal?: AbortSignal): Promise<ChatResult> {
     const { sessionId, conversation } = this.createConversation(input);
 
-    await this.resolveToolCalling(sessionId, conversation, callbacks);
+    await this.resolveToolCalling(sessionId, conversation, callbacks, signal);
 
-    const llmResponse = await callLLMStreaming(conversation, callbacks);
+    const llmResponse = await callLLMStreaming(conversation, callbacks, signal);
     const assistantText = cleanAssistantText(llmResponse.rawText);
 
     this.persistAssistantMessage(sessionId, assistantText, llmResponse.usage);

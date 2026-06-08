@@ -23,6 +23,8 @@ interface UseProactiveAssistantOptions {
     language: CodeLanguage;
     uiLanguage: Language;
     chatLoading: boolean;
+    // true solo cuando el workspace esta visible
+    active: boolean;
     getEditorCode: () => string;
     onIntervention: (message: string, trigger: ProactiveTrigger) => void;
 }
@@ -51,6 +53,7 @@ export default function useProactiveAssistant({
     language,
     uiLanguage,
     chatLoading,
+    active,
     getEditorCode,
     onIntervention,
 }: UseProactiveAssistantOptions) {
@@ -78,8 +81,30 @@ export default function useProactiveAssistant({
         getEditorCodeRef.current = getEditorCode;
     }, [getEditorCode]);
 
+    const chatLoadingRef = useRef(chatLoading);
+    const activeRef = useRef(active);
+
+    useEffect(() => {
+        chatLoadingRef.current = chatLoading;
+    }, [chatLoading]);
+
+    useEffect(() => {
+        activeRef.current = active;
+    }, [active]);
+
     const dismissBubble = useCallback(() => {
         setBubble(null);
+    }, []);
+
+    // cortar la micro-pausa pendiente y la peticion al LLM en vuelo
+    const cancelPendingWork = useCallback(() => {
+        if (idleTimerRef.current !== null) {
+            window.clearTimeout(idleTimerRef.current);
+            idleTimerRef.current = null;
+        }
+
+        abortRef.current?.abort();
+        abortRef.current = null;
     }, []);
 
     const surface = useCallback((message: string, trigger: ProactiveTrigger) => {
@@ -136,7 +161,13 @@ export default function useProactiveAssistant({
 
         testFailStreakRef.current += 1;
 
-        if (testFailStreakRef.current < TEST_FAIL_MIN_STREAK || !sessionId || !canIntervene()) {
+        if (
+            testFailStreakRef.current < TEST_FAIL_MIN_STREAK ||
+            !sessionId ||
+            !activeRef.current ||
+            chatLoadingRef.current ||
+            !canIntervene()
+        ) {
             return;
         }
 
@@ -157,7 +188,7 @@ export default function useProactiveAssistant({
     const maybeIdleCheck = useCallback(() => {
         const code = lastCodeRef.current.trim();
 
-        if (!code || !sessionId || !enabled || chatLoading) {
+        if (!code || !sessionId || !enabled || !active || chatLoading) {
             return;
         }
 
@@ -179,7 +210,7 @@ export default function useProactiveAssistant({
             responseLanguage: uiLanguage,
             editorCode: code,
         });
-    }, [sessionId, enabled, chatLoading, language, uiLanguage, canIntervene, runProactiveRequest]);
+    }, [sessionId, enabled, active, chatLoading, language, uiLanguage, canIntervene, runProactiveRequest]);
 
     const maybeIdleCheckRef = useRef(maybeIdleCheck);
 
@@ -210,29 +241,30 @@ export default function useProactiveAssistant({
         lastCodeRef.current = "";
         lastCheckedCodeRef.current = "";
 
-        if (idleTimerRef.current !== null) {
-            window.clearTimeout(idleTimerRef.current);
-            idleTimerRef.current = null;
+        cancelPendingWork();
+        setBubble(null);
+    }, [sessionId, cancelPendingWork]);
+
+    // al salir del workspace, cortar cualquier actividad proactiva
+    useEffect(() => {
+        if (active) {
+            return;
         }
 
-        abortRef.current?.abort();
-        abortRef.current = null;
+        cancelPendingWork();
         setBubble(null);
-    }, [sessionId]);
+    }, [active, cancelPendingWork]);
 
     // Limpieza al desmontar.
     useEffect(() => () => {
-        if (idleTimerRef.current !== null) {
-            window.clearTimeout(idleTimerRef.current);
-        }
-
-        abortRef.current?.abort();
-    }, []);
+        cancelPendingWork();
+    }, [cancelPendingWork]);
 
     return {
         bubble,
         dismissBubble,
         notifyTestResult,
         notifyEdit,
+        cancel: cancelPendingWork,
     };
 }

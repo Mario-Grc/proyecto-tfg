@@ -17,8 +17,16 @@ chatRouter.post("/", async (req, res) => {
   res.setHeader("X-Accel-Buffering", "no");
   res.flushHeaders();
 
+  // si el cliente se desconecta antes de terminar, cortar la generacion del LLM
+  const abortController = new AbortController();
+  res.on("close", () => {
+    if (!res.writableEnded) {
+      abortController.abort();
+    }
+  });
+
   const writeEvent = (event: unknown) => {
-    if (res.writableEnded) {
+    if (res.writableEnded || res.destroyed) {
       return;
     }
 
@@ -62,6 +70,7 @@ chatRouter.post("/", async (req, res) => {
           });
         },
       },
+      abortController.signal,
     );
 
     writeEvent({

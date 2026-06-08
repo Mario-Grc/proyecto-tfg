@@ -183,7 +183,7 @@ function isSilence(text: string): boolean {
   return normalized.startsWith(SILENCE_SENTINEL);
 }
 
-async function callLLMNonStreaming(conversation: ConversationMessage[]): Promise<string> {
+async function callLLMNonStreaming(conversation: ConversationMessage[], signal?: AbortSignal): Promise<string> {
   let response: Response;
 
   try {
@@ -199,6 +199,7 @@ async function callLLMNonStreaming(conversation: ConversationMessage[]): Promise
         max_tokens: PROACTIVE_MAX_TOKENS,
         stream: false,
       }),
+      signal,
     });
   } catch (error) {
     throw new HttpError(502, "No se pudo conectar con el LLM local", normalizeErrorDetails(error));
@@ -225,7 +226,7 @@ export class ProactiveService {
   private readonly sessionRepository = new SessionRepository();
   private readonly messageRepository = new MessageRepository();
 
-  async generateIntervention(input: ProactiveRequestInput): Promise<ProactiveResult> {
+  async generateIntervention(input: ProactiveRequestInput, signal?: AbortSignal): Promise<ProactiveResult> {
     const session = this.sessionRepository.findById(input.sessionId);
 
     if (!session) {
@@ -255,7 +256,7 @@ export class ProactiveService {
       },
     ];
 
-    const message = cleanAssistantText(await callLLMNonStreaming(conversation));
+    const message = cleanAssistantText(await callLLMNonStreaming(conversation, signal));
 
     // si se falla el test interviene siempre, si es por idle solo si el llm quiere
     if (!message || (input.trigger === "idle" && isSilence(message))) {
