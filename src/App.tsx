@@ -12,6 +12,7 @@ import {
     fetchProblems,
 } from "./services/backendApi";
 import LandingPage from "./pages/LandingPage";
+import AboutPage from "./pages/AboutPage";
 import CreateProblemPage from "./pages/CreateProblemPage";
 import ProblemSelectorPage from "./pages/ProblemSelectorPage";
 import WorkspacePage from "./pages/WorkspacePage";
@@ -25,7 +26,7 @@ import { useTranslation } from "./i18n/LanguageContext";
 import "./App.css";
 
 type ThemeMode = "dark" | "light";
-type AppView = "landing" | "selector" | "create-problem" | "edit-problem" | "workspace";
+type AppView = "landing" | "selector" | "create-problem" | "edit-problem" | "workspace" | "about";
 
 function App() {
     const { translate, language: uiLanguage } = useTranslation();
@@ -489,8 +490,13 @@ function App() {
                 onStart={() => setCurrentView("selector")}
                 canContinue={canContinueSession}
                 onContinue={handleContinueSession}
+                onAbout={() => setCurrentView("about")}
             />
         );
+    }
+
+    if (currentView === "about") {
+        return <AboutPage onBack={() => setCurrentView("landing")} />;
     }
 
     if (currentView === "selector") {

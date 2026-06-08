@@ -53,6 +53,19 @@ export const translations: Record<Language, Record<string, string>> = {
         "landing.step3.title": "Apóyate en el tutor",
         "landing.step3.desc": "El tutor te orienta con pistas en lugar de darte la solución, y se adelanta cuando detecta que te has quedado atascado.",
 
+        // About page
+        "about.link": "Acerca de",
+        "about.back": "Volver",
+        "about.description": "Asistente para el aprendizaje de la programación con un modelo de lenguaje local.",
+        "about.tfg": "Trabajo de Fin de Grado",
+        "about.degree": "Grado en Ingeniería Informática",
+        "about.school": "Escuela de Ingeniería Informática",
+        "about.university": "Universidad de Las Palmas de Gran Canaria",
+        "about.authorLabel": "Autor",
+        "about.tutorLabel": "Tutor",
+        "about.repo": "Repositorio",
+        "about.logo.alt": "Logos de la Universidad de Las Palmas de Gran Canaria y la Escuela de Ingeniería Informática",
+
         // Problem selector page
         "selector.kicker": "Seleccion de problema",
         "selector.title": "Elige un reto para trabajar",
@@ -243,6 +256,19 @@ export const translations: Record<Language, Record<string, string>> = {
         "landing.step2.desc": "Use the editor next to the instructions. Run and test your code instantly to validate your logic.",
         "landing.step3.title": "Lean on the tutor",
         "landing.step3.desc": "The tutor guides you with hints instead of giving you the answer, and steps in proactively when it detects you are stuck.",
+
+        // About page
+        "about.link": "About",
+        "about.back": "Back",
+        "about.description": "An assistant for learning programming powered by a local language model.",
+        "about.tfg": "Bachelor's Thesis",
+        "about.degree": "Grado en Ingeniería Informática",
+        "about.school": "Escuela de Ingeniería Informática",
+        "about.university": "Universidad de Las Palmas de Gran Canaria",
+        "about.authorLabel": "Author",
+        "about.tutorLabel": "Supervisor",
+        "about.repo": "Repository",
+        "about.logo.alt": "Universidad de Las Palmas de Gran Canaria and School of Computer Engineering logos",
 
         // Problem selector page
         "selector.kicker": "Problem selection",

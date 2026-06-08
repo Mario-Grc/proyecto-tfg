@@ -1,0 +1,189 @@
+/* Pantalla Acerca de */
+.about-screen {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: clamp(48px, 6vh, 96px) clamp(18px, 4vw, 64px);
+  background: var(--color-bg-app);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.about-back {
+  position: fixed;
+  top: clamp(12px, 2.5vw, 24px);
+  left: clamp(12px, 2.5vw, 24px);
+  z-index: 50;
+  background: transparent;
+  border: 1px solid var(--color-border-muted);
+  color: var(--color-text-base);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.about-back:hover {
+  background: var(--color-bg-surface);
+  border-color: var(--color-text-base);
+}
+
+/* margin-block auto: centra en vertical y deja scroll si no cabe */
+.about-content {
+  width: min(540px, 100%);
+  margin-block: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+}
+
+.about-duck {
+  width: clamp(64px, 12vw, 92px);
+  height: auto;
+  user-select: none;
+}
+
+.about-title {
+  margin: 0;
+  font-family: "Space Grotesk", var(--font-family-heading);
+  font-size: clamp(2.2rem, 6vw, 3.4rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--color-text-base);
+}
+
+.about-title-accent {
+  color: var(--color-text-heading);
+}
+
+.about-description {
+  margin: 0;
+  font-size: clamp(0.9rem, 1.4vw, 1.05rem);
+  line-height: 1.55;
+  color: var(--color-text-muted);
+  max-width: 42ch;
+}
+
+.about-tfg {
+  margin: var(--space-4) 0 0;
+  font-family: var(--font-family-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-weight: 600;
+  color: var(--color-text-heading);
+}
+
+.about-academia {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  color: var(--color-text-base);
+}
+
+/* Bloque autor/tutor */
+.about-people {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin: var(--space-2) 0;
+  padding: var(--space-6) 0;
+  border-top: 1px solid var(--color-border-soft);
+  border-bottom: 1px solid var(--color-border-soft);
+  width: 100%;
+  max-width: 460px;
+}
+
+.about-person {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.about-people-label {
+  font-family: var(--font-family-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--color-text-muted);
+}
+
+.about-author-name {
+  font-family: "Space Grotesk", var(--font-family-heading);
+  font-size: clamp(1.7rem, 4.5vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-text-base);
+}
+
+.about-tutor-name {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-weight: 600;
+  color: var(--color-text-base);
+}
+
+/* Banda del logo institucional */
+.about-logo-band {
+  width: 100%;
+  max-width: 460px;
+  margin-top: var(--space-3);
+  display: flex;
+  justify-content: center;
+  padding: clamp(14px, 2.5vw, 22px) clamp(20px, 5vw, 36px);
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+}
+
+.about-logo-band img {
+  width: 100%;
+  max-width: 380px;
+  height: auto;
+  object-fit: contain;
+}
+
+.about-year {
+  margin-top: var(--space-2);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+}
+
+/* Enlace a Acerca de en la landing */
+.landing-about-link {
+  position: fixed;
+  bottom: clamp(12px, 2.5vw, 24px);
+  right: clamp(12px, 2.5vw, 24px);
+  z-index: 50;
+  background: transparent;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.landing-about-link:hover {
+  color: var(--color-text-base);
+  text-decoration: underline;
+}
+
+@media (max-width: 760px) {
+  .about-screen {
+    padding: 64px 16px 32px;
+  }
+}

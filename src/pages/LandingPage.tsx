@@ -7,9 +7,10 @@ interface LandingPageProps {
     onStart: () => void;
     canContinue: boolean;
     onContinue: () => void;
+    onAbout: () => void;
 }
 
-export default function LandingPage({ onStart, canContinue, onContinue }: LandingPageProps) {
+export default function LandingPage({ onStart, canContinue, onContinue, onAbout }: LandingPageProps) {
     const { translate } = useTranslation();
     const [duckPressed, setDuckPressed] = useState(false);
 
@@ -85,6 +86,9 @@ export default function LandingPage({ onStart, canContinue, onContinue }: Landin
                 draggable={false}
                 onClick={handleDuckClick}
             />
+            <button type="button" className="landing-about-link" onClick={onAbout}>
+                {translate("about.link")}
+            </button>
         </div>
     );
 }
