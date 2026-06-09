@@ -128,15 +128,15 @@
 }
 
 .about-tutor-name {
-  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-size: clamp(0.95rem, 1.8vw, 1.1rem);
   font-weight: 600;
   color: var(--color-text-base);
 }
 
-/* Banda del logo institucional */
+/* Banda del logo */
 .about-logo-band {
   width: 100%;
-  max-width: 460px;
+  max-width: 360px;
   margin-top: var(--space-2);
   display: flex;
   justify-content: center;
