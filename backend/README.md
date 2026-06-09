@@ -4,18 +4,18 @@ API backend para QuackCode, construida con Express, TypeScript, Zod y better-sql
 
 ## Scripts
 
-- `npm install`: Install dependencies
-- `npm run dev`: Run server in watch mode using tsx
-- `npm run check`: Type-check only
-- `npm run build`: Compile TypeScript to `dist`
-- `npm run start`: Run compiled server
+- `npm install`: Instalar dependencias.
+- `npm run dev`: Ejecutar el servidor en modo watch con tsx.
+- `npm run check`: Comprobar tipos sin compilar.
+- `npm run build`: Compilar TypeScript a `dist`.
+- `npm run start`: Ejecutar el servidor ya compilado.
 
 ## Entorno
 
 Copia `.env.example` a `.env` y ajusta los valores si es necesario. Con los valores por defecto el backend arranca y la aplicación funciona sin búsqueda web. Si quieres cambiar la configuración, el endpoint de LM Studio o activar la búsqueda con Tavily, revisa las variables de abajo.
 
 Variables necesarias para el arranque:
-- `PORT`: Puerto del backend.
+- `PORT`: Puerto del backend (por defecto `3001`).
 - `FRONTEND_ORIGIN`: URL del frontend para CORS (ej: `http://localhost:5173`).
 - `LLM_API_ENDPOINT`: URL del endpoint de LM Studio (ej: `http://localhost:1234/v1/chat/completions`).
 - `LLM_MODEL_NAME`: Nombre del modelo que se usa en el backend. Si solo se tiene un modelo cargado en LM Studio, se puede dejar local-model.

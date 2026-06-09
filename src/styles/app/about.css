@@ -1,11 +1,11 @@
 /* Pantalla Acerca de */
 .about-screen {
   position: relative;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   padding: clamp(48px, 6vh, 96px) clamp(18px, 4vw, 64px);
   background: var(--color-bg-app);
-  overflow: auto;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
