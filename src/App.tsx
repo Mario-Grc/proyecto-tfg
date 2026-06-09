@@ -319,7 +319,11 @@ function App() {
         setStatus(translate("status.resetting"));
 
         try {
+            const currentCode = getEditorCode();
             const newSession = await createSession(selectedProblem.id);
+            if (currentCode.trim()) {
+                await updateSessionCode(newSession.id, currentCode);
+            }
             setActiveSessionId(newSession.id);
             clearConversation();
             setStatus(translate("status.resetDone"));
