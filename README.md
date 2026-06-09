@@ -1,5 +1,5 @@
 # QuackCode
-**TFG - Ayudante de aprendizaje con IA. Actualmente en desarrollo ...**
+**TFG - Ayudante de aprendizaje con IA.**
 
 Aplicación web para practicar problemas de programación con tres elementos principales:
 - editor de código (JavaScript y Python)
@@ -24,6 +24,10 @@ https://github.com/user-attachments/assets/6824cf9d-bd1b-419f-8dfb-b475c9e79716
 ### Workspace
 
 ![Workspace](./public/capturas/workspaceCompleto.png)
+
+### Acerca de
+
+![Acerca de](./public/capturas/about.png)
 
 ## Stack
 
@@ -65,7 +69,7 @@ Para ejecutar el proyecto en tu máquina, sigue estos pasos:
 1. Clonar el repositorio:
     ```bash
     git clone https://github.com/Mario-Grc/proyecto-tfg.git
-    cd proyecto-tft
+    cd proyecto-tfg
     ```
 
 2. Instalar dependencias del frontend:
