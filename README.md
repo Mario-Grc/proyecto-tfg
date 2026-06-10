@@ -8,14 +8,17 @@ Aplicación web para practicar problemas de programación con tres elementos pri
 
 Esta aplicación implementa un entorno de apoyo al aprendizaje de programación basado en práctica guiada. El usuario selecciona un problema, desarrolla su solución en el editor, consulta dudas al asistente LLM local y valida su razonamiento ejecutando el código (JavaScript o Python) y comprobándolo contra los casos de prueba del problema. La interfaz está disponible en español e inglés.
 
-Además, el entorno cuenta con un compañero interactivo (un **pato de goma virtual**) que reacciona a tus acciones de forma dinámica. Dependiendo de si estás pensando un problema, ejecutando código o hablando por el chat, el pato cambiará su estado y expresiones para acompañarte, haciendo la experiencia de aprendizaje (y el famoso *Rubber Duck Debugging*) mucho más amena visualmente.
+Además, el entorno cuenta con un compañero interactivo (un **pato de goma virtual**) que reacciona a tus acciones de forma dinámica. Dependiendo de si estás pensando un problema, ejecutando código o hablando por el chat, el pato cambiará su estado y expresiones para acompañarte, haciendo la experiencia de aprendizaje (y el famoso *Rubber Duck Debugging*) mucho más amena visualmente. Aparte de ese lado visual, el pato también es proactivo. Si te atascas o fallan los tests, interviene por su cuenta y te orienta con pistas en vez de darte la solución.
 
 ## Demo
 
+### Demo general
 
 https://github.com/user-attachments/assets/6824cf9d-bd1b-419f-8dfb-b475c9e79716
 
+### Guía en lugar de dar la solución
 
+https://github.com/user-attachments/assets/82fc4b2f-9486-493e-9c40-a73178d92272
 
 ### Landing
 
